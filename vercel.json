@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "buildCommand": "cd artifacts/placementbridge && pnpm install && pnpm run build",
+  "outputDirectory": "artifacts/placementbridge/dist/public",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}

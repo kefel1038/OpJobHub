@@ -1,0 +1,659 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: PlacementBridge API - Trust-based hiring platform
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: jobs
+    description: Job listing operations
+  - name: companies
+    description: Company operations
+  - name: applications
+    description: Application operations
+  - name: categories
+    description: Category operations
+  - name: stats
+    description: Dashboard statistics
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /jobs:
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: List all jobs
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: location
+          in: query
+          schema:
+            type: string
+        - name: verificationStatus
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: salaryMin
+          in: query
+          schema:
+            type: integer
+        - name: salaryMax
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+    post:
+      operationId: createJob
+      tags: [jobs]
+      summary: Create a new job posting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateJobBody"
+      responses:
+        "201":
+          description: Job created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+
+  /jobs/{id}:
+    get:
+      operationId: getJob
+      tags: [jobs]
+      summary: Get a job by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Job details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "404":
+          description: Job not found
+    patch:
+      operationId: updateJob
+      tags: [jobs]
+      summary: Update a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateJobBody"
+      responses:
+        "200":
+          description: Updated job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+    delete:
+      operationId: deleteJob
+      tags: [jobs]
+      summary: Delete a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /jobs/{id}/verify:
+    post:
+      operationId: verifyJob
+      tags: [jobs]
+      summary: Run AI verification on a job
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+
+  /jobs/featured:
+    get:
+      operationId: getFeaturedJobs
+      tags: [jobs]
+      summary: Get featured/top verified jobs
+      responses:
+        "200":
+          description: Featured jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+
+  /companies:
+    get:
+      operationId: listCompanies
+      tags: [companies]
+      summary: List all companies
+      responses:
+        "200":
+          description: List of companies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Company"
+    post:
+      operationId: createCompany
+      tags: [companies]
+      summary: Create a company profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyBody"
+      responses:
+        "201":
+          description: Company created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+
+  /companies/{id}:
+    get:
+      operationId: getCompany
+      tags: [companies]
+      summary: Get company by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Company details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+
+  /applications:
+    get:
+      operationId: listApplications
+      tags: [applications]
+      summary: List applications
+      parameters:
+        - name: jobId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Application"
+    post:
+      operationId: createApplication
+      tags: [applications]
+      summary: Submit a job application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateApplicationBody"
+      responses:
+        "201":
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+
+  /applications/{id}:
+    patch:
+      operationId: updateApplication
+      tags: [applications]
+      summary: Update application status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateApplicationBody"
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List all job categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+  /stats/dashboard:
+    get:
+      operationId: getDashboardStats
+      tags: [stats]
+      summary: Get platform dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /stats/categories:
+    get:
+      operationId: getCategoryStats
+      tags: [stats]
+      summary: Jobs grouped by category
+      responses:
+        "200":
+          description: Category stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryStat"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Job:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: string
+        location:
+          type: string
+        salaryMin:
+          type: ["integer", "null"]
+        salaryMax:
+          type: ["integer", "null"]
+        salaryDisplay:
+          type: ["string", "null"]
+        jobType:
+          type: string
+        category:
+          type: string
+        verificationStatus:
+          type: string
+        verificationNotes:
+          type: ["string", "null"]
+        verificationScore:
+          type: ["integer", "null"]
+        applyWhatsapp:
+          type: ["string", "null"]
+        applyEmail:
+          type: ["string", "null"]
+        applyUrl:
+          type: ["string", "null"]
+        isFeatured:
+          type: boolean
+        viewCount:
+          type: integer
+        companyId:
+          type: ["integer", "null"]
+        companyName:
+          type: string
+        companyLogo:
+          type: ["string", "null"]
+        isVerifiedEmployer:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - title
+        - description
+        - requirements
+        - location
+        - jobType
+        - category
+        - verificationStatus
+        - isFeatured
+        - viewCount
+        - companyName
+        - isVerifiedEmployer
+        - createdAt
+        - updatedAt
+
+    CreateJobBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: string
+        location:
+          type: string
+        salaryMin:
+          type: ["integer", "null"]
+        salaryMax:
+          type: ["integer", "null"]
+        salaryDisplay:
+          type: ["string", "null"]
+        jobType:
+          type: string
+        category:
+          type: string
+        applyWhatsapp:
+          type: ["string", "null"]
+        applyEmail:
+          type: ["string", "null"]
+        applyUrl:
+          type: ["string", "null"]
+        companyId:
+          type: ["integer", "null"]
+        companyName:
+          type: string
+        companyLogo:
+          type: ["string", "null"]
+      required:
+        - title
+        - description
+        - requirements
+        - location
+        - jobType
+        - category
+        - companyName
+
+    UpdateJobBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: string
+        location:
+          type: string
+        salaryMin:
+          type: ["integer", "null"]
+        salaryMax:
+          type: ["integer", "null"]
+        salaryDisplay:
+          type: ["string", "null"]
+        jobType:
+          type: string
+        category:
+          type: string
+        applyWhatsapp:
+          type: ["string", "null"]
+        applyEmail:
+          type: ["string", "null"]
+        applyUrl:
+          type: ["string", "null"]
+        isFeatured:
+          type: boolean
+        verificationStatus:
+          type: string
+        verificationNotes:
+          type: ["string", "null"]
+        verificationScore:
+          type: ["integer", "null"]
+
+    Company:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        logo:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+        isVerified:
+          type: boolean
+        verificationDocuments:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - isVerified
+        - createdAt
+
+    CreateCompanyBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        logo:
+          type: ["string", "null"]
+        website:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        industry:
+          type: ["string", "null"]
+      required:
+        - name
+
+    Application:
+      type: object
+      properties:
+        id:
+          type: integer
+        jobId:
+          type: integer
+        applicantName:
+          type: string
+        applicantEmail:
+          type: string
+        applicantPhone:
+          type: ["string", "null"]
+        coverLetter:
+          type: ["string", "null"]
+        cvUrl:
+          type: ["string", "null"]
+        status:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - jobId
+        - applicantName
+        - applicantEmail
+        - status
+        - createdAt
+
+    CreateApplicationBody:
+      type: object
+      properties:
+        jobId:
+          type: integer
+        applicantName:
+          type: string
+        applicantEmail:
+          type: string
+        applicantPhone:
+          type: ["string", "null"]
+        coverLetter:
+          type: ["string", "null"]
+        cvUrl:
+          type: ["string", "null"]
+      required:
+        - jobId
+        - applicantName
+        - applicantEmail
+
+    UpdateApplicationBody:
+      type: object
+      properties:
+        status:
+          type: string
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        icon:
+          type: ["string", "null"]
+        jobCount:
+          type: integer
+      required:
+        - id
+        - name
+        - slug
+        - jobCount
+
+    DashboardStats:
+      type: object
+      properties:
+        totalJobs:
+          type: integer
+        verifiedJobs:
+          type: integer
+        activeCompanies:
+          type: integer
+        totalApplications:
+          type: integer
+        pendingVerifications:
+          type: integer
+        recentJobsCount:
+          type: integer
+      required:
+        - totalJobs
+        - verifiedJobs
+        - activeCompanies
+        - totalApplications
+        - pendingVerifications
+        - recentJobsCount
+
+    CategoryStat:
+      type: object
+      properties:
+        category:
+          type: string
+        count:
+          type: integer
+      required:
+        - category
+        - count

@@ -1,0 +1,94 @@
+const express = require('express');
+const cors = require('cors');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { Pool } = require('pg');
+const Stripe = require('stripe');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const pool = new Pool({
+  connectionString: "YOUR_POSTGRES_URL"
+});
+
+const stripe = new Stripe("YOUR_STRIPE_SECRET");
+
+// 🔐 Register
+app.post('/register', async (req, res) => {
+  const { email, password, role } = req.body;
+
+  const hashed = await bcrypt.hash(password, 10);
+
+  await pool.query(
+    'INSERT INTO users(email,password,role) VALUES($1,$2,$3)',
+    [email, hashed, role]
+  );
+
+  res.send("User created");
+});
+
+// 🔐 Login
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await pool.query(
+    'SELECT * FROM users WHERE email=$1',
+    [email]
+  );
+
+  if (user.rows.length === 0) return res.status(400).send("No user");
+
+  const valid = await bcrypt.compare(password, user.rows[0].password);
+
+  if (!valid) return res.status(401).send("Wrong password");
+
+  const token = jwt.sign({ id: user.rows[0].id }, "SECRET");
+
+  res.json({ token });
+});
+
+// 🧑‍💼 Post Job
+app.post('/jobs', async (req, res) => {
+  const { title, company, location, salary, description } = req.body;
+
+  await pool.query(
+    `INSERT INTO jobs(title,company,location,salary,description)
+     VALUES($1,$2,$3,$4,$5)`,
+    [title, company, location, salary, description]
+  );
+
+  res.send("Job posted");
+});
+
+// 📄 Get Jobs
+app.get('/jobs', async (req, res) => {
+  const jobs = await pool.query('SELECT * FROM jobs ORDER BY created_at DESC');
+  res.json(jobs.rows);
+});
+
+
+// 💳 Stripe Payment (Job Posting Fee)
+app.post('/create-checkout-session', async (req, res) => {
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [{
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: 'Job Posting Fee',
+        },
+        unit_amount: 2000, // $20
+      },
+      quantity: 1,
+    }],
+    mode: 'payment',
+    success_url: 'http://localhost:3000/success',
+    cancel_url: 'http://localhost:3000/cancel',
+  });
+
+  res.json({ url: session.url });
+});
+
+app.listen(5000, () => console.log("Server running"));
