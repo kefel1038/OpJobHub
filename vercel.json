@@ -1,11 +1,19 @@
 {
   "version": 2,
-  "buildCommand": "cd artifacts/placementbridge && pnpm install && pnpm run build",
   "outputDirectory": "artifacts/placementbridge/dist/public",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/$1"
+      "source": "/api/(.*)",
+      "destination": "/api/index.ts"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/$1",
+      "continue": true
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
