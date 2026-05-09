@@ -87,9 +87,9 @@ router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (r
       matches,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ err: error }, "Error analyzing resume");
-    res.status(500).json({ error: "Failed to analyze resume: " + error.message });
+    res.status(500).json({ error: "Failed to analyze resume: " + (error instanceof Error ? error.message : String(error)) });
   }
 });
 
@@ -123,8 +123,8 @@ router.get("/matches", async (req, res) => {
     `);
 
     res.json({ matches });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
   }
 });
 
@@ -231,9 +231,9 @@ router.post("/match-by-profile", async (req, res) => {
     const matches = scored.sort((a, b) => b.matchScore - a.matchScore).slice(0, 10);
 
     res.json({ matches });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ err: error }, "Error in match-by-profile");
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
   }
 });
 
@@ -244,7 +244,6 @@ router.post("/career-gaps", async (req, res) => {
     const userSkills = skills.map((s: string) => s.toLowerCase().trim());
 
     // Find active jobs, optionally filtered by target role
-    const conditions = [eq(jobs.status, "active")] as const;
     const relevantJobs = targetRole
       ? await db.select().from(jobs).where(and(eq(jobs.status, "active"), sql`LOWER(${jobs.title}) LIKE ${`%${targetRole.toLowerCase()}%`}`)).limit(100)
       : await db.select().from(jobs).where(eq(jobs.status, "active")).limit(100);
@@ -277,7 +276,8 @@ router.post("/career-gaps", async (req, res) => {
       const topMissing = missingSkills.slice(0, 3).map((s) => s.skill).join(", ");
       aiAdvice = `Adding ${topMissing} to your skillset could significantly increase your job opportunities. `;
       if (targetRole) {
-        aiAdvice += `For ${targetRole} roles in the Gulf market, these skills appear in ${Math.round((missingSkills[0]?.demand ?? 0 / Math.max(1, relevantJobs.length)) * 100)}% of job postings.`;
+        const pct = Math.round(((missingSkills[0]?.demand ?? 0) / Math.max(1, relevantJobs.length)) * 100);
+        aiAdvice += `For ${targetRole} roles in the Gulf market, these skills appear in ${pct}% of job postings.`;
       }
     } else {
       aiAdvice = "Your skills are well-aligned with the current market demands.";
@@ -289,9 +289,9 @@ router.post("/career-gaps", async (req, res) => {
       aiAdvice,
       totalJobsAnalyzed: relevantJobs.length,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error({ err: error }, "Error in career-gaps");
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
   }
 });
 

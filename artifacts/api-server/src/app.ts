@@ -35,4 +35,11 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
 
+// Global error handler — always returns JSON
+app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const message = err instanceof Error ? err.message : String(err);
+  logger.error({ err }, "Unhandled error");
+  res.status(500).json({ error: message });
+});
+
 export default app;
