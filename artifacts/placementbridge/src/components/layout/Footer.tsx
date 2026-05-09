@@ -1,5 +1,6 @@
 import { changeLanguage } from "@/components/GoogleTranslate";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, Building2, Briefcase, Users, Sparkles, Globe } from "lucide-react";
+import { Link } from "wouter";
 
 export function Footer() {
   return (
@@ -7,14 +8,14 @@ export function Footer() {
       <div className="absolute top-0 left-0 right-0 h-24 city-silhouette opacity-20 pointer-events-none" />
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid md:grid-cols-4 gap-12 mb-20">
+        <div className="grid md:grid-cols-6 gap-12 mb-20">
+          {/* Brand */}
           <div className="col-span-2">
             <div className="flex items-center gap-2 mb-8">
               <img src="/logo.png" alt="KeFeL Media" className="h-12 w-auto" />
             </div>
             <p className="text-white/60 font-bold max-w-sm leading-relaxed mb-8">
-              Empowering careers in the Gulf through AI-driven matching and recruitment intelligence.
-              Connecting top talent with the region's leading companies.
+              Africa-to-Gulf AI-powered workforce recruitment platform. Connecting top talent with leading companies across the Middle East.
             </p>
             <div className="space-y-3 text-white/60 font-bold mb-8">
               <div className="flex items-center gap-3">
@@ -36,15 +37,44 @@ export function Footer() {
               <a href="#" className="h-10 w-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-[#FFBF00] hover:text-black transition-all">LI</a>
             </div>
           </div>
+
+          {/* For Employers */}
           <div>
-            <h4 className="text-[#FFBF00] font-black uppercase italic mb-8 tracking-widest">Platform</h4>
+            <h4 className="text-[#FFBF00] font-black uppercase italic mb-8 tracking-widest">For Employers</h4>
             <ul className="space-y-4 font-bold text-white/60">
-              <li><a href="/jobs" className="hover:text-white transition-colors">Browse Jobs</a></li>
-              <li><a href="/ai-matching" className="hover:text-white transition-colors">AI Matching</a></li>
-              <li><a href="/employers" className="hover:text-white transition-colors">For Employers</a></li>
-              <li><a href="/career-tools" className="hover:text-white transition-colors">Career Tools</a></li>
+              <li><Link href="/employers" className="hover:text-white transition-colors">Employer Hub</Link></li>
+              <li><Link href="/post-job" className="hover:text-white transition-colors">Post a Job</Link></li>
+              <li><a href="/jobs?type=candidates" className="hover:text-white transition-colors">Browse Candidates</a></li>
+              <li><Link href="/employer/dashboard" className="hover:text-white transition-colors">Employer Dashboard</Link></li>
+              <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+              <li><Link href="/ai-matching" className="hover:text-white transition-colors">AI Matching</Link></li>
             </ul>
           </div>
+
+          {/* For Jobseekers */}
+          <div>
+            <h4 className="text-[#FFBF00] font-black uppercase italic mb-8 tracking-widest">For Jobseekers</h4>
+            <ul className="space-y-4 font-bold text-white/60">
+              <li><Link href="/jobs" className="hover:text-white transition-colors">Browse Jobs</Link></li>
+              <li><Link href="/ai-matching" className="hover:text-white transition-colors">AI Career Match</Link></li>
+              <li><Link href="/resources" className="hover:text-white transition-colors">Career Resources</Link></li>
+              <li><Link href="/register" className="hover:text-white transition-colors">Create Profile</Link></li>
+            </ul>
+          </div>
+
+          {/* Solutions */}
+          <div>
+            <h4 className="text-[#FFBF00] font-black uppercase italic mb-8 tracking-widest">Solutions</h4>
+            <ul className="space-y-4 font-bold text-white/60">
+              <li><Link href="/employers" className="hover:text-white transition-colors">Bulk Hiring</Link></li>
+              <li><Link href="/employers" className="hover:text-white transition-colors">International Recruitment</Link></li>
+              <li><Link href="/employers" className="hover:text-white transition-colors">Workforce Outsourcing</Link></li>
+              <li><Link href="/employers" className="hover:text-white transition-colors">Executive Search</Link></li>
+              <li><Link href="/employers" className="hover:text-white transition-colors">Freelance Hiring</Link></li>
+            </ul>
+          </div>
+
+          {/* Company */}
           <div>
             <h4 className="text-[#FFBF00] font-black uppercase italic mb-8 tracking-widest">Company</h4>
             <ul className="space-y-4 font-bold text-white/60">
@@ -55,11 +85,20 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="pt-12 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 text-sm font-bold text-white/40 uppercase tracking-widest">
-          <p>© {new Date().getFullYear()} KeFeL Jobs. Built in Qatar.</p>
-          <div className="flex gap-8">
-            <span onClick={() => changeLanguage("en")} className="hover:text-white cursor-pointer transition-colors">English</span>
-            <span onClick={() => changeLanguage("ar")} className="hover:text-white cursor-pointer transition-colors">Arabic</span>
+
+        {/* Bottom Bar */}
+        <div className="pt-12 border-t border-white/10">
+          <div className="grid md:grid-cols-3 items-center gap-6 text-sm font-bold text-white/40 uppercase tracking-widest">
+            <p>© {new Date().getFullYear()} KeFeL Jobs. Built in Qatar.</p>
+            <div className="flex items-center justify-center gap-6 text-center">
+              <span className="flex items-center gap-1"><Globe className="h-3 w-3" /> Africa-to-Gulf Recruitment</span>
+              <span className="flex items-center gap-1"><Sparkles className="h-3 w-3" /> AI-Powered</span>
+              <span className="flex items-center gap-1"><Building2 className="h-3 w-3" /> Enterprise Ready</span>
+            </div>
+            <div className="flex justify-end gap-8">
+              <span onClick={() => changeLanguage("en")} className="hover:text-white cursor-pointer transition-colors">English</span>
+              <span onClick={() => changeLanguage("ar")} className="hover:text-white cursor-pointer transition-colors">Arabic</span>
+            </div>
           </div>
         </div>
       </div>

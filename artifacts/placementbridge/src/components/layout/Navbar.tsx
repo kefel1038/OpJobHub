@@ -1,46 +1,14 @@
 import { Link, useLocation } from "wouter";
-import { Menu, Sparkles, Briefcase, Users, LayoutDashboard, LogOut, Globe, Check } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { Shield, Menu, Sparkles, Building2, ChevronDown } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
-import { motion, AnimatePresence } from "framer-motion";
-import { changeLanguage } from "@/components/GoogleTranslate";
 
 export function Navbar() {
   const { user, logout } = useAuth();
   const [, navigate] = useLocation();
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [langOpen, setLangOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState("en");
-  const langRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (langRef.current && !langRef.current.contains(e.target as Node)) {
-        setLangOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const languages = [
-    { code: "en", label: "English", native: "English" },
-    { code: "ar", label: "Arabic", native: "العربية" },
-  ];
-
-  const handleLangChange = (code: string) => {
-    setCurrentLang(code);
-    setLangOpen(false);
-    changeLanguage(code);
-  };
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const handleLogout = () => {
     logout();
@@ -48,147 +16,170 @@ export function Navbar() {
     navigate("/");
   };
 
-  const navLinks = [
-    { href: "/jobs", label: "Jobs" },
-    { href: "/ai-matching", label: "AI Matching" },
-    { href: "/employers", label: "For Employers" },
-    { href: "/resources", label: "Resources" },
-    { href: "/pricing", label: "Pricing" },
-  ];
-
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-[#FFBF00]/95 backdrop-blur-md border-b-2 border-black py-2 shadow-lg" : "bg-[#FFBF00] py-4"
-      }`}
-    >
-      <div className="container mx-auto px-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-1 group">
-          <img 
-            src="/logo.png" 
-            alt="KeFeL Media" 
-            className="h-14 md:h-20 w-auto group-hover:scale-105 transition-transform invert" 
-          />
+    <header className="sticky top-0 z-40 bg-background/90 backdrop-blur border-b border-border">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+            K
+          </div>
+          <span className="font-bold text-lg tracking-tight">
+            KeFeL <span className="text-primary">Jobs</span>
+          </span>
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden lg:flex items-center gap-6">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.href} 
-              href={link.href}
-              className="text-[15px] font-bold text-foreground hover:text-primary transition-colors"
-            >
-              {link.label}
+        <nav className="hidden md:flex items-center gap-1">
+          <Button variant="ghost" asChild className="text-foreground/80 hover:text-foreground">
+            <Link href="/">Find Jobs</Link>
+          </Button>
+          <Button variant="ghost" asChild className="text-foreground/80 hover:text-foreground gap-1.5">
+            <Link href="/employers">
+              <Building2 className="h-4 w-4 text-primary" />
+              For Employers
             </Link>
-          ))}
+          </Button>
+          <Button variant="ghost" asChild className="text-foreground/80 hover:text-foreground gap-1.5">
+            <Link href="/ai-matching">
+              <Sparkles className="h-4 w-4 text-primary" />
+              AI Matching
+            </Link>
+          </Button>
+          {user && (user.role === "employer" || user.role === "admin") && (
+            <Button variant="ghost" asChild className="text-foreground/80 hover:text-foreground">
+              <Link href="/post-job">Post a Job</Link>
+            </Button>
+          )}
+          {user?.role === "admin" && (
+            <Button variant="ghost" asChild className="gap-1.5 text-foreground/80 hover:text-foreground">
+              <Link href="/admin">
+                <Shield className="h-4 w-4" />
+                Admin
+              </Link>
+            </Button>
+          )}
         </nav>
 
-          <div className="hidden lg:flex items-center gap-4">
-            <div className="relative" ref={langRef}>
-              <div
-                onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full border-2 border-black hover:bg-black/5 transition-colors cursor-pointer text-sm font-black uppercase italic"
-              >
-                <Globe className="h-4 w-4" />
-                <span>{currentLang === "en" ? "English" : "العربية"}</span>
-                <span className="text-[10px] opacity-50">▼</span>
-              </div>
-              {langOpen && (
-                <div className="absolute right-0 mt-2 w-44 bg-white border-2 border-black rounded-xl shadow-2xl overflow-hidden z-50">
-                  {languages.map((lang) => (
-                    <button
-                      key={lang.code}
-                      onClick={() => handleLangChange(lang.code)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold transition-colors hover:bg-[#FFBF00]/10 ${
-                        currentLang === lang.code ? "bg-[#FFBF00]/20 text-black" : "text-black"
-                      }`}
-                    >
-                      <Globe className="h-4 w-4" />
-                      <span>{lang.native}</span>
-                      {currentLang === lang.code && <Check className="h-4 w-4 ml-auto text-[#FFBF00]" />}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          
+        <div className="hidden md:flex items-center gap-3">
           {user ? (
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-full h-8 w-8 hover:bg-destructive/10 hover:text-destructive">
-                <LogOut className="h-4 w-4" />
+            <>
+              <Badge variant="secondary" className="capitalize font-medium">
+                {user.role}
+              </Badge>
+              <span className="text-sm text-muted-foreground hidden lg:inline">{user.email}</span>
+              {user.role === "employer" && (
+                <Button variant="outline" asChild className="rounded-full text-xs h-9 px-4">
+                  <Link href="/employer/dashboard">Dashboard</Link>
+                </Button>
+              )}
+              <Button variant="ghost" onClick={handleLogout} className="text-foreground/80">
+                Sign out
               </Button>
-              <Button asChild className="bg-primary text-black hover:bg-primary/90 font-bold rounded-full px-6">
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
-            </div>
+            </>
           ) : (
             <>
-              <Link href="/login" className="text-[15px] font-black uppercase italic text-black hover:opacity-70 transition-opacity">
-                Login
-              </Link>
-              <Button asChild className="bg-black text-[#FFBF00] hover:bg-zinc-900 font-black rounded-[2rem] px-8 h-12 text-base shadow-lg border-2 border-black">
-                <Link href="/post-job">Post a Job</Link>
+              <Button variant="ghost" asChild className="text-foreground/80">
+                <Link href="/login">Sign in</Link>
+              </Button>
+              <Button asChild className="rounded-full px-5">
+                <Link href="/register">Get started</Link>
               </Button>
             </>
           )}
         </div>
 
-        {/* Mobile Menu Toggle */}
         <button
-          className="lg:hidden p-2 rounded-full hover:bg-muted transition-colors"
+          className="md:hidden p-2 rounded-md hover:bg-muted"
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >
-          <Menu className="h-6 w-6" />
+          <Menu className="h-5 w-5" />
         </button>
       </div>
 
-      {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {open && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="lg:hidden absolute top-full left-0 right-0 bg-[#FFBF00] border-b-2 border-black shadow-2xl p-6 flex flex-col gap-4"
-          >
-            {navLinks.map((link) => (
+      {open && (
+        <div className="md:hidden border-t border-border bg-background">
+          <div className="container mx-auto px-4 py-3 flex flex-col gap-1">
+            <Link
+              href="/"
+              onClick={() => setOpen(false)}
+              className="px-3 py-2 rounded-md hover:bg-muted text-sm"
+            >
+              Find Jobs
+            </Link>
+            <Link
+              href="/employers"
+              onClick={() => setOpen(false)}
+              className="px-3 py-2 rounded-md hover:bg-muted text-sm flex items-center gap-2"
+            >
+              <Building2 className="h-4 w-4 text-primary" />
+              For Employers
+            </Link>
+            <Link
+              href="/ai-matching"
+              onClick={() => setOpen(false)}
+              className="px-3 py-2 rounded-md hover:bg-muted text-sm flex items-center gap-2"
+            >
+              <Sparkles className="h-4 w-4 text-primary" />
+              AI Matching
+            </Link>
+            {user && (user.role === "employer" || user.role === "admin") && (
               <Link
-                key={link.href}
-                href={link.href}
+                href="/post-job"
                 onClick={() => setOpen(false)}
-                className="text-lg font-bold hover:text-primary transition-colors"
+                className="px-3 py-2 rounded-md hover:bg-muted text-sm"
               >
-                {link.label}
-              </Link>
-            ))}
-            <div className="h-px bg-border my-2" />
-            <div className="flex gap-4 py-2">
-              {languages.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => { handleLangChange(lang.code); setOpen(false); }}
-                  className={`flex items-center gap-2 text-base font-bold transition-colors ${
-                    currentLang === lang.code ? "text-black" : "text-black/50"
-                  }`}
-                >
-                  <Globe className="h-4 w-4" />
-                  {lang.native}
-                </button>
-              ))}
-            </div>
-            {!user && (
-              <Link href="/login" onClick={() => setOpen(false)} className="text-lg font-bold">
-                Login
+                Post a Job
               </Link>
             )}
-            <Button asChild className="bg-black text-[#FFBF00] hover:bg-zinc-900 font-black rounded-full w-full py-6 text-lg">
-              <Link href="/post-job" onClick={() => setOpen(false)}>Post a Job</Link>
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {user?.role === "admin" && (
+              <Link
+                href="/admin"
+                onClick={() => setOpen(false)}
+                className="px-3 py-2 rounded-md hover:bg-muted text-sm flex items-center gap-1.5"
+              >
+                <Shield className="h-4 w-4" />
+                Admin
+              </Link>
+            )}
+            {user?.role === "employer" && (
+              <Link
+                href="/employer/dashboard"
+                onClick={() => setOpen(false)}
+                className="px-3 py-2 rounded-md hover:bg-muted text-sm flex items-center gap-1.5"
+              >
+                <Building2 className="h-4 w-4" />
+                Dashboard
+              </Link>
+            )}
+            <div className="border-t border-border my-2" />
+            {user ? (
+              <button
+                onClick={handleLogout}
+                className="text-left px-3 py-2 rounded-md hover:bg-muted text-sm"
+              >
+                Sign out ({user.email})
+              </button>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="px-3 py-2 rounded-md hover:bg-muted text-sm"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setOpen(false)}
+                  className="px-3 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium text-center"
+                >
+                  Get started
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }

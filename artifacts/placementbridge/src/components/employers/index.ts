@@ -1,0 +1,11 @@
+export { HeroSection } from "./HeroSection";
+export { TrustedBySection } from "./TrustedBySection";
+export { SolutionsSection } from "./SolutionsSection";
+export { AIFeaturesSection } from "./AIFeaturesSection";
+export { VerificationBadgesSection } from "./VerificationBadgesSection";
+export { PipelineSection } from "./PipelineSection";
+export { IndustryHiringSection } from "./IndustryHiringSection";
+export { InternationalSection } from "./InternationalSection";
+export { PricingSection } from "./PricingSection";
+export { TestimonialsSection } from "./TestimonialsSection";
+export { GlobalCTASection } from "./GlobalCTASection";

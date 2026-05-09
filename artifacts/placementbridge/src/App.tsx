@@ -16,6 +16,8 @@ import AdminSignup from "@/pages/admin-signup";
 import AIMatching from "@/pages/ai-matching";
 import Resources from "@/pages/resources";
 import Pricing from "@/pages/pricing";
+import Employers from "@/pages/employers";
+import EmployerDashboard from "@/pages/employer-dashboard";
 
 function Router() {
   return (
@@ -31,6 +33,8 @@ function Router() {
       <Route path="/ai-matching" component={AIMatching} />
       <Route path="/resources" component={Resources} />
       <Route path="/pricing" component={Pricing} />
+      <Route path="/employers" component={Employers} />
+      <Route path="/employer/dashboard" component={EmployerDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
