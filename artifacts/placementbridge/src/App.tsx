@@ -15,6 +15,7 @@ import Admin from "@/pages/admin";
 import AdminSignup from "@/pages/admin-signup";
 import AIMatching from "@/pages/ai-matching";
 import Resources from "@/pages/resources";
+import Pricing from "@/pages/pricing";
 
 function Router() {
   return (
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/admin/signup" component={AdminSignup} />
       <Route path="/ai-matching" component={AIMatching} />
       <Route path="/resources" component={Resources} />
+      <Route path="/pricing" component={Pricing} />
       <Route component={NotFound} />
     </Switch>
   );
