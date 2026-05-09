@@ -1,434 +1,208 @@
-import { useEffect, useState } from "react";
-import { Link } from "wouter";
-import {
-  MapPin,
-  Briefcase,
-  Star,
-  Loader2,
-  DollarSign,
-  ArrowRight,
-  Search,
-  Building2,
-  Users,
-  Sparkles,
-  CheckCircle2,
-  TrendingUp,
-} from "lucide-react";
-import { Navbar } from "@/components/navbar";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Layout } from "@/components/layout/Layout";
+import { Hero } from "@/components/sections/Hero";
+import { FeaturedJobs } from "@/components/sections/FeaturedJobs";
+import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { api, type Job } from "@/lib/api";
-import { useAuth } from "@/hooks/use-auth";
-
-const HERO_AVATARS = [
-  { src: "https://randomuser.me/api/portraits/women/68.jpg", size: "h-16 w-16", pos: "top-8 left-[6%]" },
-  { src: "https://randomuser.me/api/portraits/men/32.jpg", size: "h-24 w-24", pos: "top-1/3 left-[2%]" },
-  { src: "https://randomuser.me/api/portraits/women/44.jpg", size: "h-14 w-14", pos: "bottom-12 left-[14%]" },
-  { src: "https://randomuser.me/api/portraits/women/65.jpg", size: "h-16 w-16", pos: "top-10 right-[7%]" },
-  { src: "https://randomuser.me/api/portraits/men/45.jpg", size: "h-24 w-24", pos: "top-1/3 right-[3%]" },
-  { src: "https://randomuser.me/api/portraits/women/22.jpg", size: "h-14 w-14", pos: "bottom-14 right-[12%]" },
-];
-
-const COMPANIES = [
-  "FLUITRONICS",
-  "ALPSALPINE",
-  "FENIX",
-  "DPS",
-  "WEBESAN",
-  "PORTICO",
-];
-
-const STEPS = [
-  {
-    n: "1",
-    title: "Create your profile",
-    desc: "Set up your account in minutes — whether you're searching for talent or your next opportunity.",
-  },
-  {
-    n: "2",
-    title: "Discover & connect",
-    desc: "Browse curated job postings or candidate profiles matched to your needs.",
-  },
-  {
-    n: "3",
-    title: "Smart matching",
-    desc: "Our platform highlights the best fit so you spend less time filtering and more time interviewing.",
-  },
-  {
-    n: "4",
-    title: "Hire or get hired",
-    desc: "Manage everything from one dashboard, from first contact to signed offer.",
-  },
-];
+import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
+import { 
+  FileText, 
+  BrainCircuit, 
+  Target, 
+  ArrowRight, 
+  CheckCircle2, 
+  Zap,
+  LayoutDashboard,
+  ShieldCheck,
+  Globe
+} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function Home() {
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
-
-  useEffect(() => {
-    api
-      .listJobs()
-      .then(setJobs)
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const featuredCount = jobs.filter((j) => j.isFeatured).length;
-
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <Layout>
+      <Hero />
 
-      {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="container mx-auto px-4 pt-16 pb-20 md:pt-24 md:pb-28">
-          <div className="relative max-w-3xl mx-auto text-center">
-            {HERO_AVATARS.map((a, i) => (
-              <img
-                key={i}
-                src={a.src}
-                alt=""
-                className={`hidden md:block absolute ${a.pos} ${a.size} rounded-full object-cover ring-4 ring-background shadow-lg`}
-                loading="lazy"
-              />
-            ))}
+      {/* AI Intelligence Strip */}
+      <section className="py-20 bg-muted/30 border-y border-border/50">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-8">
+            <FeatureCard 
+              icon={<FileText className="h-6 w-6 text-primary" />}
+              title="Semantic Resume Scan"
+              description="Our AI doesn't just read words; it understands your professional narrative and career trajectory."
+            />
+            <FeatureCard 
+              icon={<BrainCircuit className="h-6 w-6 text-accent" />}
+              title="Smart Match Engine"
+              description="Get matched with roles based on your actual potential, skills, and market demand."
+            />
+            <FeatureCard 
+              icon={<Target className="h-6 w-6 text-violet-500" />}
+              title="ATS Optimization"
+              description="Score your resume against real-world recruiter standards and get instant improvements."
+            />
+          </div>
+        </div>
+      </section>
 
-            <Badge
-              variant="secondary"
-              className="mb-6 rounded-full px-4 py-1.5 text-xs font-medium gap-1.5"
+      <FeaturedJobs />
+
+      {/* AI Preview Section */}
+      <section className="py-24 bg-foreground text-background relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/10 blur-[100px] pointer-events-none" />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="space-y-8"
             >
-              <Sparkles className="h-3 w-3 text-primary" />
-              Smarter hiring, better careers
-            </Badge>
-
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
-              Start your <br className="hidden sm:block" />
-              <span className="text-primary">recruitment</span> now
-            </h1>
-
-            <p className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto">
-              We turn your hiring into a success story — high reach, excellent service,
-              and smart technology, all on one platform.
-            </p>
-
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Button asChild size="lg" className="rounded-full px-7 h-12 text-base">
-                <Link href="#jobs">
-                  Discover job postings
-                  <ArrowRight className="ml-1.5 h-4 w-4" />
-                </Link>
-              </Button>
-              {!user && (
-                <Button
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="rounded-full px-7 h-12 text-base"
-                >
-                  <Link href="/register">I'm hiring</Link>
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Company logos band */}
-        <div className="border-y border-border bg-muted/40">
-          <div className="container mx-auto px-4 py-6">
-            <p className="text-center text-xs font-medium uppercase tracking-widest text-muted-foreground mb-4">
-              These employers rely on us
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
-              {COMPANIES.map((c) => (
-                <span
-                  key={c}
-                  className="text-base md:text-lg font-bold tracking-tight text-foreground/40 hover:text-foreground/70 transition-colors"
-                >
-                  {c}
-                </span>
-              ))}
-              <span className="text-sm text-muted-foreground">+ 66,000 more companies</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CUSTOM RECRUITMENT FEATURE STRIP */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="grid md:grid-cols-12 gap-10 items-center">
-          <div className="md:col-span-5">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight">
-              Custom recruitment <br />
-              for <span className="text-primary">smarter hiring</span>
-            </h2>
-            <p className="mt-5 text-muted-foreground">
-              Our platform adapts to your needs — whether you're an employer searching for
-              top talent or a candidate looking for your next role. Data-driven matching,
-              measurable results, ongoing improvements.
-            </p>
-            <div className="mt-6 flex items-center gap-1.5">
-              <span className="h-1 w-12 rounded-full bg-primary" />
-              <span className="h-1 w-3 rounded-full bg-primary/30" />
-              <span className="h-1 w-3 rounded-full bg-primary/30" />
-            </div>
-          </div>
-
-          <div className="md:col-span-7 grid sm:grid-cols-2 gap-4">
-            <FeatureCard
-              icon={<Search className="h-5 w-5" />}
-              title="All-in-One"
-              text="From posting jobs to managing applications, do it all from a single, focused dashboard."
-            />
-            <FeatureCard
-              icon={<Users className="h-5 w-5" />}
-              title="Individual Collaboration"
-              text="We adapt to you — not the other way around. Reliable partner for individual roles or whole teams."
-            />
-            <FeatureCard
-              icon={<TrendingUp className="h-5 w-5" />}
-              title="Featured Listings"
-              text="Boost a posting for $20 to land at the top of search and get qualified applicants faster."
-              highlight
-            />
-            <FeatureCard
-              icon={<CheckCircle2 className="h-5 w-5" />}
-              title="Verified Roles"
-              text="Every employer is reviewed, so candidates can trust what they see and apply with confidence."
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* JOBS SECTION */}
-      <section id="jobs" className="bg-muted/40 border-y border-border">
-        <div className="container mx-auto px-4 py-20">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-10">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-widest text-primary mb-2">
-                Open positions
-              </p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-                {loading
-                  ? "Loading opportunities..."
-                  : `${jobs.length} role${jobs.length === 1 ? "" : "s"} ready for you`}
+              <Badge className="bg-primary text-primary-foreground border-0">AI Assistant</Badge>
+              <h2 className="text-4xl md:text-6xl font-heading font-bold leading-tight">
+                Your Personal <br />
+                <span className="text-primary">Career Agent.</span>
               </h2>
-              {!loading && featuredCount > 0 && (
-                <p className="text-sm text-muted-foreground mt-2">
-                  Including {featuredCount} featured posting{featuredCount === 1 ? "" : "s"}
-                </p>
-              )}
-            </div>
-            {user?.role === "employer" || user?.role === "admin" ? (
-              <Button asChild className="rounded-full px-6">
-                <Link href="/post-job">
-                  Post a job <ArrowRight className="ml-1.5 h-4 w-4" />
-                </Link>
-              </Button>
-            ) : !user ? (
-              <Button asChild variant="outline" className="rounded-full px-6">
-                <Link href="/register">Become an employer</Link>
-              </Button>
-            ) : null}
-          </div>
-
-          {loading && (
-            <div className="flex justify-center py-16">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          )}
-
-          {error && (
-            <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-xl p-4">
-              {error}
-            </div>
-          )}
-
-          {!loading && !error && jobs.length === 0 && (
-            <Card className="border-dashed">
-              <CardContent className="py-16 text-center text-muted-foreground">
-                <Briefcase className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                <p>No jobs posted yet. Be the first to post one.</p>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="grid md:grid-cols-2 gap-4">
-            {jobs.map((job) => (
-              <Link key={job.id} href={`/jobs/${job.id}`}>
-                <Card
-                  className={`group h-full transition-all cursor-pointer hover:shadow-lg hover:-translate-y-0.5 ${
-                    job.isFeatured ? "border-primary/30 bg-primary/[0.02]" : ""
-                  }`}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                          {job.isFeatured && (
-                            <Badge className="gap-1 rounded-full bg-primary/10 text-primary hover:bg-primary/10 border-0">
-                              <Star className="h-3 w-3 fill-current" />
-                              Featured
-                            </Badge>
-                          )}
-                        </div>
-                        <h3 className="text-lg font-semibold leading-tight group-hover:text-primary transition-colors">
-                          {job.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-0.5 flex items-center gap-1.5">
-                          <Building2 className="h-3.5 w-3.5" />
-                          {job.company}
-                        </p>
-                      </div>
-                      <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
-                    </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4" />
-                        {job.location}
-                      </span>
-                      {job.salary && (
-                        <span className="flex items-center gap-1">
-                          <DollarSign className="h-4 w-4" />
-                          {job.salary}
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-3 text-sm text-muted-foreground line-clamp-2">
-                      {job.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* HOW IT WORKS / NUMBERED STEPS */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <p className="text-xs font-medium uppercase tracking-widest text-primary mb-2">
-            How it works
-          </p>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Four steps to your next great hire — or job
-          </h2>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {STEPS.map((s) => (
-            <Card key={s.n} className="border-border">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <span className="text-2xl font-bold text-foreground/30">{s.n}</span>
-                  <Badge className="rounded-full bg-primary/10 text-primary hover:bg-primary/10 border-0 text-[10px] font-medium">
-                    fast
-                  </Badge>
-                </div>
-                <h3 className="font-semibold text-lg mb-2">{s.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* DARK CTA STRIP */}
-      <section className="bg-foreground text-background">
-        <div className="container mx-auto px-4 py-16">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight">
-              Intensive and individual collaboration with every partner — from consulting to perfection.
-            </h2>
-            <div className="space-y-5">
-              <p className="text-background/70">
-                Arrange a free consultation and see how KeFeL Jobs can work as an extension of your
-                hiring team. Smarter sourcing, faster placements, measurable outcomes.
+              <p className="text-xl text-background/70 leading-relaxed max-w-lg">
+                Stop applying blindly. Use our AI tools to optimize your profile, 
+                generate custom cover letters, and track your market competitiveness in real-time.
               </p>
-              <Button
-                asChild
-                size="lg"
-                className="rounded-full px-7 bg-background text-foreground hover:bg-background/90"
-              >
-                <Link href={user ? "/post-job" : "/register"}>
-                  Get to know the strategy
-                  <ArrowRight className="ml-1.5 h-4 w-4" />
-                </Link>
-              </Button>
+              
+              <ul className="space-y-4">
+                <li className="flex items-center gap-3">
+                  <div className="h-6 w-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  </div>
+                  <span>Real-time ATS Scoring & Feedback</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="h-6 w-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  </div>
+                  <span>Semantic Skill Gap Analysis</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="h-6 w-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  </div>
+                  <span>Gulf Market Demand Insights</span>
+                </li>
+              </ul>
+
+              <div className="pt-6">
+                <Button asChild size="lg" className="rounded-full px-8 bg-background text-foreground hover:bg-background/90 group">
+                  <Link href="/ai-matching">
+                    Try AI Matching Free
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="aspect-square rounded-[3rem] bg-gradient-to-br from-primary/20 to-accent/20 border border-white/10 p-8 glass-dark relative">
+                {/* Mock UI Elements */}
+                <div className="absolute top-10 left-10 right-10 bg-background/5 p-6 rounded-2xl border border-white/10 backdrop-blur-xl">
+                   <div className="flex items-center justify-between mb-4">
+                      <div className="h-2 w-24 bg-white/20 rounded-full" />
+                      <div className="h-6 w-12 bg-primary/40 rounded-full" />
+                   </div>
+                   <div className="space-y-3">
+                      <div className="h-2 w-full bg-white/10 rounded-full" />
+                      <div className="h-2 w-2/3 bg-white/10 rounded-full" />
+                   </div>
+                </div>
+                
+                <div className="absolute bottom-10 left-10 bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-2xl backdrop-blur-xl animate-bounce duration-[3000ms]">
+                   <Zap className="h-6 w-6 text-emerald-500 mb-2" />
+                   <div className="text-xs font-bold text-emerald-500 uppercase tracking-widest">ATS Score</div>
+                   <div className="text-2xl font-bold text-white">92%</div>
+                </div>
+
+                <div className="absolute bottom-20 right-10 bg-primary/10 border border-primary/20 p-6 rounded-2xl backdrop-blur-xl animate-pulse">
+                   <LayoutDashboard className="h-6 w-6 text-primary mb-2" />
+                   <div className="text-xs font-bold text-primary uppercase tracking-widest">Market Demand</div>
+                   <div className="text-2xl font-bold text-white">Very High</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* STATS */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <Stat value="66K+" label="Companies trust us" />
-          <Stat value="120K+" label="Active candidates" />
-          <Stat value="4.9★" label="Employer satisfaction" />
-          <Stat value="$20" label="To feature a posting" />
+      {/* Trust / Stats Section */}
+      <section className="py-24 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">Trusted by over <span className="text-primary">66,000+</span> Companies</h2>
+            <p className="text-muted-foreground">From startups to Fortune 500s, we help organizations find the talent they need to grow.</p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+             <StatCard value="120K+" label="Active Candidates" icon={<Users className="h-5 w-5" />} />
+             <StatCard value="4.9/5" label="User Satisfaction" icon={<ShieldCheck className="h-5 w-5" />} />
+             <StatCard value="15M+" label="Matches Made" icon={<Sparkles className="h-5 w-5" />} />
+             <StatCard value="30+" label="Countries Covered" icon={<Globe className="h-5 w-5" />} />
+          </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-border bg-muted/30">
-        <div className="container mx-auto px-4 py-10 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
-              K
+      {/* CTA Section */}
+      <section className="pb-24">
+        <div className="container mx-auto px-4">
+          <div className="rounded-[3rem] bg-primary p-12 md:p-20 text-center relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-full h-full bg-mesh opacity-20 pointer-events-none" />
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-5xl font-heading font-bold text-primary-foreground mb-6">Ready to find your <br /> next success story?</h2>
+              <p className="text-primary-foreground/80 text-lg mb-10 max-w-xl mx-auto">
+                Join thousands of others who are transforming their careers through data-driven recruitment.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button asChild size="lg" variant="secondary" className="rounded-full px-10 h-14 font-bold shadow-xl">
+                  <Link href="/register">Get Started Free</Link>
+                </Button>
+                <Button asChild variant="outline" size="lg" className="rounded-full px-10 h-14 font-bold border-white/20 text-white hover:bg-white/10">
+                  <Link href="/post-job">I'm an Employer</Link>
+                </Button>
+              </div>
             </div>
-            <span className="font-semibold">
-              KeFeL <span className="text-primary">Jobs</span>
-            </span>
           </div>
-          <p className="text-muted-foreground">
-            © {new Date().getFullYear()} KeFeL Jobs. Smarter hiring, better careers.
-          </p>
         </div>
-      </footer>
-    </div>
+      </section>
+    </Layout>
   );
 }
 
-function FeatureCard({
-  icon,
-  title,
-  text,
-  highlight,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  text: string;
-  highlight?: boolean;
-}) {
+function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <Card
-      className={`border-border h-full transition-all hover:shadow-md ${
-        highlight ? "bg-primary/[0.04] border-primary/20" : ""
-      }`}
-    >
-      <CardContent className="p-5">
-        <div
-          className={`h-10 w-10 rounded-xl flex items-center justify-center mb-3 ${
-            highlight ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
-          }`}
-        >
+    <Card className="border-0 shadow-none bg-transparent">
+      <CardContent className="p-0 space-y-4">
+        <div className="h-12 w-12 rounded-2xl bg-background shadow-lg shadow-black/5 flex items-center justify-center">
           {icon}
         </div>
-        <h3 className="font-semibold mb-1">{title}</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">{text}</p>
+        <h3 className="text-xl font-bold">{title}</h3>
+        <p className="text-muted-foreground leading-relaxed text-sm">
+          {description}
+        </p>
       </CardContent>
     </Card>
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
+function StatCard({ value, label, icon }: { value: string; label: string; icon: React.ReactNode }) {
   return (
-    <div>
-      <div className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">{value}</div>
-      <div className="text-sm text-muted-foreground mt-1">{label}</div>
+    <div className="text-center space-y-2">
+      <div className="flex items-center justify-center text-primary/40 mb-2">
+        {icon}
+      </div>
+      <div className="text-4xl font-heading font-extrabold">{value}</div>
+      <div className="text-sm font-bold text-muted-foreground uppercase tracking-widest">{label}</div>
     </div>
   );
 }

@@ -21,7 +21,7 @@ import {
   PieChart as PieChartIcon,
   BarChart as BarChartIcon,
 } from "lucide-react";
-import { Navbar } from "@/components/navbar";
+import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -110,8 +110,8 @@ export default function AIMatching() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
+    <Layout>
+      <div className="pt-16 pb-12">
 
       <main className="container mx-auto px-4 py-12">
         {/* Hero Section */}
@@ -450,7 +450,8 @@ export default function AIMatching() {
           )}
         </AnimatePresence>
       </main>
-    </div>
+      </div>
+    </Layout>
   );
 }
 

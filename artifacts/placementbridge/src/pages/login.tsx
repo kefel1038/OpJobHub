@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Briefcase } from "lucide-react";
-import { Navbar } from "@/components/navbar";
+import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,9 +31,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="container mx-auto px-4 py-12 max-w-md">
+    <Layout>
+      <div className="pt-20 container mx-auto px-4 py-12 max-w-md">
         <Card>
           <CardHeader className="text-center">
             <div className="flex justify-center mb-2">
@@ -94,6 +93,6 @@ export default function Login() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Layout>
   );
 }
