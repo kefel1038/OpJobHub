@@ -1,13 +1,12 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Briefcase, Loader2, SlidersHorizontal, ChevronDown, ChevronUp,
-  Bell, Download, Search, Filter, X, ArrowUp
+  Search, X, ArrowUp, Clock, Bell, ShieldCheck, Sparkles, Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
 import { api, type Job } from "@/lib/api";
 import { JobsNavbar } from "@/components/jobs/JobsNavbar";
 import { JobsHero } from "@/components/jobs/JobsHero";
@@ -20,51 +19,35 @@ import { AICareerInsights } from "@/components/jobs/AICareerInsights";
 import { AIChatbot } from "@/components/jobs/AIChatbot";
 import { ResumeUploadCTA } from "@/components/jobs/ResumeUploadCTA";
 
-interface ExtendedJob extends Job {
-  aiMatch?: number;
-  atsScore?: number;
-  skills?: string[];
-  workType?: string;
-  salaryMin?: number;
-  salaryMax?: number;
-  logo?: string;
-}
-
 export default function Jobs() {
-  const [allJobs, setAllJobs] = useState<ExtendedJob[]>([]);
+  const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState<{ totalJobs: number; recentJobs: number }>({ totalJobs: 0, recentJobs: 0 });
 
   const [searchQuery, setSearchQuery] = useState("");
   const [locationQuery, setLocationQuery] = useState("");
-  const [jobType, setJobType] = useState("All Types");
+  const [jobType, setJobType] = useState("");
   const [filters, setFilters] = useState<FilterState>(defaultFilterState);
   const [filterMobileOpen, setFilterMobileOpen] = useState(false);
 
-  const [selectedJob, setSelectedJob] = useState<ExtendedJob | null>(null);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
 
   const [sortBy, setSortBy] = useState<"newest" | "match" | "salary">("newest");
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
-  const jobsRef = useRef<HTMLDivElement>(null);
+  const [showJobAlerts, setShowJobAlerts] = useState(false);
+  const pageSize = 15;
 
   useEffect(() => {
-    api.listJobs()
-      .then((res) => {
-        const enriched = res.map((job) => ({
-          ...job,
-          aiMatch: Math.floor(Math.random() * 30) + 70,
-          atsScore: Math.floor(Math.random() * 20) + 78,
-          skills: ["React", "TypeScript", "Node.js", "Python", "AWS", "Docker", "GraphQL", "PostgreSQL"]
-            .sort(() => Math.random() - 0.5)
-            .slice(0, Math.floor(Math.random() * 4) + 3),
-          workType: ["Remote", "Hybrid", "On-site", "Flexible"][Math.floor(Math.random() * 4)],
-          salaryMin: Math.floor(Math.random() * 80 + 60) * 1000,
-          salaryMax: Math.floor(Math.random() * 100 + 120) * 1000,
-        }));
-        setAllJobs(enriched);
+    Promise.all([
+      api.listJobs(),
+      api.searchStats().catch(() => ({ totalJobs: 0, recentJobs: 0 })),
+    ])
+      .then(([jobs, s]) => {
+        setAllJobs(jobs);
+        setStats(s);
         setLoading(false);
       })
       .catch((e) => {
@@ -87,39 +70,62 @@ export default function Jobs() {
       result = result.filter(
         (j) =>
           j.title.toLowerCase().includes(q) ||
-          j.company.toLowerCase().includes(q)
+          j.company.toLowerCase().includes(q) ||
+          (j.description || "").toLowerCase().includes(q) ||
+          (j.skills || []).some((s) => s.toLowerCase().includes(q)) ||
+          (j.industry || "").toLowerCase().includes(q),
       );
     }
     if (locationQuery) {
       const l = locationQuery.toLowerCase();
       result = result.filter((j) => j.location.toLowerCase().includes(l));
     }
-    if (jobType !== "All Types") {
-      result = result.filter((j) => (j.workType ?? "Full-Time").toLowerCase() === jobType.toLowerCase());
+    if (jobType) {
+      result = result.filter((j) => (j.employmentType || "Full-Time").toLowerCase() === jobType.toLowerCase());
+    }
+
+    if (filters.locations.length > 0) {
+      result = result.filter((j) =>
+        filters.locations.some((loc) => j.location.toLowerCase().includes(loc.toLowerCase()))
+      );
     }
     if (filters.categories.length > 0) {
       result = result.filter((j) =>
-        filters.categories.some((c) => j.title.toLowerCase().includes(c.toLowerCase().split(" ")[0]))
+        filters.categories.some((cat) =>
+          (j.industry || j.title).toLowerCase().includes(cat.toLowerCase().slice(0, 4))
+        )
       );
     }
     if (filters.workTypes.length > 0) {
-      result = result.filter((j) => filters.workTypes.includes(j.workType ?? ""));
-    }
-    if (filters.experienceLevels.length > 0) {
-      result = result.filter((_, i) => i % 3 === 0);
+      result = result.filter((j) => {
+        const wt = j.isRemote ? "Remote" : "On-site";
+        return filters.workTypes.some((fw) => wt.toLowerCase().includes(fw.toLowerCase()));
+      });
     }
     if (filters.skills.length > 0) {
       result = result.filter((j) =>
-        filters.skills.some((s) => (j.skills ?? []).includes(s))
+        filters.skills.some((s) => (j.skills || []).some((js) => js.toLowerCase().includes(s.toLowerCase())))
       );
     }
+    if (filters.visaSonsored) {
+      result = result.filter((j) => j.visaSonsored === true);
+    }
+    if (filters.isRemote) {
+      result = result.filter((j) => j.isRemote === true);
+    }
+    if (filters.isUrgent) {
+      result = result.filter((j) => j.isUrgent === true);
+    }
     if (filters.aiMatchScore > 0) {
-      result = result.filter((j) => (j.aiMatch ?? 0) >= filters.aiMatchScore);
+      result = result.filter((j) => (j.aiMatchScore ?? 0) >= filters.aiMatchScore);
+    }
+    if (filters.salaryRange[0] > 0) {
+      result = result.filter((j) => (j.salaryMax ?? 999999) >= filters.salaryRange[0]);
     }
 
     switch (sortBy) {
       case "match":
-        result.sort((a, b) => (b.aiMatch ?? 0) - (a.aiMatch ?? 0));
+        result.sort((a, b) => (b.aiMatchScore ?? 0) - (a.aiMatchScore ?? 0));
         break;
       case "salary":
         result.sort((a, b) => (b.salaryMax ?? 0) - (a.salaryMax ?? 0));
@@ -132,18 +138,12 @@ export default function Jobs() {
   }, [allJobs, searchQuery, locationQuery, jobType, filters, sortBy]);
 
   const paginatedJobs = filtered.slice(0, currentPage * pageSize);
-  const totalPages = Math.ceil(filtered.length / pageSize);
   const hasMore = paginatedJobs.length < filtered.length;
 
-  const handleSearch = useCallback(() => {
-    setCurrentPage(1);
-  }, []);
+  const handleSearch = useCallback(() => setCurrentPage(1), []);
+  const loadMore = useCallback(() => setCurrentPage((prev) => prev + 1), []);
 
-  const loadMore = useCallback(() => {
-    setCurrentPage((prev) => prev + 1);
-  }, []);
-
-  const handleSelectJob = useCallback((job: ExtendedJob) => {
+  const handleSelectJob = useCallback((job: Job) => {
     setSelectedJob(job);
     setDetailPanelOpen(true);
   }, []);
@@ -153,9 +153,13 @@ export default function Jobs() {
     setTimeout(() => setSelectedJob(null), 300);
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+  const now = new Date();
+  const qatarTime = now.toLocaleString("en-US", {
+    hour: "numeric", minute: "2-digit", hour12: true,
+    timeZone: "Asia/Qatar",
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -175,20 +179,41 @@ export default function Jobs() {
 
       <FeaturedJobsCarousel />
 
-      <div ref={jobsRef} className="relative">
+      <div className="relative">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl md:text-3xl font-heading font-black">
-                {loading ? "Loading jobs..." : `${filtered.length} Jobs Found`}
-              </h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                {searchQuery && `"${searchQuery}"`}
-                {locationQuery && ` in ${locationQuery}`}
-                {filters.categories.length > 0 && ` \u2022 ${filters.categories.length} categories`}
-              </p>
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl md:text-3xl font-heading font-black">
+                  {loading ? "Loading jobs..." : `${filtered.length} Jobs in Qatar`}
+                </h2>
+                {!loading && filtered.length > 0 && (
+                  <Badge variant="secondary" className="rounded-full text-xs px-3 py-1">
+                    Updated {qatarTime}
+                  </Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+                {searchQuery && <span>"{searchQuery}"</span>}
+                {locationQuery && <span>in {locationQuery}</span>}
+                {stats.recentJobs > 0 && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3 text-primary" />
+                    {stats.recentJobs} new today
+                  </span>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full h-9 gap-1.5"
+                onClick={() => setShowJobAlerts(true)}
+              >
+                <Bell className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Job Alerts</span>
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -199,7 +224,7 @@ export default function Jobs() {
                 Filters
               </Button>
               <div className="hidden sm:flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 rounded-full px-3 py-1.5">
-                <Filter className="h-3.5 w-3.5" />
+                <ChevronDown className="h-3.5 w-3.5" />
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
@@ -260,31 +285,34 @@ export default function Jobs() {
                   </div>
                   <p className="text-xl font-bold mb-2">No jobs found</p>
                   <p className="text-muted-foreground mb-4 max-w-md mx-auto">
-                    Try adjusting your search terms or filters to find more opportunities.
+                    Try adjusting your search terms or filters to find more opportunities in Qatar.
                   </p>
-                  <Button
-                    variant="outline"
-                    onClick={() => { setSearchQuery(""); setLocationQuery(""); setFilters(defaultFilterState); }}
-                    className="rounded-full"
-                  >
-                    Clear all filters
-                  </Button>
+                  <div className="flex items-center justify-center gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => { setSearchQuery(""); setLocationQuery(""); setFilters(defaultFilterState); }}
+                      className="rounded-full"
+                    >
+                      Clear all filters
+                    </Button>
+                    <Button variant="default" className="rounded-full gap-2" onClick={() => setShowJobAlerts(true)}>
+                      <Bell className="h-4 w-4" /> Get Job Alerts
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <>
-                  <AnimatePresence mode="popLayout">
-                    <div className="space-y-3">
-                      {paginatedJobs.map((job, i) => (
-                        <JobCard
-                          key={job.id}
-                          job={job}
-                          index={i}
-                          onSelect={handleSelectJob}
-                          isSelected={selectedJob?.id === job.id}
-                        />
-                      ))}
-                    </div>
-                  </AnimatePresence>
+                  <div className="space-y-3">
+                    {paginatedJobs.map((job, i) => (
+                      <JobCard
+                        key={job.id}
+                        job={job}
+                        index={i}
+                        onSelect={handleSelectJob}
+                        isSelected={selectedJob?.id === job.id}
+                      />
+                    ))}
+                  </div>
 
                   {hasMore && (
                     <div className="flex justify-center mt-8">
@@ -306,7 +334,7 @@ export default function Jobs() {
                     <div className="text-center py-10">
                       <div className="h-px bg-border/60 max-w-xs mx-auto mb-6" />
                       <p className="text-sm text-muted-foreground">
-                        Showing all {filtered.length} jobs
+                        Showing all {filtered.length} Qatar jobs
                       </p>
                     </div>
                   )}
@@ -318,16 +346,63 @@ export default function Jobs() {
       </div>
 
       <TopCompaniesGrid />
-
       <AICareerInsights />
 
-      <JobDetailPanel
-        job={selectedJob}
-        open={detailPanelOpen}
-        onClose={handleClosePanel}
-      />
-
+      <JobDetailPanel job={selectedJob} open={detailPanelOpen} onClose={handleClosePanel} />
       <AIChatbot />
+
+      <AnimatePresence>
+        {showJobAlerts && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-40"
+              onClick={() => setShowJobAlerts(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-background rounded-2xl border shadow-2xl p-6"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Bell className="h-5 w-5 text-primary" />
+                  <h3 className="text-lg font-bold">Job Alerts</h3>
+                </div>
+                <button onClick={() => setShowJobAlerts(false)} className="p-1 rounded-md hover:bg-muted">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Get notified when new jobs matching your preferences are posted in Qatar.
+              </p>
+              <div className="space-y-3">
+                <input
+                  type="email"
+                  placeholder="Your email address"
+                  className="w-full h-11 px-4 rounded-xl border border-border/60 bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+                <input
+                  type="text"
+                  placeholder="Job keywords (e.g., Engineer, Driver)"
+                  className="w-full h-11 px-4 rounded-xl border border-border/60 bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+                <select className="w-full h-11 px-4 rounded-xl border border-border/60 bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+                  <option>Daily updates</option>
+                  <option>Weekly updates</option>
+                  <option>Instant alerts</option>
+                </select>
+                <Button className="w-full rounded-xl h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold gap-2">
+                  <Bell className="h-4 w-4" /> Subscribe to Alerts
+                </Button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {showBackToTop && (
@@ -336,7 +411,7 @@ export default function Jobs() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0 }}
             onClick={scrollToTop}
-            className="fixed bottom-6 left-6 z-50 h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors"
+            className="fixed bottom-6 left-6 z-50 h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90"
           >
             <ArrowUp className="h-5 w-5" />
           </motion.button>
@@ -350,14 +425,18 @@ export default function Jobs() {
               <div className="h-6 w-6 rounded bg-primary flex items-center justify-center">
                 <Briefcase className="h-3 w-3 text-primary-foreground" />
               </div>
-              <span className="font-semibold text-foreground">KeFeL Jobs</span>
-              <span className="hidden sm:inline">&mdash; AI-Powered Career Platform</span>
+              <span className="font-semibold text-foreground">OP Job Hub</span>
+              <span className="hidden sm:inline">&mdash; Fresh Qatar Jobs Updated Daily</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Updated {qatarTime} Qatar time</span>
+              <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {stats.totalJobs.toLocaleString()} active jobs</span>
             </div>
             <div className="flex items-center gap-6">
               <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
               <a href="#" className="hover:text-foreground transition-colors">Terms</a>
-              <a href="#" className="hover:text-foreground transition-colors">Cookies</a>
-              <span>&copy; {new Date().getFullYear()} KeFeL Media</span>
+              <a href="#" className="hover:text-foreground transition-colors">Contact</a>
+              <span>&copy; {new Date().getFullYear()} OP Job Hub</span>
             </div>
           </div>
         </div>

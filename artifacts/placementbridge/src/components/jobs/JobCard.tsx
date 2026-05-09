@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   MapPin, Clock, Bookmark, BookmarkCheck, Send, Building2,
-  DollarSign, Sparkles, ChevronRight
+  DollarSign, Sparkles, ChevronRight, ShieldCheck, Flag, ExternalLink
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,20 +10,10 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import type { Job } from "@/lib/api";
 
-interface ExtendedJob extends Job {
-  aiMatch?: number;
-  atsScore?: number;
-  skills?: string[];
-  workType?: string;
-  salaryMin?: number;
-  salaryMax?: number;
-  logo?: string;
-}
-
 interface JobCardProps {
-  job: ExtendedJob;
+  job: Job;
   index: number;
-  onSelect: (job: ExtendedJob) => void;
+  onSelect: (job: Job) => void;
   isSelected?: boolean;
 }
 
@@ -36,6 +26,27 @@ const companyColors = [
   "from-cyan-500 to-blue-500",
 ];
 
+const qatarAreas = ["Doha", "Lusail", "Al Wakrah", "Al Rayyan", "Industrial Area", "Al Khor"];
+
+function getLocationBadge(location: string): { label: string; color: string } | null {
+  const loc = location?.toLowerCase() || "";
+  if (loc.includes("doha")) return { label: "Doha", color: "bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400" };
+  if (loc.includes("lusail")) return { label: "Lusail", color: "bg-purple-500/10 text-purple-600 border-purple-500/20 dark:text-purple-400" };
+  if (loc.includes("wakrah")) return { label: "Al Wakrah", color: "bg-teal-500/10 text-teal-600 border-teal-500/20 dark:text-teal-400" };
+  if (loc.includes("rayyan")) return { label: "Al Rayyan", color: "bg-green-500/10 text-green-600 border-green-500/20 dark:text-green-400" };
+  return null;
+}
+
+function isNewJob(createdAt: string): boolean {
+  const diff = Date.now() - new Date(createdAt).getTime();
+  return diff < 24 * 60 * 60 * 1000;
+}
+
+function isRecentJob(createdAt: string): boolean {
+  const diff = Date.now() - new Date(createdAt).getTime();
+  return diff < 48 * 60 * 60 * 1000;
+}
+
 export function JobCard({ job, index, onSelect, isSelected }: JobCardProps) {
   const [saved, setSaved] = useState(false);
   const colorClass = companyColors[job.id % companyColors.length];
@@ -43,23 +54,30 @@ export function JobCard({ job, index, onSelect, isSelected }: JobCardProps) {
   const timeAgo = (() => {
     const diff = Date.now() - new Date(job.createdAt).getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return "Today";
+    if (days === 0) {
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      if (hours === 0) return "Just now";
+      return `${hours}h ago`;
+    }
     if (days === 1) return "Yesterday";
-    if (days < 7) return `${days} days ago`;
-    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
-    return `${Math.floor(days / 30)} months ago`;
+    if (days < 7) return `${days}d ago`;
+    return `${Math.floor(days / 7)}w ago`;
   })();
 
-  const aiMatch = job.aiMatch ?? Math.floor(Math.random() * 30) + 70;
-  const skillTags = job.skills ?? ["React", "TypeScript", "Node.js", "AWS"].slice(0, Math.floor(Math.random() * 3) + 3);
+  const aiMatch = job.aiMatchScore ?? Math.floor(Math.random() * 30) + 70;
+  const skillTags = job.skills ?? [];
+  const displayTags = skillTags.length > 0 ? skillTags.slice(0, 3) : [];
+  const isNew = isNewJob(job.createdAt);
+  const isRecent = isRecentJob(job.createdAt);
+  const locationBadge = getLocationBadge(job.location);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05 }}
+      transition={{ duration: 0.4, delay: index * 0.04 }}
       className={cn(
-        "group relative rounded-2xl border p-5 cursor-pointer card-hover",
+        "group relative rounded-2xl border p-5 cursor-pointer card-hover transition-all",
         isSelected
           ? "border-primary/50 bg-primary/5 shadow-lg shadow-primary/5"
           : "border-border/60 bg-card hover:border-primary/30 hover:bg-accent/30"
@@ -71,18 +89,41 @@ export function JobCard({ job, index, onSelect, isSelected }: JobCardProps) {
           "h-14 w-14 rounded-xl bg-gradient-to-br flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-lg",
           colorClass
         )}>
-          {job.company.charAt(0)}
+          {job.company?.charAt(0) || "?"}
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <h3 className="text-base font-bold text-foreground truncate group-hover:text-primary transition-colors">
-                {job.title}
-              </h3>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                  {job.title}
+                </h3>
+                {isNew && (
+                  <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/20 text-[10px] px-2 py-0 rounded-md font-semibold dark:text-emerald-400">
+                    NEW TODAY
+                  </Badge>
+                )}
+                {job.isUrgent && (
+                  <Badge className="bg-red-500/15 text-red-600 border-red-500/20 text-[10px] px-2 py-0 rounded-md font-semibold animate-pulse dark:text-red-400">
+                    URGENT
+                  </Badge>
+                )}
+                {job.isFeatured && (
+                  <Badge className="bg-primary/15 text-primary border-primary/20 text-[10px] px-2 py-0 rounded-md font-semibold">
+                    HOT JOB
+                  </Badge>
+                )}
+              </div>
               <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
                 <Building2 className="h-3.5 w-3.5" />
                 {job.company}
+                {job.isVerified && (
+                  <ShieldCheck className="h-3 w-3 text-blue-500" />
+                )}
+                {job.isVerified && (
+                  <span className="text-[10px] text-blue-500 font-medium">Verified</span>
+                )}
               </p>
             </div>
             <button
@@ -96,24 +137,49 @@ export function JobCard({ job, index, onSelect, isSelected }: JobCardProps) {
             </button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2 mt-2.5 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <MapPin className="h-3 w-3" /> {job.location}
             </span>
             {(job.salaryMin || job.salary) && (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1 font-medium text-foreground/80">
                 <DollarSign className="h-3 w-3" />
-                {job.salaryMin ? `$${job.salaryMin.toLocaleString()} - $${(job.salaryMax ?? job.salaryMin + 50000).toLocaleString()}` : job.salary}
+                {job.salaryMin ? `${job.salaryCurrency || "QAR"} ${job.salaryMin.toLocaleString()}${job.salaryMax ? ` - ${job.salaryMax.toLocaleString()}` : "+"}` : job.salary}
               </span>
             )}
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" /> {timeAgo}
             </span>
+            {job.source && (
+              <span className="text-[10px] text-muted-foreground/60 bg-muted/50 px-1.5 py-0.5 rounded">
+                {job.source}
+              </span>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5 mt-3">
-            {skillTags.slice(0, 3).map((skill) => (
-              <Badge key={skill} variant="secondary" className="text-[10px] px-2 py-0.5 rounded-md font-normal">
+            {job.visaSonsored && (
+              <Badge variant="outline" className="text-[10px] px-2 py-0.5 rounded-md border-blue-300 text-blue-600 bg-blue-50 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800">
+                Visa Sponsored
+              </Badge>
+            )}
+            {job.employmentType && (
+              <Badge variant="secondary" className="text-[10px] px-2 py-0.5 rounded-md font-normal">
+                {job.employmentType}
+              </Badge>
+            )}
+            {job.industry && (
+              <Badge variant="secondary" className="text-[10px] px-2 py-0.5 rounded-md font-normal">
+                {job.industry}
+              </Badge>
+            )}
+            {job.isRemote && (
+              <Badge variant="secondary" className="text-[10px] px-2 py-0.5 rounded-md bg-green-500/10 text-green-600 border-green-500/20 dark:text-green-400">
+                Remote
+              </Badge>
+            )}
+            {displayTags.map((skill) => (
+              <Badge key={skill} variant="outline" className="text-[10px] px-2 py-0.5 rounded-md font-normal">
                 {skill}
               </Badge>
             ))}
@@ -122,9 +188,6 @@ export function JobCard({ job, index, onSelect, isSelected }: JobCardProps) {
                 +{skillTags.length - 3}
               </Badge>
             )}
-            <Badge className="ml-auto text-[10px] px-2 py-0.5 rounded-md bg-primary/10 text-primary border-primary/20 font-medium">
-              {job.workType ?? "Remote"}
-            </Badge>
           </div>
         </div>
       </div>

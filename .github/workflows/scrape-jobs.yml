@@ -1,0 +1,48 @@
+name: Daily Qatar Jobs Scraper
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+    inputs:
+      source:
+        description: "Scrape specific source (leave empty for all)"
+        required: false
+        type: string
+
+env:
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
+jobs:
+  scrape:
+    name: Scrape Qatar Jobs
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run scraper
+        run: pnpm --filter @workspace/api-server run scrape
+        env:
+          SCRAPE_SOURCE: ${{ github.event.inputs.source || '' }}
+
+      - name: Cleanup expired jobs
+        run: pnpm --filter @workspace/api-server run scrape:cleanup
+
+      - name: Log completion
+        run: echo "Scrape completed at $(date)"

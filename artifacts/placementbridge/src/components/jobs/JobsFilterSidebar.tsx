@@ -7,19 +7,37 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const categories = [
-  "Software Engineering", "Data Science", "Design", "Product", "Marketing",
-  "Sales", "Finance", "HR", "Operations", "Legal"
+  "Construction", "Oil & Gas", "Healthcare", "Hospitality", "Engineering",
+  "IT", "Security", "Driving", "Logistics", "Education", "Finance", "Retail",
+  "Telecom", "Manufacturing", "Government"
 ];
 
-const experienceLevels = ["Entry Level", "Mid Level", "Senior", "Lead", "Director", "Executive"];
+const experienceLevels = ["Entry Level", "Mid Level", "Senior", "Lead", "Executive"];
 const workTypes = ["Remote", "Hybrid", "On-site", "Flexible"];
 const employmentTypes = ["Full-Time", "Part-Time", "Contract", "Temporary", "Internship", "Freelance"];
+const qatarLocations = ["Doha", "Lusail", "Al Wakrah", "Al Rayyan", "Industrial Area", "Al Khor", "Mesaieed", "Al Shamal"];
+
 const skills = [
-  "React", "TypeScript", "Python", "Node.js", "AWS", "Docker", "SQL",
-  "GraphQL", "Machine Learning", "UI/UX", "Go", "Rust"
+  "Driving License", "QID", "Valid Visa", "English", "Arabic", "Microsoft Office",
+  "AutoCAD", "SQL", "Python", "Project Management", "Sales", "Customer Service",
+  "HVAC", "Electrical", "Plumbing", "Welding"
 ];
+
 const companySizes = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"];
-const datePosted = ["Last 24 hours", "Last 3 days", "Last 7 days", "Last 14 days", "Last 30 days", "Anytime"];
+const datePosted = ["Last 24 hours", "Last 3 days", "Last 7 days", "Last 14 days", "Last 30 days"];
+const salaryRanges = [
+  { label: "QAR 1k - 3k", min: 1000, max: 3000 },
+  { label: "QAR 3k - 5k", min: 3000, max: 5000 },
+  { label: "QAR 5k - 8k", min: 5000, max: 8000 },
+  { label: "QAR 8k - 12k", min: 8000, max: 12000 },
+  { label: "QAR 12k - 20k", min: 12000, max: 20000 },
+  { label: "QAR 20k+", min: 20000, max: 999999 },
+];
+
+const nationalities = [
+  "Any Nationality", "Indian", "Pakistani", "Bangladeshi", "Filipino",
+  "Egyptian", "Nepali", "Sri Lankan", "Kenyan", "Ugandan"
+];
 
 interface FilterSectionProps {
   title: string;
@@ -88,10 +106,15 @@ export interface FilterState {
   experienceLevels: string[];
   workTypes: string[];
   employmentTypes: string[];
+  locations: string[];
   skills: string[];
   companySizes: string[];
-  datePosted: string;
+  nationalities: string[];
   salaryRange: [number, number];
+  datePosted: string;
+  visaSponsored: boolean;
+  isRemote: boolean;
+  isUrgent: boolean;
   aiMatchScore: number;
 }
 
@@ -117,10 +140,15 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
       experienceLevels: [],
       workTypes: [],
       employmentTypes: [],
+      locations: [],
       skills: [],
       companySizes: [],
+      nationalities: [],
+      salaryRange: [0, 999999],
       datePosted: "Anytime",
-      salaryRange: [0, 300000],
+      visaSponsored: false,
+      isRemote: false,
+      isUrgent: false,
       aiMatchScore: 0,
     });
   };
@@ -130,8 +158,13 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
     ...filters.experienceLevels,
     ...filters.workTypes,
     ...filters.employmentTypes,
+    ...filters.locations,
     ...filters.skills,
     ...filters.companySizes,
+    ...filters.nationalities,
+    filters.visaSonsored ? "Visa Sponsored" : null,
+    filters.isRemote ? "Remote" : null,
+    filters.isUrgent ? "Urgent" : null,
     filters.datePosted !== "Anytime" ? filters.datePosted : null,
   ].filter(Boolean).length;
 
@@ -155,7 +188,50 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
         )}
       </div>
 
-      <FilterSection title="Job Category">
+      <FilterSection title="Quick Toggles" defaultOpen={true}>
+        <div className="space-y-2 px-1">
+          <label className="flex items-center justify-between py-2 cursor-pointer">
+            <span className="text-sm text-muted-foreground">Visa Sponsored</span>
+            <input
+              type="checkbox"
+              checked={filters.visaSonsored}
+              onChange={(e) => setFilters({ ...filters, visaSponsored: e.target.checked })}
+              className="h-4 w-4 rounded accent-primary"
+            />
+          </label>
+          <label className="flex items-center justify-between py-2 cursor-pointer">
+            <span className="text-sm text-muted-foreground">Remote Only</span>
+            <input
+              type="checkbox"
+              checked={filters.isRemote}
+              onChange={(e) => setFilters({ ...filters, isRemote: e.target.checked })}
+              className="h-4 w-4 rounded accent-primary"
+            />
+          </label>
+          <label className="flex items-center justify-between py-2 cursor-pointer">
+            <span className="text-sm text-muted-foreground">Urgent Hiring</span>
+            <input
+              type="checkbox"
+              checked={filters.isUrgent}
+              onChange={(e) => setFilters({ ...filters, isUrgent: e.target.checked })}
+              className="h-4 w-4 rounded accent-primary"
+            />
+          </label>
+        </div>
+      </FilterSection>
+
+      <FilterSection title="Location">
+        {qatarLocations.map((loc) => (
+          <FilterCheckbox
+            key={loc}
+            label={loc}
+            checked={filters.locations.includes(loc)}
+            onChange={() => toggleArrayFilter("locations", loc)}
+          />
+        ))}
+      </FilterSection>
+
+      <FilterSection title="Industry">
         {categories.map((cat) => (
           <FilterCheckbox
             key={cat}
@@ -164,6 +240,23 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
             onChange={() => toggleArrayFilter("categories", cat)}
           />
         ))}
+      </FilterSection>
+
+      <FilterSection title="Salary Range">
+        <div className="px-1 space-y-1">
+          {salaryRanges.map((range) => (
+            <label key={range.label} className="flex items-center gap-2.5 py-1.5 cursor-pointer group rounded-md hover:bg-muted/50 transition-colors">
+              <input
+                type="radio"
+                name="salaryRange"
+                checked={filters.salaryRange[0] === range.min && filters.salaryRange[1] === range.max}
+                onChange={() => setFilters({ ...filters, salaryRange: [range.min, range.max] })}
+                className="h-4 w-4 text-primary accent-primary"
+              />
+              <span className="text-sm text-muted-foreground group-hover:text-foreground">{range.label}</span>
+            </label>
+          ))}
+        </div>
       </FilterSection>
 
       <FilterSection title="Experience Level">
@@ -199,7 +292,7 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
         ))}
       </FilterSection>
 
-      <FilterSection title="Skills">
+      <FilterSection title="Skills / Qualifications">
         <div className="flex flex-wrap gap-1.5">
           {skills.map((skill) => (
             <button
@@ -218,13 +311,13 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
         </div>
       </FilterSection>
 
-      <FilterSection title="Company Size">
-        {companySizes.map((size) => (
+      <FilterSection title="Nationality Friendly">
+        {nationalities.map((nat) => (
           <FilterCheckbox
-            key={size}
-            label={size}
-            checked={filters.companySizes.includes(size)}
-            onChange={() => toggleArrayFilter("companySizes", size)}
+            key={nat}
+            label={nat}
+            checked={filters.nationalities.includes(nat)}
+            onChange={() => toggleArrayFilter("nationalities", nat)}
           />
         ))}
       </FilterSection>
@@ -311,9 +404,14 @@ export const defaultFilterState: FilterState = {
   experienceLevels: [],
   workTypes: [],
   employmentTypes: [],
+  locations: [],
   skills: [],
   companySizes: [],
+  nationalities: [],
+  salaryRange: [0, 999999],
   datePosted: "Anytime",
-  salaryRange: [0, 300000],
+  visaSponsored: false,
+  isRemote: false,
+  isUrgent: false,
   aiMatchScore: 0,
 };
