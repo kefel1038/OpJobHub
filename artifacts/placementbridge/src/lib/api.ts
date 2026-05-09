@@ -392,6 +392,20 @@ export const api = {
     });
   },
 
+  // ─── Freelance/Gig Marketplace APIs ───────────────────────────────
+  getFreelanceGigs(params?: { category?: string; limit?: number }) {
+    const qs = new URLSearchParams();
+    if (params?.category) qs.set("category", params.category);
+    if (params?.limit) qs.set("limit", String(params.limit));
+    return request<Job[]>(`/freelance/gigs?${qs.toString()}`);
+  },
+  getFreelanceStats() {
+    return request<{ totalGigs: number }>("/freelance/stats");
+  },
+  getFreelanceCategories() {
+    return request<Array<{ category: string; count: number }>>("/freelance/categories");
+  },
+
   // ─── Employer-Specific APIs ─────────────────────────────────────
   getEmployerStats() {
     return request<EmployerStats>("/employer/stats");

@@ -70,7 +70,7 @@ export function Footer() {
               <li><Link href="/employers" className="hover:text-white transition-colors">International Recruitment</Link></li>
               <li><Link href="/employers" className="hover:text-white transition-colors">Workforce Outsourcing</Link></li>
               <li><Link href="/employers" className="hover:text-white transition-colors">Executive Search</Link></li>
-              <li><Link href="/employers" className="hover:text-white transition-colors">Freelance Hiring</Link></li>
+              <li><Link href="/freelance" className="hover:text-white transition-colors">Freelance Marketplace</Link></li>
             </ul>
           </div>
 

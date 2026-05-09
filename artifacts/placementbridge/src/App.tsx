@@ -20,6 +20,7 @@ import Employers from "@/pages/employers";
 import EmployerDashboard from "@/pages/employer-dashboard";
 import About from "@/pages/about";
 import Contact from "@/pages/contact";
+import Freelance from "@/pages/freelance";
 
 function Router() {
   return (
@@ -39,6 +40,7 @@ function Router() {
       <Route path="/employer/dashboard" component={EmployerDashboard} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
+      <Route path="/freelance" component={Freelance} />
       <Route component={NotFound} />
     </Switch>
   );
