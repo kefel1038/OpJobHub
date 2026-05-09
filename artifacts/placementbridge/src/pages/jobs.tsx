@@ -18,6 +18,7 @@ import { TopCompaniesGrid } from "@/components/jobs/TopCompaniesGrid";
 import { AICareerInsights } from "@/components/jobs/AICareerInsights";
 import { AIChatbot } from "@/components/jobs/AIChatbot";
 import { ResumeUploadCTA } from "@/components/jobs/ResumeUploadCTA";
+import { Footer } from "@/components/layout/Footer";
 
 export default function Jobs() {
   const [allJobs, setAllJobs] = useState<Job[]>([]);
@@ -418,29 +419,7 @@ export default function Jobs() {
         )}
       </AnimatePresence>
 
-      <footer className="border-t border-border/60 bg-muted/20">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <div className="h-6 w-6 rounded bg-primary flex items-center justify-center">
-                <Briefcase className="h-3 w-3 text-primary-foreground" />
-              </div>
-              <span className="font-semibold text-foreground">OP Job Hub</span>
-              <span className="hidden sm:inline">&mdash; Fresh Qatar Jobs Updated Daily</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Updated {qatarTime} Qatar time</span>
-              <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {stats.totalJobs.toLocaleString()} active jobs</span>
-            </div>
-            <div className="flex items-center gap-6">
-              <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-              <a href="#" className="hover:text-foreground transition-colors">Terms</a>
-              <a href="#" className="hover:text-foreground transition-colors">Contact</a>
-              <span>&copy; {new Date().getFullYear()} OP Job Hub</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

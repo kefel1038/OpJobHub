@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useRoute, useLocation } from "wouter";
 import { MapPin, DollarSign, Calendar, ArrowLeft, Star, Loader2, Trash2 } from "lucide-react";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -111,6 +112,7 @@ export default function JobDetail() {
           </Card>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

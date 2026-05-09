@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Shield } from "lucide-react";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -107,6 +108,7 @@ export default function AdminSignup() {
           </CardContent>
         </Card>
       </div>
+      <Footer />
     </div>
   );
 }

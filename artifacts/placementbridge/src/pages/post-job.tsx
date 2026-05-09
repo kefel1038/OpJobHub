@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useSearch } from "wouter";
 import { CreditCard, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -198,6 +199,7 @@ export default function PostJob() {
           </CardContent>
         </Card>
       </div>
+      <Footer />
     </div>
   );
 }
