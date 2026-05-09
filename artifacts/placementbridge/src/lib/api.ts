@@ -134,6 +134,33 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return data as T;
 }
 
+export interface EmployerStats {
+  totalJobs: number;
+  totalApplicants: number;
+  interviewsThisWeek: number;
+  hiredThisMonth: number;
+  pipeline: Record<string, number>;
+}
+
+export interface Applicant {
+  id: number;
+  jobId: number;
+  userId: number;
+  status: string;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  jobTitle: string;
+  applicant: { id: number; email: string } | null;
+}
+
+export interface AIMatch {
+  candidateId: number;
+  email: string;
+  matchScore: number;
+  matchedJobs: string[];
+}
+
 export const api = {
   register(email: string, password: string, role: "jobseeker" | "employer") {
     return request<{ token: string; user: User }>("/register", {
@@ -363,5 +390,27 @@ export const api = {
       method: "POST",
       body: JSON.stringify(payload),
     });
+  },
+
+  // ─── Employer-Specific APIs ─────────────────────────────────────
+  getEmployerStats() {
+    return request<EmployerStats>("/employer/stats");
+  },
+  getEmployerJobs(status?: string) {
+    const qs = status ? `?status=${status}` : "";
+    return request<Job[]>(`/employer/jobs${qs}`);
+  },
+  getEmployerApplicants(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<Applicant[]>(`/employer/applicants${qs}`);
+  },
+  updateApplicationStatus(id: number, status: string) {
+    return request<{ id: number; status: string }>(`/employer/applications/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+  },
+  getEmployerAIMatches() {
+    return request<{ matches: AIMatch[] }>("/employer/ai-matches");
   },
 };

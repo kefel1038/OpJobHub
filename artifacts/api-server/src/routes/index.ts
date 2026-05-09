@@ -7,6 +7,7 @@ import adminRouter from "./admin";
 import aiRouter from "./ai";
 import scraperRouter from "./scraper";
 import searchRouter from "./search";
+import employerRouter from "./employer";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(adminRouter);
 router.use("/ai", aiRouter);
 router.use("/scraper", scraperRouter);
 router.use("/search", searchRouter);
+router.use(employerRouter);
 
 export default router;
