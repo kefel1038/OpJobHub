@@ -21,6 +21,8 @@ import EmployerDashboard from "@/pages/employer-dashboard";
 import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import Freelance from "@/pages/freelance";
+import Privacy from "@/pages/privacy";
+import Terms from "@/pages/terms";
 
 function Router() {
   return (
@@ -41,6 +43,8 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
       <Route path="/freelance" component={Freelance} />
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
       <Route component={NotFound} />
     </Switch>
   );
