@@ -39,13 +39,11 @@ export function Navbar() {
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-1 group">
-          <div className="flex items-center font-black text-2xl tracking-tighter uppercase italic">
-            <span className="text-[#FF5722]">K</span>
-            <span className="text-[#4CAF50]">E</span>
-            <span className="text-[#2196F3]">F</span>
-            <span className="text-[#FFEB3B]">E</span>
-            <span className="text-[#9C27B0]">L</span>
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="KeFeL Media" 
+            className="h-10 w-auto group-hover:scale-105 transition-transform invert" 
+          />
         </Link>
 
         {/* Desktop Nav */}

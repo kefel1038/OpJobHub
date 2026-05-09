@@ -27,12 +27,8 @@ export function Layout({ children, showNavbar = true }: LayoutProps) {
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid md:grid-cols-4 gap-12 mb-20">
             <div className="col-span-2">
-              <div className="flex items-center font-black text-3xl tracking-tighter uppercase italic mb-8">
-                <span className="text-[#FF5722]">K</span>
-                <span className="text-[#4CAF50]">E</span>
-                <span className="text-[#2196F3]">F</span>
-                <span className="text-[#FFEB3B]">E</span>
-                <span className="text-[#9C27B0]">L</span>
+              <div className="flex items-center gap-2 mb-8">
+                <img src="/logo.png" alt="KeFeL Media" className="h-12 w-auto" />
               </div>
               <p className="text-white/60 font-bold max-w-sm leading-relaxed mb-8">
                 Empowering careers in the Gulf through AI-driven matching and recruitment intelligence. 
