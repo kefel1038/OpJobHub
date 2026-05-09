@@ -1,75 +1,113 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, ArrowRight, CheckCircle2, ShieldCheck, Zap } from "lucide-react";
+import { Sparkles, ArrowRight, PlayCircle } from "lucide-react";
 
 export function Hero() {
   return (
-    <section className="relative pt-32 pb-20 overflow-hidden bg-mesh min-h-[90vh] flex items-center">
-      {/* Animated background blobs */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px] -z-10 animate-pulse" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-[120px] -z-10 animate-pulse delay-1000" />
+    <section className="relative pt-32 pb-24 overflow-hidden bg-[#FFBF00]">
+      {/* Background Graphics */}
+      <div className="absolute bottom-0 left-0 right-0 h-40 city-silhouette opacity-30 pointer-events-none" />
+      
+      {/* Floating Clouds */}
+      <motion.div 
+        animate={{ x: [0, 20, 0] }} 
+        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+        className="absolute top-20 right-[15%] h-12 w-24 bg-white rounded-full opacity-40 blur-sm pointer-events-none" 
+      />
+      <motion.div 
+        animate={{ x: [0, -30, 0] }} 
+        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+        className="absolute top-40 left-[10%] h-10 w-20 bg-white rounded-full opacity-30 blur-sm pointer-events-none" 
+      />
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-2xl"
           >
-            <Badge variant="secondary" className="mb-6 rounded-full px-4 py-1.5 text-xs font-semibold gap-1.5 bg-background/50 backdrop-blur-md border-border/50 text-foreground">
-              <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
-              Now powered by AI Career Intelligence
-            </Badge>
-            
-            <h1 className="text-5xl md:text-7xl font-heading font-extrabold tracking-tight text-foreground leading-[1.05] mb-8">
-              The Future of <span className="text-gradient">Hiring</span> <br /> 
-              is Semantic.
+            <h1 className="text-6xl md:text-8xl font-heading font-[900] tracking-tighter text-black leading-[0.9] mb-8 uppercase italic">
+              find your <br />
+              dream job <br />
+              without <br />
+              <span className="bg-black text-[#FFBF00] px-4 py-1 mt-2 inline-block transform -rotate-1">
+                any hustle
+              </span>
             </h1>
             
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-              Skip the keyword matching. Our AI understands your skills, experience, and potential 
-              to match you with high-growth roles in the Gulf and globally.
+            <p className="text-xl md:text-2xl text-black font-bold max-w-lg mb-10 leading-snug">
+              Today's top candidates care about fairness and equality. 
+              Discover verified jobs, match your skills instantly, and get hired faster.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-              <Button asChild size="lg" className="rounded-full px-8 h-14 text-base font-bold shadow-xl shadow-primary/20 hover:shadow-primary/30 group">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <Button asChild className="bg-black text-[#FFBF00] hover:bg-zinc-900 font-black rounded-full px-10 h-14 text-lg shadow-xl group">
                 <Link href="/ai-matching">
-                  Get Matched Now
-                  <Sparkles className="ml-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
+                  Get Started
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="rounded-full px-8 h-14 text-base font-semibold glass border-border/50 hover:bg-background/80 transition-all">
-                <Link href="/jobs">Explore All Jobs</Link>
+              <Button variant="outline" className="bg-white border-black text-black hover:bg-zinc-50 font-black rounded-full px-10 h-14 text-lg border-2 shadow-sm gap-2">
+                <PlayCircle className="h-6 w-6" />
+                How it works?
               </Button>
+            </div>
+
+            <div className="mt-12 flex items-center gap-2">
+              <div className="flex -space-x-4">
+                {[1,2,3,4,5].map(i => (
+                  <div key={i} className="h-12 w-12 rounded-full border-4 border-[#FFBF00] bg-white overflow-hidden shadow-sm">
+                    <img src={`https://i.pravatar.cc/150?u=${i + 20}`} alt="Candidate" className="h-full w-full object-cover" />
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm font-black text-black uppercase tracking-tight">
+                Our platform is <span className="text-white bg-black px-1.5 py-0.5 rounded italic">free</span> for all the job seekers
+              </p>
             </div>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-3xl mx-auto"
+            initial={{ opacity: 0, scale: 0.9, rotate: 2 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="hidden lg:block relative"
           >
-            <HeroStat icon={<Zap className="h-5 w-5 text-amber-500" />} label="Instant Match" />
-            <HeroStat icon={<ShieldCheck className="h-5 w-5 text-emerald-500" />} label="Verified Roles" />
-            <HeroStat icon={<CheckCircle2 className="h-5 w-5 text-blue-500" />} label="ATS Optimized" />
-            <HeroStat icon={<Sparkles className="h-5 w-5 text-primary" />} label="AI Guidance" />
+            {/* Desktop Mockup Shape */}
+            <div className="aspect-[4/3] bg-black rounded-[3rem] p-1 shadow-2xl relative group overflow-hidden border-[6px] border-black">
+              <div className="h-full w-full bg-white rounded-[2.8rem] overflow-hidden relative">
+                 <img src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&q=80" alt="Modern Office" className="w-full h-full object-cover opacity-80" />
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                 
+                 <div className="absolute bottom-8 left-8 right-8 text-white">
+                    <div className="h-2 w-24 bg-[#FFBF00] rounded-full mb-4" />
+                    <h3 className="text-3xl font-black uppercase italic leading-none">The Future of Hiring</h3>
+                    <p className="text-white/80 font-bold mt-2">Connecting talent with purpose.</p>
+                 </div>
+              </div>
+            </div>
+
+            {/* Floating Element */}
+            <motion.div 
+              animate={{ y: [0, -10, 0] }} 
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-10 -right-10 bg-white p-6 rounded-3xl shadow-2xl border-2 border-black max-w-[200px]"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-black uppercase text-black">Active Match</span>
+              </div>
+              <p className="text-xs font-bold text-black leading-tight">Software Engineer matched with 4 companies today</p>
+            </motion.div>
           </motion.div>
         </div>
       </div>
-    </section>
-  );
-}
 
-function HeroStat({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <div className="flex flex-col items-center gap-2 p-4 rounded-3xl glass border-border/20">
-      <div className="h-10 w-10 rounded-2xl bg-background/50 flex items-center justify-center shadow-sm">
-        {icon}
-      </div>
-      <span className="text-xs font-bold text-foreground/70 uppercase tracking-widest">{label}</span>
-    </div>
+      {/* Dotted Line Graphic */}
+      <div className="absolute top-1/2 left-0 w-full h-64 dotted-line opacity-10 pointer-events-none -z-10" />
+    </section>
   );
 }
