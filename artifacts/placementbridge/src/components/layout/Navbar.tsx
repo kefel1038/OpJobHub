@@ -34,7 +34,7 @@ export function Navbar() {
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-white/90 backdrop-blur-md border-b border-border py-2 shadow-sm" : "bg-white py-4"
+        scrolled ? "bg-[#FFBF00]/95 backdrop-blur-md border-b-2 border-black py-2 shadow-lg" : "bg-[#FFBF00] py-4"
       }`}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
@@ -42,7 +42,7 @@ export function Navbar() {
           <img 
             src="/logo.png" 
             alt="KeFeL Media" 
-            className="h-10 w-auto group-hover:scale-105 transition-transform invert" 
+            className="h-14 md:h-20 w-auto group-hover:scale-105 transition-transform invert" 
           />
         </Link>
 
@@ -60,7 +60,7 @@ export function Navbar() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border hover:bg-muted transition-colors cursor-pointer text-sm font-medium">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border-2 border-black hover:bg-black/5 transition-colors cursor-pointer text-sm font-black uppercase italic">
             <Globe className="h-4 w-4" />
             <span>Select Language</span>
             <span className="text-[10px] opacity-50">▼</span>
@@ -76,14 +76,12 @@ export function Navbar() {
               </Button>
             </div>
           ) : (
-            <>
-              <Link href="/login" className="text-[15px] font-bold text-foreground hover:text-primary transition-colors">
+              <Link href="/login" className="text-[15px] font-black uppercase italic text-black hover:opacity-70 transition-opacity">
                 Login
               </Link>
-              <Button asChild className="bg-[#FFBF00] text-black hover:bg-[#E6AC00] font-black rounded-[2rem] px-8 h-12 text-base shadow-sm">
+              <Button asChild className="bg-black text-[#FFBF00] hover:bg-zinc-900 font-black rounded-[2rem] px-8 h-12 text-base shadow-lg border-2 border-black">
                 <Link href="/post-job">Post a Job</Link>
               </Button>
-            </>
           )}
         </div>
 
@@ -104,7 +102,7 @@ export function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="lg:hidden absolute top-full left-0 right-0 bg-white border-b border-border shadow-2xl p-6 flex flex-col gap-4"
+            className="lg:hidden absolute top-full left-0 right-0 bg-[#FFBF00] border-b-2 border-black shadow-2xl p-6 flex flex-col gap-4"
           >
             {navLinks.map((link) => (
               <Link
@@ -122,7 +120,7 @@ export function Navbar() {
                 Login
               </Link>
             )}
-            <Button asChild className="bg-[#FFBF00] text-black hover:bg-[#E6AC00] font-black rounded-full w-full py-6 text-lg">
+            <Button asChild className="bg-black text-[#FFBF00] hover:bg-zinc-900 font-black rounded-full w-full py-6 text-lg">
               <Link href="/post-job" onClick={() => setOpen(false)}>Post a Job</Link>
             </Button>
           </motion.div>
