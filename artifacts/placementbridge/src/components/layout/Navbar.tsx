@@ -76,12 +76,14 @@ export function Navbar() {
               </Button>
             </div>
           ) : (
+            <>
               <Link href="/login" className="text-[15px] font-black uppercase italic text-black hover:opacity-70 transition-opacity">
                 Login
               </Link>
               <Button asChild className="bg-black text-[#FFBF00] hover:bg-zinc-900 font-black rounded-[2rem] px-8 h-12 text-base shadow-lg border-2 border-black">
                 <Link href="/post-job">Post a Job</Link>
               </Button>
+            </>
           )}
         </div>
 
