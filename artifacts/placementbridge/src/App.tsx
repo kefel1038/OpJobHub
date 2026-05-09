@@ -14,6 +14,7 @@ import Jobs from "@/pages/jobs";
 import Admin from "@/pages/admin";
 import AdminSignup from "@/pages/admin-signup";
 import AIMatching from "@/pages/ai-matching";
+import Resources from "@/pages/resources";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/admin" component={Admin} />
       <Route path="/admin/signup" component={AdminSignup} />
       <Route path="/ai-matching" component={AIMatching} />
+      <Route path="/resources" component={Resources} />
       <Route component={NotFound} />
     </Switch>
   );
