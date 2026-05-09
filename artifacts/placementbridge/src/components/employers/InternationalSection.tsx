@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import {
   Globe, Plane, FileCheck, HeartPulse, ShieldCheck,
   Building2, MapPin, ArrowRight, CheckCircle2, Clock,
-  Passport, GraduationCap
+  GraduationCap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

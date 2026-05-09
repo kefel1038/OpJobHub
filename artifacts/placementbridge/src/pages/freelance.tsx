@@ -11,7 +11,7 @@ import {
   Search, FileText, Monitor, Smartphone, Grid3X3,
   Code, Palette, Pen, TrendingUp, Database, HeadphonesIcon,
   Building2, HardHat, Calculator, ChevronRight, Layers,
-  PlayCircle, Lightbulb, Network, Lock, BookOpen
+  PlayCircle, Lightbulb, Network, Lock, BookOpen, UserPlus
 } from "lucide-react";
 
 function AnimatedCounter({ value, label, suffix = "", prefix = "" }: { value: number; label: string; suffix?: string; prefix?: string }) {
@@ -58,7 +58,7 @@ function FadeIn({ children, delay = 0, direction = "up" }: { children: React.Rea
       opacity: 1,
       y: 0,
       x: 0,
-      transition: { duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] },
+      transition: { duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] as const },
     },
   };
   return (
@@ -229,7 +229,7 @@ function StatsSection() {
 
 function HowItWorksFreelancerSection() {
   const steps = [
-    { icon: UserCheck, title: "Create Profile", description: "Sign up, showcase your skills, portfolio, and experience. Our AI helps optimize your profile for better matches." },
+    { icon: UserPlus, title: "Create Profile", description: "Sign up, showcase your skills, portfolio, and experience. Our AI helps optimize your profile for better matches." },
     { icon: Search, title: "Find Gigs", description: "Browse AI-matched freelance opportunities across 20+ categories. Get personalized project recommendations." },
     { icon: MessageSquare, title: "Connect & Bid", description: "Chat directly with employers, submit proposals, and negotiate terms — all within the platform." },
     { icon: DollarSign, title: "Get Paid Securely", description: "Escrow payment protection ensures you get paid on time. Milestone-based releases for peace of mind." },

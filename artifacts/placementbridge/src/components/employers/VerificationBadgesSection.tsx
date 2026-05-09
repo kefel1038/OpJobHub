@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import {
-  ShieldCheck, Passport, Fingerprint, Briefcase,
+  ShieldCheck, Fingerprint, Briefcase,
   FileCheck, HeartPulse, Plane, Languages,
   CheckCircle2, Sparkles
 } from "lucide-react";

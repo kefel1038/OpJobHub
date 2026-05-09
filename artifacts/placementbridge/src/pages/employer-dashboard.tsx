@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import {
@@ -8,7 +8,7 @@ import {
   Calendar, Download, Filter, MoreVertical, TrendingUp,
   UserPlus, Sparkles, ShieldCheck, Globe, DollarSign,
   BrainCircuit, Building2, LogOut, Moon, Sun,
-  Loader2, AlertCircle
+  Loader2, AlertCircle, GripVertical, ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -438,78 +438,254 @@ function JobsTab() {
   );
 }
 
-// ─── Candidates Tab ───────────────────────────────────────────────
+// ─── Candidates Tab (Kanban Pipeline) ─────────────────────────────
+const PIPELINE_STAGES = ["applied", "reviewed", "shortlisted", "interviewed", "hired", "deployed"];
+
+const stageLabels: Record<string, string> = {
+  applied: "Applied", reviewed: "Reviewed", shortlisted: "Shortlisted",
+  interviewed: "Interviewed", hired: "Hired", deployed: "Deployed",
+};
+
+const stageColors: Record<string, string> = {
+  applied: "bg-gray-100 text-gray-700 border-gray-200",
+  reviewed: "bg-blue-100 text-blue-700 border-blue-200",
+  shortlisted: "bg-amber-100 text-amber-700 border-amber-200",
+  interviewed: "bg-purple-100 text-purple-700 border-purple-200",
+  hired: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  deployed: "bg-cyan-100 text-cyan-700 border-cyan-200",
+};
+
+const stageDotColors: Record<string, string> = {
+  applied: "bg-gray-400",
+  reviewed: "bg-blue-500",
+  shortlisted: "bg-amber-500",
+  interviewed: "bg-purple-500",
+  hired: "bg-emerald-500",
+  deployed: "bg-cyan-500",
+};
+
 function CandidatesTab() {
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [draggingId, setDraggingId] = useState<number | null>(null);
+  const [dragOverStage, setDragOverStage] = useState<string | null>(null);
+  const dropTargets = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  useEffect(() => {
-    api.getEmployerApplicants(20)
-      .then(setApplicants)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+  const fetchApplicants = useCallback(async (limit = 50) => {
+    try {
+      const data = await api.getEmployerApplicants(limit);
+      setApplicants(data);
+      setError(null);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => { fetchApplicants(); }, [fetchApplicants]);
+
+  const handleDragStart = (applicant: Applicant) => {
+    setDraggingId(applicant.id);
+  };
+
+  const handleDragEnd = async (applicantId: number, newStatus: string) => {
+    const prevApplicants = [...applicants];
+    setApplicants((prev) =>
+      prev.map((a) => (a.id === applicantId ? { ...a, status: newStatus } : a))
+    );
+    setDraggingId(null);
+    setDragOverStage(null);
+
+    try {
+      await api.updateApplicationStatus(applicantId, newStatus);
+    } catch {
+      setApplicants(prevApplicants);
+    }
+  };
+
+  const onDragOver = (e: React.DragEvent, stage: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverStage(stage);
+  };
+
+  const onDrop = (e: React.DragEvent, stage: string) => {
+    e.preventDefault();
+    const appId = Number(e.dataTransfer.getData("text/plain"));
+    if (appId && draggingId === appId) {
+      handleDragEnd(appId, stage);
+    }
+  };
+
+  const grouped = PIPELINE_STAGES.reduce((acc, stage) => {
+    acc[stage] = applicants.filter((a) => a.status === stage);
+    return acc;
+  }, {} as Record<string, Applicant[]>);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-heading font-black text-gray-800">Candidate Pool</h1>
-          <p className="text-gray-500 mt-1">Browse and manage applicants for your jobs</p>
+          <h1 className="text-2xl lg:text-3xl font-heading font-black text-gray-800">
+            Candidate Pipeline
+          </h1>
+          <p className="text-gray-500 mt-1">
+            Drag and drop candidates between stages to update their status
+          </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="rounded-full h-10 gap-2">
-            <Download className="h-4 w-4" />
-            Export
+          <Button
+            variant="outline"
+            className="rounded-full h-10 gap-2"
+            onClick={() => fetchApplicants(50)}
+            disabled={loading}
+          >
+            <Loader2 className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            Refresh
           </Button>
         </div>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-blue-600" /></div>
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
+        </div>
+      ) : error ? (
+        <div className="text-center py-20">
+          <AlertCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-500">{error}</p>
+          <Button
+            onClick={() => { setLoading(true); fetchApplicants(); }}
+            variant="outline"
+            className="mt-4 rounded-full"
+          >
+            Retry
+          </Button>
+        </div>
       ) : applicants.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
           <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <p className="text-gray-500 font-medium">No candidates yet</p>
-          <p className="text-sm text-gray-400 mt-1">Applications will appear here once candidates apply to your jobs.</p>
+          <p className="text-sm text-gray-400 mt-1">
+            Applications will appear here once candidates apply to your jobs.
+          </p>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {applicants.map((a) => (
-            <Card key={a.id} className="border-gray-100 card-hover">
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold">
-                      {a.applicant?.email?.charAt(0).toUpperCase() || "?"}
+        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-4 px-4">
+          {PIPELINE_STAGES.map((stage) => {
+            const items = grouped[stage] || [];
+            return (
+              <div
+                key={stage}
+                ref={(el) => {
+                  if (el) dropTargets.current.set(stage, el);
+                  else dropTargets.current.delete(stage);
+                }}
+                onDragOver={(e) => onDragOver(e, stage)}
+                onDrop={(e) => onDrop(e, stage)}
+                onDragLeave={() => setDragOverStage(null)}
+                className={`flex-shrink-0 w-72 snap-start rounded-2xl border-2 transition-all duration-200 ${
+                  dragOverStage === stage
+                    ? "border-blue-400 bg-blue-50/50 shadow-lg shadow-blue-200/30"
+                    : "border-gray-100 bg-gray-50/50"
+                }`}
+              >
+                <div className="p-4 border-b border-gray-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`h-2.5 w-2.5 rounded-full ${stageDotColors[stage]}`} />
+                      <h3 className="font-bold text-gray-800 text-sm">
+                        {stageLabels[stage]}
+                      </h3>
                     </div>
-                    <div>
-                      <div className="font-bold text-gray-800">{a.applicant?.email?.split("@")[0] || "Anonymous"}</div>
-                      <div className="text-sm text-gray-500">{a.jobTitle}</div>
+                    <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">
+                      {items.length}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3 space-y-3 min-h-[200px]">
+                  <AnimatePresence>
+                    {items.map((applicant) => (
+                      <motion.div
+                        key={applicant.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{
+                          opacity: 1,
+                          scale: 1,
+                          transition: { duration: 0.2 },
+                        }}
+                        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
+                        draggable
+                        onDragStart={() => handleDragStart(applicant)}
+                        onDragEnd={() => {
+                          if (draggingId === applicant.id && !dragOverStage) {
+                            setDraggingId(null);
+                          }
+                        }}
+                        onDrag={(e) => {
+                          // dataTransfer only available in onDragStart/onDrop
+                        }}
+                        onDragStartCapture={(e) => {
+                          e.dataTransfer.setData("text/plain", String(applicant.id));
+                          e.dataTransfer.effectAllowed = "move";
+                        }}
+                        className={`bg-white rounded-xl border p-3 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-shadow ${
+                          draggingId === applicant.id
+                            ? "opacity-50 ring-2 ring-blue-400 ring-offset-2"
+                            : "border-gray-100"
+                        }`}
+                      >
+                        <div className="flex items-start gap-2.5">
+                          <GripVertical className="h-4 w-4 text-gray-300 mt-1 flex-shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <div className="h-7 w-7 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                                {applicant.applicant?.email?.charAt(0).toUpperCase() || "?"}
+                              </div>
+                              <div className="truncate">
+                                <div className="font-semibold text-gray-800 text-sm truncate">
+                                  {applicant.applicant?.email?.split("@")[0] || "Anonymous"}
+                                </div>
+                              </div>
+                            </div>
+                            <p className="text-xs text-gray-500 truncate mb-2">
+                              {applicant.jobTitle}
+                            </p>
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {new Date(applicant.createdAt).toLocaleDateString()}
+                              </span>
+                              <Button
+                                size="sm"
+                                className="h-7 px-2.5 text-[10px] rounded-full bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                Profile
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+
+                  {items.length === 0 && (
+                    <div className="text-center py-8">
+                      <div className="h-8 w-8 rounded-full bg-gray-100 mx-auto flex items-center justify-center mb-2">
+                        <ArrowRight className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <p className="text-xs text-gray-400">Drop candidates here</p>
                     </div>
-                  </div>
-                  <Badge className={
-                    a.status === "shortlisted" ? "bg-amber-100 text-amber-700" :
-                    a.status === "reviewed" ? "bg-blue-100 text-blue-700" :
-                    a.status === "interviewed" ? "bg-purple-100 text-purple-700" :
-                    a.status === "hired" ? "bg-emerald-100 text-emerald-700" :
-                    "bg-gray-100 text-gray-600"
-                  }>
-                    {a.status}
-                  </Badge>
+                  )}
                 </div>
-                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                  <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                    <Clock className="h-4 w-4" />
-                    {new Date(a.createdAt).toLocaleDateString()}
-                  </div>
-                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white rounded-full h-8 px-4 text-xs">
-                    View Profile
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

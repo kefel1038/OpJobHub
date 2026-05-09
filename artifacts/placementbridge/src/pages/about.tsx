@@ -10,7 +10,7 @@ import {
   Sparkles, ShieldCheck, Zap, BarChart3, Bell, Cloud,
   Smartphone, CheckCircle2, ArrowRight, Quote, Star,
   Linkedin, Twitter, Mail, MapPin, ChevronRight,
-  Building2, HardHat, UserCheck, TrendingUp, Award,
+  Building2, HardHat, UserPlus, TrendingUp, Award,
   Cpu, Network, Lock, Rocket, Lightbulb,
   Layers, BookOpen, Monitor, MessageSquare, Clock,
   FileText, PlayCircle, Calendar, DollarSign, HeadphonesIcon,
@@ -61,7 +61,7 @@ function FadeIn({ children, delay = 0, direction = "up" }: { children: React.Rea
       opacity: 1,
       y: 0,
       x: 0,
-      transition: { duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] },
+      transition: { duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] as const },
     },
   };
   return (
@@ -550,7 +550,7 @@ function StatisticsSection() {
 
 function HowItWorksSection() {
   const seekerSteps = [
-    { icon: UserCheck, title: "Create Profile", desc: "Sign up in minutes and build a professional profile that showcases your skills, experience, and career aspirations." },
+    { icon: UserPlus, title: "Create Profile", desc: "Sign up in minutes and build a professional profile that showcases your skills, experience, and career aspirations." },
     { icon: FileText, title: "Upload CV & Get AI Analysis", desc: "Upload your resume for instant AI analysis. Get suggestions on how to improve your CV for better matches." },
     { icon: Search, title: "Apply With One Click", desc: "Browse AI-matched opportunities and apply instantly. Track every application from your personalized dashboard." },
     { icon: Briefcase, title: "Get Hired & Start Working", desc: "Connect with verified employers, interview through our platform, and land your dream role." },
@@ -985,7 +985,7 @@ function ForEmployersSection() {
 function ForJobSeekersSection() {
   const benefits = [
     { icon: Briefcase, title: "Career Opportunities", desc: "Access thousands of verified job listings across industries and countries." },
-    { icon: UserCheck, title: "Professional Profile", desc: "Build a standout profile that gets noticed by top employers." },
+    { icon: UserPlus, title: "Professional Profile", desc: "Build a standout profile that gets noticed by top employers." },
     { icon: Sparkles, title: "AI Recommendations", desc: "Get personalized job recommendations based on your skills and experience." },
     { icon: FileText, title: "Resume Building", desc: "AI-powered tools to optimize your CV for ATS and recruiter review." },
     { icon: Bell, title: "Job Alerts", desc: "Never miss an opportunity with real-time job alerts tailored to you." },
