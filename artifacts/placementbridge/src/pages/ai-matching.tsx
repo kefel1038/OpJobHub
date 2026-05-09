@@ -1,480 +1,666 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Upload,
-  FileText,
-  TrendingUp,
-  Target,
-  Sparkles,
-  CheckCircle2,
-  AlertCircle,
-  ArrowRight,
-  Briefcase,
-  Search,
-  Zap,
-  ChevronRight,
-  Cpu,
-  BrainCircuit,
-  MapPin,
-  Building2,
-  DollarSign,
-  PieChart as PieChartIcon,
-  BarChart as BarChartIcon,
+  Sparkles, Search, MapPin, Briefcase, Building2, DollarSign,
+  Target, BrainCircuit, TrendingUp, CheckCircle2, AlertCircle,
+  ArrowRight, ChevronRight, Bookmark, BookmarkCheck, X,
+  Upload, Filter, SlidersHorizontal, RotateCcw, Loader2,
+  GraduationCap, Zap, Star, Clock, BarChart3,
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-  ResponsiveContainer,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
+import { api, getToken } from "@/lib/api";
 
-const MOCK_RADAR_DATA = [
-  { subject: "ATS Compatibility", A: 92, fullMark: 100 },
-  { subject: "Keyword Strength", A: 80, fullMark: 100 },
-  { subject: "Readability", A: 89, fullMark: 100 },
-  { subject: "Skills Relevance", A: 76, fullMark: 100 },
-  { subject: "Market Competitiveness", A: 71, fullMark: 100 },
-];
+interface MatchResult {
+  jobId: number;
+  title: string;
+  company: string;
+  companyLogo?: string;
+  location: string;
+  salary?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  employmentType?: string;
+  experienceLevel?: string;
+  isRemote?: boolean;
+  isVerified?: boolean;
+  matchScore: number;
+  reasons: string[];
+  alignedSkills: string[];
+  skillGaps: string[];
+  improvementSuggestions: string[];
+}
 
-const MOCK_DEMAND_DATA = [
-  { name: "Mon", demand: 4000 },
-  { name: "Tue", demand: 3000 },
-  { name: "Wed", demand: 2000 },
-  { name: "Thu", demand: 2780 },
-  { name: "Fri", demand: 1890 },
-  { name: "Sat", demand: 2390 },
-  { name: "Sun", demand: 3490 },
-];
+interface GapResult {
+  marketSkills: Array<{ skill: string; demand: number; avgSalary: number }>;
+  missingSkills: Array<{ skill: string; demand: number; avgSalary: number }>;
+  aiAdvice: string;
+  totalJobsAnalyzed: number;
+}
 
-const MOCK_MATCHES = [
-  {
-    id: 1,
-    title: "Senior Cloud Architect",
-    company: "Google Cloud",
-    location: "Doha, Qatar",
-    salary: "QAR 25,000 - 35,000",
-    matchScore: 94,
-    tags: ["High Demand", "Remote Friendly"],
-  },
-  {
-    id: 2,
-    title: "Full Stack Engineer",
-    company: "Qatar Airways",
-    location: "Doha, Qatar",
-    salary: "QAR 18,000 - 24,000",
-    matchScore: 89,
-    tags: ["Gulf Focused"],
-  },
-  {
-    id: 3,
-    title: "Technical Support Specialist",
-    company: "Ooredoo",
-    location: "Doha, Qatar",
-    salary: "QAR 12,000 - 15,000",
-    matchScore: 82,
-    tags: ["Entry Level"],
-  },
-];
+function MatchScoreCircle({ score, size = "md" }: { score: number; size?: "sm" | "md" | "lg" }) {
+  const dimensions = size === "sm" ? 40 : size === "lg" ? 72 : 56;
+  const strokeWidth = size === "sm" ? 3 : 4;
+  const radius = (dimensions - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (circumference * Math.min(score, 100)) / 100;
+  const color = score >= 80 ? "text-emerald-500" : score >= 60 ? "text-amber-500" : "text-orange-500";
+
+  return (
+    <div className="relative inline-flex items-center justify-center" style={{ width: dimensions, height: dimensions }}>
+      <svg className="absolute inset-0 h-full w-full -rotate-90" viewBox={`0 0 ${dimensions} ${dimensions}`}>
+        <circle cx={dimensions / 2} cy={dimensions / 2} r={radius} fill="transparent" stroke="hsl(var(--muted))" strokeWidth={strokeWidth} />
+        <circle cx={dimensions / 2} cy={dimensions / 2} r={radius} fill="transparent" stroke="currentColor" strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={offset} className={color} strokeLinecap="round" />
+      </svg>
+      <span className={cn("font-bold", size === "sm" ? "text-xs" : size === "lg" ? "text-lg" : "text-sm", color)}>
+        {Math.min(score, 100)}%
+      </span>
+    </div>
+  );
+}
 
 export default function AIMatching() {
-  const [isUploading, setIsUploading] = useState(false);
-  const [isAnalyzed, setIsAnalyzed] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [skillsInput, setSkillsInput] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
+  const [location, setLocation] = useState("");
+  const [experience, setExperience] = useState("");
+  const [preferences, setPreferences] = useState<string[]>([]);
+  const [matches, setMatches] = useState<MatchResult[]>([]);
+  const [gapAnalysis, setGapAnalysis] = useState<GapResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [error, setError] = useState("");
+  const [savedJobIds, setSavedJobIds] = useState<Set<number>>(new Set());
+  const [showFilters, setShowFilters] = useState(false);
+  const [resultsTab, setResultsTab] = useState("matches");
+  const [selectedJob, setSelectedJob] = useState<MatchResult | null>(null);
 
-  const handleUpload = () => {
-    setIsUploading(true);
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 10;
-      setUploadProgress(progress);
-      if (progress >= 100) {
-        clearInterval(interval);
-        setTimeout(() => {
-          setIsUploading(false);
-          setIsAnalyzed(true);
-        }, 500);
-      }
-    }, 200);
-  };
+  const isAuthenticated = !!getToken();
+
+  const addSkill = useCallback(() => {
+    const trimmed = skillsInput.trim();
+    if (trimmed && !skills.includes(trimmed)) {
+      setSkills([...skills, trimmed]);
+      setSkillsInput("");
+    }
+  }, [skillsInput, skills]);
+
+  const removeSkill = useCallback((skill: string) => {
+    setSkills(skills.filter((s) => s !== skill));
+  }, [skills]);
+
+  const togglePreference = useCallback((pref: string) => {
+    setPreferences((prev) =>
+      prev.includes(pref) ? prev.filter((p) => p !== pref) : [...prev, pref],
+    );
+  }, []);
+
+  const handleSearch = useCallback(async () => {
+    if (!skills.length) return;
+    setSearching(true);
+    setError("");
+    setMatches([]);
+    setGapAnalysis(null);
+    setSelectedJob(null);
+    try {
+      const [matchRes, gapRes] = await Promise.all([
+        api.matchByProfile({ skills, experience: experience || undefined, location: location || undefined, preferences: preferences.length ? preferences : undefined }),
+        api.careerGaps({ skills, targetRole: undefined }),
+      ]);
+      setMatches(matchRes.matches);
+      setGapAnalysis(gapRes);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setSearching(false);
+    }
+  }, [skills, experience, location, preferences]);
+
+  const toggleSaved = useCallback((jobId: number) => {
+    setSavedJobIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(jobId)) next.delete(jobId);
+      else next.add(jobId);
+      return next;
+    });
+  }, []);
+
+  const experienceLevels = ["Entry", "Mid", "Senior", "Lead", "Principal"];
 
   return (
     <Layout>
       <div className="pt-16 pb-12">
-
-      <main className="container mx-auto px-4 py-12">
-        {/* Hero Section */}
-        <div className="mb-16 text-center max-w-3xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Badge variant="secondary" className="mb-6 rounded-full px-4 py-1.5 text-xs font-medium gap-1.5 bg-primary/10 text-primary border-primary/20">
+        <main className="container mx-auto px-4 py-8">
+          {/* Hero */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-4xl mx-auto mb-10">
+            <Badge variant="secondary" className="mb-4 rounded-full px-4 py-1.5 text-xs font-medium gap-1.5 bg-primary/10 text-primary border-primary/20">
               <Sparkles className="h-3 w-3" />
-              Next-Gen Career Intelligence
+              AI Job Matching Engine
             </Badge>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.1] mb-6">
-              Your Career, <span className="text-primary">AI-Powered</span>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+              Find Jobs That Match <span className="text-primary">Your Skills</span>
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-10">
-              Upload your resume and let our advanced AI engine optimize it for ATS, 
-              match you with top jobs in the Gulf, and provide real-time market insights.
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Enter your skills and preferences. Our AI analyzes thousands of jobs to find the perfect match, explains why, and helps you close skill gaps.
             </p>
           </motion.div>
 
-          {!isAnalyzed && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="relative"
-            >
-              <div
-                className={`group relative flex flex-col items-center justify-center border-2 border-dashed border-primary/20 rounded-3xl p-12 transition-all hover:border-primary/40 hover:bg-primary/[0.02] cursor-pointer ${
-                  isUploading ? "pointer-events-none" : ""
-                }`}
-                onClick={() => !isUploading && handleUpload()}
-              >
-                {isUploading ? (
-                  <div className="w-full max-w-sm space-y-4">
-                    <div className="flex items-center justify-between text-sm font-medium">
-                      <span className="flex items-center gap-2">
-                        <Cpu className="h-4 w-4 animate-spin text-primary" />
-                        AI Analysis in progress...
-                      </span>
-                      <span>{uploadProgress}%</span>
-                    </div>
-                    <Progress value={uploadProgress} className="h-2" />
-                    <p className="text-xs text-muted-foreground text-center animate-pulse">
-                      Extracting semantic data, generating embeddings, and scanning ATS patterns...
-                    </p>
+          {/* Search Form */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="max-w-3xl mx-auto mb-10">
+            <Card className="border-border/50 shadow-sm">
+              <CardContent className="p-6 space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Skills <span className="text-destructive">*</span></label>
+                  <div className="flex gap-2 mb-2">
+                    <Input
+                      placeholder="e.g. React, Node.js, Python"
+                      value={skillsInput}
+                      onChange={(e) => setSkillsInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && addSkill()}
+                    />
+                    <Button onClick={addSkill} variant="secondary" className="shrink-0">Add</Button>
                   </div>
-                ) : (
-                  <>
-                    <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                      <Upload className="h-8 w-8 text-primary" />
+                  {skills.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {skills.map((s) => (
+                        <Badge key={s} variant="secondary" className="gap-1 pr-1">
+                          {s}
+                          <button onClick={() => removeSkill(s)} className="hover:text-destructive ml-0.5"><X className="h-3 w-3" /></button>
+                        </Badge>
+                      ))}
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">Drop your resume here</h3>
-                    <p className="text-sm text-muted-foreground mb-6">
-                      PDF, DOCX supported. Max file size 10MB.
-                    </p>
-                    <Button size="lg" className="rounded-full px-8">
-                      Select File
-                    </Button>
-                  </>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </div>
-
-        <AnimatePresence>
-          {isAnalyzed && (
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-8"
-            >
-              {/* Dashboard Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* ATS Score Card */}
-                <Card className="lg:col-span-2 border-border/50 shadow-sm overflow-hidden group">
-                  <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <div>
-                      <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                        <Target className="h-5 w-5 text-primary" />
-                        AI ATS Score Dashboard
-                      </CardTitle>
-                      <CardDescription>Comprehensive analysis of your resume performance</CardDescription>
-                    </div>
-                    <Badge className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/10 border-emerald-500/20 text-lg py-1.5 px-4 rounded-full">
-                      87/100
-                    </Badge>
-                  </CardHeader>
-                  <CardContent className="grid md:grid-cols-2 gap-8 pt-6">
-                    <div className="h-[250px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={MOCK_RADAR_DATA}>
-                          <PolarGrid stroke="hsl(var(--border))" />
-                          <PolarAngleAxis dataKey="subject" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
-                          <PolarRadiusAxis angle={30} domain={[0, 100]} axisLine={false} tick={false} />
-                          <Radar
-                            name="Resume Score"
-                            dataKey="A"
-                            stroke="hsl(var(--primary))"
-                            fill="hsl(var(--primary))"
-                            fillOpacity={0.4}
-                          />
-                        </RadarChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div className="space-y-6">
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">ATS Compatibility</span>
-                          <span className="text-sm font-bold text-emerald-500">92%</span>
-                        </div>
-                        <Progress value={92} className="h-1.5" />
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">Keyword Strength</span>
-                          <span className="text-sm font-bold text-amber-500">80%</span>
-                        </div>
-                        <Progress value={80} className="h-1.5" />
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium">Readability</span>
-                          <span className="text-sm font-bold text-blue-500">89%</span>
-                        </div>
-                        <Progress value={89} className="h-1.5" />
-                      </div>
-                      <div className="pt-4 grid grid-cols-2 gap-3">
-                        <Button variant="outline" className="rounded-full gap-2 text-xs h-9">
-                          <Zap className="h-3 w-3" />
-                          Optimize Resume
-                        </Button>
-                        <Button variant="outline" className="rounded-full gap-2 text-xs h-9">
-                          <FileText className="h-3 w-3" />
-                          Cover Letter
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Market Insights Card */}
-                <Card className="border-border/50 shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="text-xl font-bold flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-primary" />
-                      Market Positioning
-                    </CardTitle>
-                    <CardDescription>How you rank in the Gulf market</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="p-4 rounded-2xl bg-muted/30 border border-border/50">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm text-muted-foreground">ATS Rank</span>
-                        <Badge variant="secondary" className="bg-primary/10 text-primary">Top 25%</Badge>
-                      </div>
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm text-muted-foreground">Market Demand</span>
-                        <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500">High</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Salary Potential</span>
-                        <span className="font-bold">QAR 15k-22k</span>
-                      </div>
-                    </div>
-                    <div className="h-[120px] w-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={MOCK_DEMAND_DATA}>
-                          <Bar dataKey="demand" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                          <Tooltip 
-                            contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
-                            itemStyle={{ color: 'hsl(var(--foreground))' }}
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <p className="text-xs text-muted-foreground text-center">Demand for your role in Qatar is up 12% this month.</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Suggestions and Matches */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* AI Suggestions */}
-                <div className="space-y-6">
-                  <h3 className="text-xl font-bold flex items-center gap-2">
-                    <BrainCircuit className="h-5 w-5 text-primary" />
-                    AI Optimization Tips
-                  </h3>
-                  <div className="space-y-3">
-                    <SuggestionItem 
-                      type="warning" 
-                      title="Missing Keywords" 
-                      desc="Add 'Cloud Governance' and 'Terraform' to your skills section to improve visibility." 
-                    />
-                    <SuggestionItem 
-                      type="info" 
-                      title="Weak Achievements" 
-                      desc="Try to quantify your results. E.g., 'Improved server uptime by 15%'" 
-                    />
-                    <SuggestionItem 
-                      type="success" 
-                      title="Strong Headline" 
-                      desc="Your headline effectively captures your seniority level and core expertise." 
-                    />
-                  </div>
-                  
-                  <Card className="bg-primary text-primary-foreground border-0 overflow-hidden relative">
-                    <Sparkles className="absolute -top-4 -right-4 h-24 w-24 opacity-10 rotate-12" />
-                    <CardHeader className="relative z-10">
-                      <CardTitle className="text-lg">One-Click Optimization</CardTitle>
-                      <CardDescription className="text-primary-foreground/70">
-                        Let AI rewrite your experience bullets for maximum impact.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="relative z-10">
-                      <Button variant="secondary" className="w-full rounded-full group">
-                        Upgrade Experience
-                        <Zap className="ml-2 h-4 w-4 fill-current group-hover:animate-pulse" />
-                      </Button>
-                    </CardContent>
-                  </Card>
+                  )}
                 </div>
 
-                {/* Smart Job Matches */}
-                <div className="lg:col-span-2 space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold flex items-center gap-2">
-                      <Search className="h-5 w-5 text-primary" />
-                      Smart Semantic Matches
-                    </h3>
-                    <Button variant="ghost" size="sm" className="gap-1.5 text-primary">
-                      View All <ChevronRight className="h-4 w-4" />
-                    </Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Location</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input className="pl-9" placeholder="e.g. Doha, Qatar" value={location} onChange={(e) => setLocation(e.target.value)} />
+                    </div>
                   </div>
-                  <div className="grid grid-cols-1 gap-4">
-                    {MOCK_MATCHES.map((match) => (
-                      <Card key={match.id} className="group hover:border-primary/50 transition-all cursor-pointer shadow-sm">
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                {match.tags.map(tag => (
-                                  <Badge key={tag} variant="secondary" className="text-[10px] px-2 py-0 h-4">{tag}</Badge>
-                                ))}
-                              </div>
-                              <h4 className="text-lg font-bold group-hover:text-primary transition-colors">{match.title}</h4>
-                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1.5">
-                                  <Building2 className="h-4 w-4" /> {match.company}
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                  <MapPin className="h-4 w-4" /> {match.location}
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                  <DollarSign className="h-4 w-4" /> {match.salary}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="text-right shrink-0">
-                              <div className="inline-flex items-center justify-center h-14 w-14 rounded-full border-4 border-emerald-500/20 text-emerald-500 font-bold text-sm relative">
-                                <svg className="absolute inset-0 h-full w-full -rotate-90">
-                                  <circle
-                                    cx="28"
-                                    cy="28"
-                                    r="24"
-                                    fill="transparent"
-                                    stroke="currentColor"
-                                    strokeWidth="4"
-                                    strokeDasharray={150.8}
-                                    strokeDashoffset={150.8 - (150.8 * match.matchScore) / 100}
-                                    className="text-emerald-500"
-                                  />
-                                </svg>
-                                {match.matchScore}%
-                              </div>
-                              <p className="text-[10px] text-muted-foreground mt-1 font-medium">Match</p>
-                            </div>
-                          </div>
-                          <div className="mt-4 flex items-center justify-end">
-                            <Button size="sm" className="rounded-full gap-2 px-6">
-                              Apply Now <ArrowRight className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
+                  <div>
+                    <label className="text-sm font-medium mb-1.5 block">Experience Level</label>
+                    <div className="flex gap-2">
+                      {experienceLevels.map((level) => (
+                        <button
+                          key={level}
+                          onClick={() => setExperience(experience === level.toLowerCase() ? "" : level.toLowerCase())}
+                          className={cn(
+                            "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
+                            experience === level.toLowerCase()
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-background text-muted-foreground border-border hover:border-primary/50",
+                          )}
+                        >
+                          {level}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Preferences</label>
+                  <div className="flex flex-wrap gap-2">
+                    {["Full-Time", "Part-Time", "Contract", "Remote", "Hybrid", "Onsite"].map((pref) => (
+                      <button
+                        key={pref}
+                        onClick={() => togglePreference(pref)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors",
+                          preferences.includes(pref)
+                            ? "bg-primary/10 text-primary border-primary/30"
+                            : "bg-background text-muted-foreground border-border hover:border-primary/50",
+                        )}
+                      >
+                        {pref}
+                      </button>
                     ))}
                   </div>
                 </div>
-              </div>
 
-              {/* Career Gap Analysis */}
-              <section className="pt-8 border-t border-border/50">
-                <div className="bg-muted/30 rounded-3xl p-8 border border-border/50">
-                  <div className="flex flex-col md:flex-row gap-8 items-center">
-                    <div className="md:w-1/3 space-y-4">
-                      <div className="h-14 w-14 rounded-2xl bg-amber-500/10 flex items-center justify-center">
-                        <AlertCircle className="h-7 w-7 text-amber-500" />
-                      </div>
-                      <h3 className="text-2xl font-bold">Career Gap Analysis</h3>
-                      <p className="text-muted-foreground">
-                        Our AI detected missing certifications that are trending in the Qatar market for your role.
-                      </p>
-                      <Button variant="outline" className="rounded-full">View Learning Roadmap</Button>
-                    </div>
-                    <div className="flex-1 grid sm:grid-cols-2 gap-4 w-full">
-                      <Card className="bg-background border-border/50">
-                        <CardContent className="p-5">
-                          <Badge className="bg-amber-500/10 text-amber-500 hover:bg-amber-500/10 border-amber-500/20 mb-3">Recommended</Badge>
-                          <h5 className="font-bold mb-1">AWS Certified Solutions Architect</h5>
-                          <p className="text-xs text-muted-foreground mb-4">Required by 65% of high-paying roles in Doha.</p>
-                          <Button size="sm" variant="ghost" className="p-0 h-auto text-primary text-xs group">
-                            Explore course <ArrowRight className="ml-1 h-3 w-3 group-hover:translate-x-1 transition-transform" />
-                          </Button>
-                        </CardContent>
-                      </Card>
-                      <Card className="bg-background border-border/50">
-                        <CardContent className="p-5">
-                          <Badge className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/10 border-blue-500/20 mb-3">Skill Gap</Badge>
-                          <h5 className="font-bold mb-1">Kubernetes (K8s)</h5>
-                          <p className="text-xs text-muted-foreground mb-4">You have Docker experience, but K8s is in higher demand.</p>
-                          <Button size="sm" variant="ghost" className="p-0 h-auto text-primary text-xs group">
-                            Explore course <ArrowRight className="ml-1 h-3 w-3 group-hover:translate-x-1 transition-transform" />
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-                </div>
-              </section>
+                <Button size="lg" className="w-full rounded-full gap-2" onClick={handleSearch} disabled={!skills.length || searching}>
+                  {searching ? <Loader2 className="h-5 w-5 animate-spin" /> : <Search className="h-5 w-5" />}
+                  {searching ? "Analyzing..." : "Find Matches"}
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Error State */}
+          {error && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-2xl mx-auto mb-8">
+              <Card className="border-destructive/50 bg-destructive/5">
+                <CardContent className="p-4 flex items-center gap-3">
+                  <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
+                  <p className="text-sm text-destructive">{error}</p>
+                </CardContent>
+              </Card>
             </motion.div>
           )}
-        </AnimatePresence>
-      </main>
+
+          {/* Loading State */}
+          {searching && (
+            <div className="max-w-6xl mx-auto space-y-6">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="border-border/50">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <Skeleton className="h-14 w-14 rounded-full shrink-0" />
+                      <div className="flex-1 space-y-3">
+                        <Skeleton className="h-5 w-64" />
+                        <Skeleton className="h-4 w-48" />
+                        <Skeleton className="h-4 w-full max-w-md" />
+                      </div>
+                      <Skeleton className="h-10 w-24 rounded-full" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Results */}
+          <AnimatePresence>
+            {!searching && matches.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} className="max-w-7xl mx-auto">
+                {/* Profile Summary */}
+                <div className="flex flex-wrap items-center gap-3 mb-8 p-4 bg-muted/30 rounded-2xl border border-border/50">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Target className="h-4 w-4 text-primary" />
+                    <span className="font-medium">Your Profile:</span>
+                  </div>
+                  {skills.map((s) => (
+                    <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
+                  ))}
+                  {location && <Badge variant="outline" className="text-xs"><MapPin className="h-3 w-3 mr-1" />{location}</Badge>}
+                  {experience && <Badge variant="outline" className="text-xs"><Briefcase className="h-3 w-3 mr-1" />{experience}</Badge>}
+                  <Button variant="ghost" size="sm" className="ml-auto text-xs gap-1" onClick={() => setShowFilters(!showFilters)}>
+                    <Filter className="h-3 w-3" />
+                    {showFilters ? "Hide Filters" : "Filters"}
+                  </Button>
+                </div>
+
+                <div className="flex gap-6">
+                  {/* Filters Sidebar */}
+                  <AnimatePresence>
+                    {showFilters && (
+                      <motion.aside
+                        initial={{ opacity: 0, x: -20, width: 0 }}
+                        animate={{ opacity: 1, x: 0, width: 240 }}
+                        exit={{ opacity: 0, x: -20, width: 0 }}
+                        className="shrink-0 hidden md:block"
+                      >
+                        <Card className="border-border/50">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                                <SlidersHorizontal className="h-4 w-4" />
+                                Filters
+                              </CardTitle>
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setShowFilters(false)}>
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div>
+                              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Job Type</h4>
+                              {["Full-Time", "Part-Time", "Contract"].map((t) => (
+                                <label key={t} className="flex items-center gap-2 py-1.5 cursor-pointer">
+                                  <input type="checkbox" checked={preferences.includes(t)} onChange={() => togglePreference(t)} className="h-3.5 w-3.5 rounded accent-primary" />
+                                  <span className="text-sm">{t}</span>
+                                </label>
+                              ))}
+                            </div>
+                            <div>
+                              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Work Mode</h4>
+                              {["Remote", "Hybrid", "Onsite"].map((t) => (
+                                <label key={t} className="flex items-center gap-2 py-1.5 cursor-pointer">
+                                  <input type="checkbox" checked={preferences.includes(t)} onChange={() => togglePreference(t)} className="h-3.5 w-3.5 rounded accent-primary" />
+                                  <span className="text-sm">{t}</span>
+                                </label>
+                              ))}
+                            </div>
+                            <Button size="sm" variant="outline" className="w-full text-xs gap-1" onClick={() => setPreferences([])}>
+                              <RotateCcw className="h-3 w-3" /> Reset
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </motion.aside>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Main Results */}
+                  <div className="flex-1 min-w-0">
+                    <Tabs value={resultsTab} onValueChange={setResultsTab} className="w-full">
+                      <div className="flex items-center justify-between mb-6">
+                        <TabsList>
+                          <TabsTrigger value="matches" className="gap-2">
+                            <Search className="h-4 w-4" /> Matches ({matches.length})
+                          </TabsTrigger>
+                          <TabsTrigger value="saved" className="gap-2">
+                            <Bookmark className="h-4 w-4" /> Saved ({savedJobIds.size})
+                          </TabsTrigger>
+                          <TabsTrigger value="gaps" className="gap-2">
+                            <TrendingUp className="h-4 w-4" /> Skill Gaps
+                          </TabsTrigger>
+                        </TabsList>
+                        <p className="text-xs text-muted-foreground hidden sm:block">Analyzed {gapAnalysis?.totalJobsAnalyzed ?? 0} jobs</p>
+                      </div>
+
+                      <TabsContent value="matches" className="mt-0 space-y-4">
+                        {matches.filter((m) => !savedJobIds.has(m.jobId) || resultsTab === "matches").map((match, i) => (
+                          <motion.div
+                            key={match.jobId}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.05 }}
+                          >
+                            <Card
+                              className={cn(
+                                "border-border/50 shadow-sm hover:border-primary/40 transition-all cursor-pointer group",
+                                selectedJob?.jobId === match.jobId && "ring-1 ring-primary",
+                              )}
+                              onClick={() => setSelectedJob(selectedJob?.jobId === match.jobId ? null : match)}
+                            >
+                              <CardContent className="p-5">
+                                <div className="flex items-start gap-4">
+                                  <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center shrink-0 text-lg font-bold text-muted-foreground">
+                                    {match.company.charAt(0)}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div>
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                          <h3 className="font-bold group-hover:text-primary transition-colors truncate">{match.title}</h3>
+                                          {match.isVerified && <Badge variant="outline" className="h-5 text-[10px] border-blue-300 text-blue-600 bg-blue-50 dark:bg-blue-950 dark:text-blue-400">Verified</Badge>}
+                                        </div>
+                                        <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+                                          <Building2 className="h-3.5 w-3.5" />{match.company}
+                                        </p>
+                                      </div>
+                                      <MatchScoreCircle score={match.matchScore} />
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
+                                      <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{match.location}</span>
+                                      {(match.salaryMin || match.salary) && (
+                                        <span className="flex items-center gap-1"><DollarSign className="h-3 w-3" />{match.salary ?? `${match.salaryMin?.toLocaleString()}${match.salaryMax ? ` - ${match.salaryMax.toLocaleString()}` : "+"}`}</span>
+                                      )}
+                                      {match.employmentType && <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" />{match.employmentType}</span>}
+                                      {match.isRemote && <Badge variant="secondary" className="text-[10px] h-5">Remote</Badge>}
+                                      {match.experienceLevel && <Badge variant="outline" className="text-[10px] h-5">{match.experienceLevel}</Badge>}
+                                    </div>
+                                  </div>
+                                  <div className="flex flex-col gap-1.5 shrink-0">
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="h-8 w-8"
+                                      onClick={(e) => { e.stopPropagation(); toggleSaved(match.jobId); }}
+                                    >
+                                      {savedJobIds.has(match.jobId) ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4" />}
+                                    </Button>
+                                  </div>
+                                </div>
+
+                                {/* Expanded AI Explanation */}
+                                <AnimatePresence>
+                                  {selectedJob?.jobId === match.jobId && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: "auto", opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      className="overflow-hidden"
+                                    >
+                                      <div className="mt-4 pt-4 border-t border-border/50 space-y-4">
+                                        {/* Why This Matches */}
+                                        {match.reasons.length > 0 && (
+                                          <div>
+                                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Why this matches you
+                                            </h4>
+                                            <div className="space-y-1.5">
+                                              {match.reasons.map((r, ri) => (
+                                                <div key={ri} className="flex items-start gap-2 text-sm">
+                                                  <span className="text-emerald-500 mt-0.5 shrink-0"><CheckCircle2 className="h-3.5 w-3.5" /></span>
+                                                  <span className="text-muted-foreground">{r}</span>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                          {/* Skills Aligned */}
+                                          {match.alignedSkills.length > 0 && (
+                                            <div>
+                                              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Skills Aligned</h4>
+                                              <div className="flex flex-wrap gap-1.5">
+                                                {match.alignedSkills.map((s) => (
+                                                  <Badge key={s} variant="secondary" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[11px]">
+                                                    <CheckCircle2 className="h-3 w-3 mr-1" />{s}
+                                                  </Badge>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          )}
+
+                                          {/* Skill Gaps */}
+                                          {match.skillGaps.length > 0 && (
+                                            <div>
+                                              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Skills Missing</h4>
+                                              <div className="flex flex-wrap gap-1.5">
+                                                {match.skillGaps.slice(0, 4).map((s) => (
+                                                  <Badge key={s} variant="secondary" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[11px]">
+                                                    <Zap className="h-3 w-3 mr-1" />{s}
+                                                  </Badge>
+                                                ))}
+                                                {match.skillGaps.length > 4 && (
+                                                  <Badge variant="secondary" className="text-[11px]">+{match.skillGaps.length - 4} more</Badge>
+                                                )}
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        {/* Improvement Suggestions */}
+                                        {match.improvementSuggestions.length > 0 && (
+                                          <div className="bg-primary/5 rounded-xl p-3 border border-primary/10">
+                                            <div className="flex items-start gap-2">
+                                              <BrainCircuit className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                                              <div>
+                                                <p className="text-xs font-semibold mb-0.5">AI Coach Tip</p>
+                                                <p className="text-xs text-muted-foreground">{match.improvementSuggestions[0]}</p>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        <div className="flex gap-2 pt-1">
+                                          <Button size="sm" className="rounded-full gap-1.5 text-xs">
+                                            Apply Now <ArrowRight className="h-3 w-3" />
+                                          </Button>
+                                          <Button size="sm" variant="outline" className="rounded-full text-xs" onClick={(e) => { e.stopPropagation(); toggleSaved(match.jobId); }}>
+                                            {savedJobIds.has(match.jobId) ? "Saved" : "Save Job"}
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </CardContent>
+                            </Card>
+                          </motion.div>
+                        ))}
+
+                        {matches.length === 0 && (
+                          <div className="text-center py-16 text-muted-foreground">
+                            <Search className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                            <p className="font-medium">No matches found</p>
+                            <p className="text-sm">Try adding more skills or changing your filters</p>
+                          </div>
+                        )}
+                      </TabsContent>
+
+                      <TabsContent value="saved" className="mt-0 space-y-4">
+                        {savedJobIds.size === 0 ? (
+                          <div className="text-center py-16 text-muted-foreground">
+                            <Bookmark className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                            <p className="font-medium">No saved matches</p>
+                            <p className="text-sm">Click the bookmark icon on a job to save it here</p>
+                          </div>
+                        ) : (
+                          matches.filter((m) => savedJobIds.has(m.jobId)).map((match) => (
+                            <Card key={match.jobId} className="border-border/50">
+                              <CardContent className="p-5 flex items-start gap-4">
+                                <MatchScoreCircle score={match.matchScore} size="sm" />
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-bold text-sm">{match.title}</h3>
+                                  <p className="text-xs text-muted-foreground">{match.company} · {match.location}</p>
+                                </div>
+                                <Button size="sm" variant="ghost" className="shrink-0 h-8" onClick={() => toggleSaved(match.jobId)}>
+                                  <BookmarkCheck className="h-4 w-4 text-primary mr-1" /> Saved
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          ))
+                        )}
+                      </TabsContent>
+
+                      <TabsContent value="gaps" className="mt-0">
+                        {gapAnalysis && (
+                          <div className="space-y-6">
+                            {/* AI Advice */}
+                            {gapAnalysis.aiAdvice && (
+                              <Card className="bg-primary/5 border-primary/10">
+                                <CardContent className="p-5 flex items-start gap-3">
+                                  <BrainCircuit className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                                  <div>
+                                    <h4 className="text-sm font-bold mb-1">AI Career Insight</h4>
+                                    <p className="text-sm text-muted-foreground">{gapAnalysis.aiAdvice}</p>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            )}
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              {/* Missing Skills */}
+                              <Card className="border-border/50">
+                                <CardHeader className="pb-3">
+                                  <CardTitle className="text-sm font-bold flex items-center gap-2">
+                                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                                    Skills to Learn
+                                  </CardTitle>
+                                  <CardDescription className="text-xs">High-demand skills you're missing</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                  {gapAnalysis.missingSkills.length === 0 && (
+                                    <p className="text-sm text-muted-foreground text-center py-4">No gaps found — your skills are well-aligned!</p>
+                                  )}
+                                  {gapAnalysis.missingSkills.slice(0, 6).map((s) => (
+                                    <div key={s.skill} className="flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <Zap className="h-3.5 w-3.5 text-amber-500" />
+                                        <span className="text-sm font-medium capitalize">{s.skill}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-xs text-muted-foreground">{s.demand} jobs</span>
+                                        <Badge variant="secondary" className="text-[10px]">
+                                          {s.avgSalary > 0 ? `QAR ${s.avgSalary.toLocaleString()}` : ""}
+                                        </Badge>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </CardContent>
+                              </Card>
+
+                              {/* Market Trends */}
+                              <Card className="border-border/50">
+                                <CardHeader className="pb-3">
+                                  <CardTitle className="text-sm font-bold flex items-center gap-2">
+                                    <BarChart3 className="h-4 w-4 text-primary" />
+                                    Market Skill Demand
+                                  </CardTitle>
+                                  <CardDescription className="text-xs">Most requested skills in the Gulf job market</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                  {gapAnalysis.marketSkills.map((s) => {
+                                    const maxDemand = Math.max(...gapAnalysis.marketSkills.map((x) => x.demand));
+                                    return (
+                                      <div key={s.skill}>
+                                        <div className="flex items-center justify-between mb-1">
+                                          <span className="text-sm font-medium capitalize">{s.skill}</span>
+                                          <span className="text-xs text-muted-foreground">{s.demand} openings</span>
+                                        </div>
+                                        <Progress value={(s.demand / maxDemand) * 100} className="h-1.5" />
+                                      </div>
+                                    );
+                                  })}
+                                </CardContent>
+                                <CardFooter className="pt-0 text-xs text-muted-foreground">
+                                  Based on {gapAnalysis.totalJobsAnalyzed} active job postings
+                                </CardFooter>
+                              </Card>
+                            </div>
+
+                            {/* Improve Score CTA */}
+                            <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+                              <CardContent className="p-6 flex flex-col sm:flex-row items-center gap-4">
+                                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                                  <GraduationCap className="h-6 w-6 text-primary" />
+                                </div>
+                                <div className="flex-1 text-center sm:text-left">
+                                  <h4 className="font-bold text-sm">Improve Your Match Score</h4>
+                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                    {gapAnalysis.missingSkills.length > 0
+                                      ? `Learning ${gapAnalysis.missingSkills.slice(0, 2).map((s) => s.skill).join(" and ")} could unlock ${Math.min(30, gapAnalysis.missingSkills.length * 8)}% more job matches.`
+                                      : "Your skills are in demand! Keep building your profile."}
+                                  </p>
+                                </div>
+                                <Button className="rounded-full shrink-0 gap-1.5 text-xs">
+                                  View Learning Roadmap <ArrowRight className="h-3 w-3" />
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        )}
+                      </TabsContent>
+                    </Tabs>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Empty State (no search yet) */}
+          {!searching && matches.length === 0 && !error && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20 max-w-md mx-auto">
+              <div className="h-20 w-20 rounded-3xl bg-muted flex items-center justify-center mx-auto mb-6">
+                <Sparkles className="h-10 w-10 text-muted-foreground/50" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Ready to find your next role?</h3>
+              <p className="text-sm text-muted-foreground mb-2">
+                Add your skills above and hit "Find Matches" to get AI-powered job recommendations tailored to you.
+              </p>
+              {!isAuthenticated && (
+                <p className="text-xs text-muted-foreground">
+                  <a href="/login" className="text-primary hover:underline">Sign in</a> to upload your resume for deeper ATS analysis and personalized career insights.
+                </p>
+              )}
+            </motion.div>
+          )}
+        </main>
       </div>
     </Layout>
-  );
-}
-
-function SuggestionItem({ type, title, desc }: { type: 'warning' | 'info' | 'success', title: string, desc: string }) {
-  const icons = {
-    warning: <AlertCircle className="h-5 w-5 text-amber-500" />,
-    info: <Zap className="h-5 w-5 text-blue-500" />,
-    success: <CheckCircle2 className="h-5 w-5 text-emerald-500" />,
-  };
-
-  const bgColors = {
-    warning: 'bg-amber-500/5 border-amber-500/10',
-    info: 'bg-blue-500/5 border-blue-500/10',
-    success: 'bg-emerald-500/5 border-emerald-500/10',
-  };
-
-  return (
-    <div className={`flex gap-4 p-4 rounded-2xl border ${bgColors[type]}`}>
-      <div className="shrink-0 mt-0.5">{icons[type]}</div>
-      <div>
-        <h5 className="text-sm font-bold">{title}</h5>
-        <p className="text-xs text-muted-foreground leading-relaxed mt-1">{desc}</p>
-      </div>
-    </div>
   );
 }

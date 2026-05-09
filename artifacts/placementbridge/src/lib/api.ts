@@ -290,4 +290,69 @@ export const api = {
       method: "DELETE",
     });
   },
+
+  // ─── AI Matching ──────────────────────────────────────────────
+  analyzeResume(file: File) {
+    const formData = new FormData();
+    formData.append("resume", file);
+    return request<{
+      resumeId: number;
+      analysis: {
+        parsed: { fullName: string; headline: string; skills: string[]; experience: any[]; education: any[] };
+        scores: { ats: number; keyword: number; readability: number; skills: number; market: number };
+        suggestions: { missingKeywords: string[]; weakAreas: string[]; optimizationTips: string[] };
+        marketPosition: { rank: string; demand: string; salaryRange: string };
+      };
+      matches: any[];
+    }>("/ai/analyze-resume", {
+      method: "POST",
+      body: formData,
+      headers: {} as Record<string, string>,
+    });
+  },
+  getAIMatches() {
+    return request<{ matches: any[] }>("/ai/matches");
+  },
+  matchByProfile(payload: {
+    skills: string[];
+    experience?: string;
+    location?: string;
+    preferences?: string[];
+  }) {
+    return request<{
+      matches: Array<{
+        jobId: number;
+        title: string;
+        company: string;
+        companyLogo?: string;
+        location: string;
+        salary?: string;
+        salaryMin?: number;
+        salaryMax?: number;
+        employmentType?: string;
+        experienceLevel?: string;
+        isRemote?: boolean;
+        isVerified?: boolean;
+        matchScore: number;
+        reasons: string[];
+        alignedSkills: string[];
+        skillGaps: string[];
+        improvementSuggestions: string[];
+      }>;
+    }>("/ai/match-by-profile", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+  careerGaps(payload: { skills: string[]; targetRole?: string }) {
+    return request<{
+      marketSkills: Array<{ skill: string; demand: number; avgSalary: number }>;
+      missingSkills: Array<{ skill: string; demand: number; avgSalary: number }>;
+      aiAdvice: string;
+      totalJobsAnalyzed: number;
+    }>("/ai/career-gaps", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
 };
