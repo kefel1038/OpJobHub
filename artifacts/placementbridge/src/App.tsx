@@ -10,6 +10,7 @@ import PostJob from "@/pages/post-job";
 import JobDetail from "@/pages/job-detail";
 import Admin from "@/pages/admin";
 import AdminSignup from "@/pages/admin-signup";
+import AIMatching from "@/pages/ai-matching";
 
 function Router() {
   return (
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/jobs/:id" component={JobDetail} />
       <Route path="/admin" component={Admin} />
       <Route path="/admin/signup" component={AdminSignup} />
+      <Route path="/ai-matching" component={AIMatching} />
       <Route component={NotFound} />
     </Switch>
   );

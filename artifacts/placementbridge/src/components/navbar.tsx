@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Shield, Menu } from "lucide-react";
+import { Shield, Menu, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +31,12 @@ export function Navbar() {
         <nav className="hidden md:flex items-center gap-1">
           <Button variant="ghost" asChild className="text-foreground/80 hover:text-foreground">
             <Link href="/">Find Jobs</Link>
+          </Button>
+          <Button variant="ghost" asChild className="text-foreground/80 hover:text-foreground gap-1.5">
+            <Link href="/ai-matching">
+              <Sparkles className="h-4 w-4 text-primary" />
+              AI Matching
+            </Link>
           </Button>
           {user && (user.role === "employer" || user.role === "admin") && (
             <Button variant="ghost" asChild className="text-foreground/80 hover:text-foreground">
@@ -88,6 +94,14 @@ export function Navbar() {
               className="px-3 py-2 rounded-md hover:bg-muted text-sm"
             >
               Find Jobs
+            </Link>
+            <Link
+              href="/ai-matching"
+              onClick={() => setOpen(false)}
+              className="px-3 py-2 rounded-md hover:bg-muted text-sm flex items-center gap-2"
+            >
+              <Sparkles className="h-4 w-4 text-primary" />
+              AI Matching
             </Link>
             {user && (user.role === "employer" || user.role === "admin") && (
               <Link
