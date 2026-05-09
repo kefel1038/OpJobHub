@@ -113,7 +113,16 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
   const text = await res.text();
-  const data = text ? JSON.parse(text) : {};
+  let data: any = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    // Non-JSON response (HTML error page, etc.)
+    if (!res.ok) {
+      throw new Error(`Server error (${res.status}). Please try again later.`);
+    }
+    throw new Error("Unexpected response from server");
+  }
 
   if (!res.ok) {
     const message =
