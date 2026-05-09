@@ -181,7 +181,12 @@
     border: 1px solid rgba(255, 255, 255, 0.3);
   }
 
-  .dark .glass-card {
+  .goog-te-banner-frame.skiptranslate { display: none !important; }
+body { top: 0px !important; }
+.goog-te-gadget { color: transparent !important; font-size: 0 !important; }
+.goog-te-gadget .goog-te-combo { font-size: 14px !important; color: #000 !important; }
+
+.dark .glass-card {
     background: rgba(0, 0, 0, 0.5);
     border-color: rgba(255, 255, 255, 0.06);
   }

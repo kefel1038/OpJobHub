@@ -1,15 +1,40 @@
 import { Link, useLocation } from "wouter";
-import { Menu, Sparkles, Briefcase, Users, LayoutDashboard, LogOut, Globe } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Menu, Sparkles, Briefcase, Users, LayoutDashboard, LogOut, Globe, Check } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { motion, AnimatePresence } from "framer-motion";
+import { changeLanguage } from "@/components/GoogleTranslate";
 
 export function Navbar() {
   const { user, logout } = useAuth();
   const [, navigate] = useLocation();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState("en");
+  const langRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const languages = [
+    { code: "en", label: "English", native: "English" },
+    { code: "ar", label: "Arabic", native: "العربية" },
+  ];
+
+  const handleLangChange = (code: string) => {
+    setCurrentLang(code);
+    setLangOpen(false);
+    changeLanguage(code);
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -59,12 +84,34 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden lg:flex items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border-2 border-black hover:bg-black/5 transition-colors cursor-pointer text-sm font-black uppercase italic">
-            <Globe className="h-4 w-4" />
-            <span>Select Language</span>
-            <span className="text-[10px] opacity-50">▼</span>
-          </div>
+          <div className="hidden lg:flex items-center gap-4">
+            <div className="relative" ref={langRef}>
+              <div
+                onClick={() => setLangOpen(!langOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full border-2 border-black hover:bg-black/5 transition-colors cursor-pointer text-sm font-black uppercase italic"
+              >
+                <Globe className="h-4 w-4" />
+                <span>{currentLang === "en" ? "English" : "العربية"}</span>
+                <span className="text-[10px] opacity-50">▼</span>
+              </div>
+              {langOpen && (
+                <div className="absolute right-0 mt-2 w-44 bg-white border-2 border-black rounded-xl shadow-2xl overflow-hidden z-50">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => handleLangChange(lang.code)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold transition-colors hover:bg-[#FFBF00]/10 ${
+                        currentLang === lang.code ? "bg-[#FFBF00]/20 text-black" : "text-black"
+                      }`}
+                    >
+                      <Globe className="h-4 w-4" />
+                      <span>{lang.native}</span>
+                      {currentLang === lang.code && <Check className="h-4 w-4 ml-auto text-[#FFBF00]" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           
           {user ? (
             <div className="flex items-center gap-3">
@@ -117,6 +164,20 @@ export function Navbar() {
               </Link>
             ))}
             <div className="h-px bg-border my-2" />
+            <div className="flex gap-4 py-2">
+              {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => { handleLangChange(lang.code); setOpen(false); }}
+                  className={`flex items-center gap-2 text-base font-bold transition-colors ${
+                    currentLang === lang.code ? "text-black" : "text-black/50"
+                  }`}
+                >
+                  <Globe className="h-4 w-4" />
+                  {lang.native}
+                </button>
+              ))}
+            </div>
             {!user && (
               <Link href="/login" onClick={() => setOpen(false)} className="text-lg font-bold">
                 Login

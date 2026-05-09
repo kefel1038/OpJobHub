@@ -1,6 +1,8 @@
 import { ReactNode } from "react";
 import { Navbar } from "./Navbar";
 import { motion } from "framer-motion";
+import { changeLanguage } from "@/components/GoogleTranslate";
+import { Mail, Phone, MapPin } from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -34,6 +36,20 @@ export function Layout({ children, showNavbar = true }: LayoutProps) {
                 Empowering careers in the Gulf through AI-driven matching and recruitment intelligence. 
                 Connecting top talent with the region's leading companies.
               </p>
+              <div className="space-y-3 text-white/60 font-bold mb-8">
+                <div className="flex items-center gap-3">
+                  <Mail className="h-4 w-4 text-[#FFBF00]" />
+                  <a href="mailto:kefel1038@gmail.com" className="hover:text-white transition-colors">kefel1038@gmail.com</a>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Phone className="h-4 w-4 text-[#FFBF00]" />
+                  <a href="tel:+97451306916" className="hover:text-white transition-colors">+974 5130 6916</a>
+                </div>
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-4 w-4 text-[#FFBF00]" />
+                  <span>Doha, Qatar</span>
+                </div>
+              </div>
               <div className="flex gap-6">
                 <a href="#" className="h-10 w-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-[#FFBF00] hover:text-black transition-all">FB</a>
                 <a href="#" className="h-10 w-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-[#FFBF00] hover:text-black transition-all">TW</a>
@@ -62,8 +78,8 @@ export function Layout({ children, showNavbar = true }: LayoutProps) {
           <div className="pt-12 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 text-sm font-bold text-white/40 uppercase tracking-widest">
             <p>© {new Date().getFullYear()} KeFeL Jobs. Built in Qatar.</p>
             <div className="flex gap-8">
-              <span className="hover:text-white cursor-pointer transition-colors">English</span>
-              <span className="hover:text-white cursor-pointer transition-colors">Arabic</span>
+              <span onClick={() => changeLanguage("en")} className="hover:text-white cursor-pointer transition-colors">English</span>
+              <span onClick={() => changeLanguage("ar")} className="hover:text-white cursor-pointer transition-colors">Arabic</span>
             </div>
           </div>
         </div>
