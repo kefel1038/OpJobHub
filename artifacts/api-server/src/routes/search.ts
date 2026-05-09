@@ -80,8 +80,8 @@ router.get("/", async (req: Request, res: Response) => {
     conditions.push(lt(jobs.salaryMin, parseInt(salaryMax)));
   }
 
-  if (visaSonsored === "true") {
-    conditions.push(eq(jobs.visaSonsored, true));
+  if (visaSponsored === "true") {
+    conditions.push(eq(jobs.visaSponsored, true));
   }
 
   if (isRemote === "true") {

@@ -158,7 +158,7 @@ export function JobCard({ job, index, onSelect, isSelected }: JobCardProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5 mt-3">
-            {job.visaSonsored && (
+            {job.visaSponsored && (
               <Badge variant="outline" className="text-[10px] px-2 py-0.5 rounded-md border-blue-300 text-blue-600 bg-blue-50 dark:bg-blue-950 dark:text-blue-400 dark:border-blue-800">
                 Visa Sponsored
               </Badge>

@@ -114,7 +114,7 @@ export function FeaturedJobsCarousel() {
                 )}
               </div>
               <div className="flex items-center justify-between pt-3 border-t border-border/40">
-                {job.visaSonsored && (
+                {job.visaSponsored && (
                   <Badge variant="outline" className="text-[10px] px-2 py-0.5 rounded-full border-blue-300 text-blue-600">
                     Visa
                   </Badge>

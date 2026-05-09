@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db, jobs, companies, savedJobs } from "@workspace/db";
-import { eq, desc, and, sql, count, gte, lt, inArray } from "drizzle-orm";
+import { eq, desc, and, sql, count, gte, lt, inArray, or } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../lib/auth";
 import { serializeDates } from "../lib/serialize";
 
@@ -53,7 +53,7 @@ router.get("/jobs/visa-sponsored", async (_req: Request, res: Response) => {
   const visaJobs = await db
     .select()
     .from(jobs)
-    .where(and(eq(jobs.status, "active"), eq(jobs.visaSonsored, true)))
+    .where(and(eq(jobs.status, "active"), eq(jobs.visaSponsored, true)))
     .orderBy(desc(jobs.createdAt))
     .limit(50);
 
@@ -143,7 +143,7 @@ router.post("/jobs", authMiddleware, requireRole("employer", "admin"), async (re
       employmentType: employmentType ?? "Full-Time",
       industry,
       isFeatured: Boolean(isFeatured),
-      visaSponsored: Boolean(visaSonsored),
+      visaSponsored: Boolean(visaSponsored),
       applyUrl,
       expiresAt,
       createdBy: req.user!.id,

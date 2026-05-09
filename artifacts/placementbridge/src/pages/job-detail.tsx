@@ -10,7 +10,7 @@ import { api, type Job } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function JobDetail() {
-  const [, params] = useRoute("/jobs/:id");
+  const [, params] = useRoute<{ id: string }>("/jobs/:id");
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const [job, setJob] = useState<Job | null>(null);

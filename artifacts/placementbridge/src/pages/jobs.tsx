@@ -108,8 +108,8 @@ export default function Jobs() {
         filters.skills.some((s) => (j.skills || []).some((js) => js.toLowerCase().includes(s.toLowerCase())))
       );
     }
-    if (filters.visaSonsored) {
-      result = result.filter((j) => j.visaSonsored === true);
+    if (filters.visaSponsored) {
+      result = result.filter((j) => j.visaSponsored === true);
     }
     if (filters.isRemote) {
       result = result.filter((j) => j.isRemote === true);

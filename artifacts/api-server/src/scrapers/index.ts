@@ -1,4 +1,10 @@
 import type { ScrapedJob } from "../lib/scraper-engine";
+import { scrapeBaytQatar } from "./bayt";
+import { scrapeQatarLiving } from "./qatar-living";
+import { scrapeTanqeeb } from "./tanqeeb";
+import { scrapeNaukrigulf } from "./naukrigulf";
+import { scrapeGulfTalent } from "./gulf-talent";
+import { scrapeIndeedQatar } from "./indeed";
 
 export interface ScraperDefinition {
   name: string;
@@ -6,12 +12,14 @@ export interface ScraperDefinition {
   scrape: () => Promise<ScrapedJob[]>;
 }
 
-export { scrapeBaytQatar } from "./bayt";
-export { scrapeQatarLiving } from "./qatar-living";
-export { scrapeTanqeeb } from "./tanqeeb";
-export { scrapeNaukrigulf } from "./naukrigulf";
-export { scrapeGulfTalent } from "./gulf-talent";
-export { scrapeIndeedQatar } from "./indeed";
+export {
+  scrapeBaytQatar,
+  scrapeQatarLiving,
+  scrapeTanqeeb,
+  scrapeNaukrigulf,
+  scrapeGulfTalent,
+  scrapeIndeedQatar,
+};
 
 export const allScrapers: ScraperDefinition[] = [
   { name: "bayt", displayName: "Bayt Qatar", scrape: scrapeBaytQatar },

@@ -1,5 +1,5 @@
 import { db, jobs, jobSources, scrapeLogs, companies } from "@workspace/db";
-import { eq, and, sql, gte, lt, desc } from "drizzle-orm";
+import { eq, and, sql, gte, lt, desc, inArray } from "drizzle-orm";
 import { logger } from "./logger";
 import { openai } from "./openai";
 
@@ -107,7 +107,7 @@ export class ScraperEngine {
         and(
           sql`LOWER(${jobs.title}) = ${normalizedTitle}`,
           sql`LOWER(${jobs.company}) = ${normalizedCompany}`,
-          jobs.status.in(["active", "expired"]),
+          inArray(jobs.status, ["active", "expired"]),
           gte(jobs.createdAt, sql`NOW() - INTERVAL '7 days'`),
         ),
       )

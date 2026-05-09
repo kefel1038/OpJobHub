@@ -14,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { Job } from "@/lib/api";
 
-interface ExtendedJob extends Job {
+interface ExtendedJob extends Omit<Job, "description"> {
   aiMatch?: number;
   atsScore?: number;
   skills?: string[];

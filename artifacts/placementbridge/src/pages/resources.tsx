@@ -6,7 +6,7 @@ import {
   TrendingUp, Star, ChevronRight, Download, Users, Sparkles,
   Brain, FileCheck, FileSpreadsheet, Calculator, MapPin, GraduationCap,
   Briefcase, Lock, Heart, AlertTriangle, ChevronDown, ExternalLink,
-  Clock, Bookmark, ThumbsUp, MessageCircle, Share2, Play,
+  Calendar, Clock, Bookmark, ThumbsUp, MessageCircle, Share2, Play,
   ArrowRight, CheckCircle, BookmarkPlus, Zap, Target, Compass,
   BarChart3, ScrollText, Scale, Building2, Plane, Eye,
   X, ChevronLeft, SlidersHorizontal, Filter, Clock4, ArrowUpRight,
@@ -155,7 +155,7 @@ function SearchBar({ placeholder = "Search resources, guides, tools..." }: { pla
   )
 }
 
-function SectionHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: React.ReactNode }) {
+function SectionHeader({ title, subtitle, action }: { title: React.ReactNode; subtitle?: string; action?: React.ReactNode }) {
   return (
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
       <div>

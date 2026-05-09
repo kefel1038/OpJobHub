@@ -162,7 +162,7 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
     ...filters.skills,
     ...filters.companySizes,
     ...filters.nationalities,
-    filters.visaSonsored ? "Visa Sponsored" : null,
+    filters.visaSponsored ? "Visa Sponsored" : null,
     filters.isRemote ? "Remote" : null,
     filters.isUrgent ? "Urgent" : null,
     filters.datePosted !== "Anytime" ? filters.datePosted : null,
@@ -194,7 +194,7 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
             <span className="text-sm text-muted-foreground">Visa Sponsored</span>
             <input
               type="checkbox"
-              checked={filters.visaSonsored}
+              checked={filters.visaSponsored}
               onChange={(e) => setFilters({ ...filters, visaSponsored: e.target.checked })}
               className="h-4 w-4 rounded accent-primary"
             />

@@ -9,8 +9,7 @@ declare global {
           pageLanguage: string
           includedLanguages: string
           autoDisplay: boolean
-        }, elementId: string) => void
-        TranslateElement: {
+        }, elementId: string) => void & {
           InlineLayout: { SIMPLE: number }
         }
       }
