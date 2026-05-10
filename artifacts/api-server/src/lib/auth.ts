@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
 
-if (!process.env.JWT_SECRET) {
-  throw new Error("JWT_SECRET must be set.");
+function getJwtSecret(): string {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET must be set.");
+  }
+  return process.env.JWT_SECRET;
 }
-
-const JWT_SECRET = process.env.JWT_SECRET;
 
 export interface AuthPayload {
   id: number;
@@ -14,12 +15,12 @@ export interface AuthPayload {
 }
 
 export function signToken(payload: AuthPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: "7d" });
 }
 
 export function verifyToken(token: string): AuthPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as AuthPayload;
+    return jwt.verify(token, getJwtSecret()) as AuthPayload;
   } catch {
     return null;
   }
