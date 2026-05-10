@@ -78,7 +78,7 @@ const plans = [
 
 export function PricingSection() {
   return (
-    <section className="py-24 bg-white relative overflow-hidden" id="pricing">
+    <section className="py-24 bg-surface relative overflow-hidden" id="pricing">
       <div className="absolute inset-0 bg-grid-blue opacity-30 pointer-events-none" />
 
       <div className="container mx-auto px-4">
@@ -88,12 +88,12 @@ export function PricingSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-blue-600 font-bold text-sm tracking-widest uppercase mb-4 block">Pricing</span>
+          <span className="text-blue-400lue-600 font-bold text-sm tracking-widest uppercase mb-4 block">Pricing</span>
           <h2 className="text-4xl md:text-5xl font-heading font-black mb-4">
             Simple, transparent{" "}
             <span className="text-gradient-blue">pricing</span>
           </h2>
-          <p className="text-gray-500 max-w-3xl mx-auto text-lg">
+          <p className="text-gray-400 max-w-3xl mx-auto text-lg">
             Start free, scale as you grow. No hidden fees, no surprises.
           </p>
         </motion.div>
@@ -108,8 +108,8 @@ export function PricingSection() {
               transition={{ delay: i * 0.1 }}
               className={`relative rounded-3xl border-2 p-8 transition-all duration-500 ${
                 plan.highlighted
-                  ? "border-blue-500 shadow-2xl shadow-blue-500/10 scale-105 bg-white"
-                  : "border-gray-100 hover:border-blue-200 bg-gray-50/50"
+                  ? "border-blue-500 shadow-2xl shadow-blue-500/10 scale-105 bg-surface"
+                  : "border-[#2C2C2E] hover:border-blue-200 bg-elevated/50"
               }`}
             >
               {plan.popular && (
@@ -125,16 +125,16 @@ export function PricingSection() {
                 <plan.icon className="h-7 w-7 text-white" />
               </div>
 
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">{plan.name}</h3>
+              <h3 className="text-2xl font-bold text-gray-100 mb-2">{plan.name}</h3>
               <div className="flex items-baseline gap-1 mb-1">
-                <span className="text-4xl font-black text-gray-800">{plan.price}</span>
+                <span className="text-4xl font-black text-gray-100">{plan.price}</span>
                 <span className="text-sm text-gray-400">/{plan.period}</span>
               </div>
-              <p className="text-sm text-gray-500 mb-6">{plan.description}</p>
+              <p className="text-sm text-gray-400 mb-6">{plan.description}</p>
 
               <ul className="space-y-3 mb-8">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm text-gray-600">
+                  <li key={feature} className="flex items-start gap-2 text-sm text-gray-300">
                     <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
                     {feature}
                   </li>
@@ -146,7 +146,7 @@ export function PricingSection() {
                 className={
                   plan.highlighted
                     ? "w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0 rounded-full h-12 font-bold shadow-lg shadow-blue-600/25 group"
-                    : "w-full bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-full h-12 font-bold group"
+                    : "w-full bg-elevated text-gray-700 hover:bg-gray-200 rounded-full h-12 font-bold group"
                 }
               >
                 <Link href={plan.href}>
@@ -162,7 +162,7 @@ export function PricingSection() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-16 bg-gray-50 rounded-3xl p-10 border border-gray-100 max-w-4xl mx-auto"
+          className="mt-16 bg-elevated rounded-3xl p-10 border border-[#2C2C2E] max-w-4xl mx-auto"
         >
           <div className="grid md:grid-cols-4 gap-8 text-center">
             {[
@@ -172,8 +172,8 @@ export function PricingSection() {
               { icon: ShieldCheck, label: "99.9% Uptime", desc: "Enterprise reliability" },
             ].map((item) => (
               <div key={item.label}>
-                <item.icon className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-                <div className="font-bold text-gray-800 text-sm">{item.label}</div>
+                <item.icon className="h-6 w-6 text-blue-400lue-600 mx-auto mb-2" />
+                <div className="font-bold text-gray-100 text-sm">{item.label}</div>
                 <div className="text-xs text-gray-400">{item.desc}</div>
               </div>
             ))}

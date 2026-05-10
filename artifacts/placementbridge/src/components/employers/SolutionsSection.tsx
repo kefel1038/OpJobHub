@@ -12,8 +12,8 @@ const solutions = [
     title: "Permanent Recruitment",
     description: "Find and hire top-tier permanent talent for long-term roles across all industries.",
     color: "from-blue-600 to-blue-400",
-    bgColor: "bg-blue-50",
-    iconColor: "text-blue-600",
+    bgColor: "bg-blue-500lue-50",
+    iconColor: "text-blue-400lue-600",
   },
   {
     icon: Users,
@@ -93,12 +93,12 @@ export function SolutionsSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-blue-600 font-bold text-sm tracking-widest uppercase mb-4 block">Solutions</span>
+          <span className="text-blue-400lue-600 font-bold text-sm tracking-widest uppercase mb-4 block">Solutions</span>
           <h2 className="text-4xl md:text-5xl font-heading font-black mb-4">
             Complete workforce{" "}
             <span className="text-gradient-blue">solutions</span>
           </h2>
-          <p className="text-gray-500 max-w-3xl mx-auto text-lg">
+          <p className="text-gray-400 max-w-3xl mx-auto text-lg">
             One platform for all your recruitment needs — from permanent hiring to international workforce deployment.
           </p>
         </motion.div>
@@ -111,13 +111,13 @@ export function SolutionsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
-              className="group bg-white rounded-3xl p-8 border border-gray-100 hover:border-blue-200 transition-all duration-500 card-hover"
+              className="group bg-surface rounded-3xl p-8 border border-[#2C2C2E] hover:border-blue-200 transition-all duration-500 card-hover"
             >
               <div className={`h-14 w-14 rounded-2xl ${solution.bgColor} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
                 <solution.icon className={`h-7 w-7 ${solution.iconColor}`} />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">{solution.title}</h3>
-              <p className="text-gray-500 leading-relaxed mb-5">{solution.description}</p>
+              <h3 className="text-xl font-bold text-gray-100 mb-3">{solution.title}</h3>
+              <p className="text-gray-400 leading-relaxed mb-5">{solution.description}</p>
               <div className={`h-1 w-12 rounded-full bg-gradient-to-r ${solution.color} group-hover:w-full transition-all duration-300`} />
             </motion.div>
           ))}

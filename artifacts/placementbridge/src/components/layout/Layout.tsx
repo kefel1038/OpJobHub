@@ -10,7 +10,7 @@ interface LayoutProps {
 
 export function Layout({ children, showNavbar = true }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-white selection:bg-primary selection:text-black">
+    <div className="min-h-screen bg-default selection:bg-primary selection:text-white">
       {showNavbar && <Navbar />}
       <motion.main
         initial={{ opacity: 0 }}

@@ -10,9 +10,9 @@ const pipelineStages = [
     label: "Applied",
     icon: FileText,
     count: 48,
-    color: "bg-blue-500",
-    textColor: "text-blue-600",
-    bgColor: "bg-blue-50",
+    color: "bg-blue-500lue-500",
+    textColor: "text-blue-400lue-600",
+    bgColor: "bg-blue-500lue-50",
     candidates: [
       { name: "James O.", role: "Construction Worker", time: "2h ago" },
       { name: "Mary A.", role: "Cleaner", time: "3h ago" },
@@ -93,14 +93,14 @@ export function PipelineSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-blue-600 font-bold text-sm tracking-widest uppercase mb-4 block">
+          <span className="text-blue-400lue-600 font-bold text-sm tracking-widest uppercase mb-4 block">
             Recruitment Pipeline
           </span>
           <h2 className="text-4xl md:text-5xl font-heading font-black mb-4">
             From application to{" "}
             <span className="text-gradient-blue">deployment</span>
           </h2>
-          <p className="text-gray-500 max-w-3xl mx-auto text-lg">
+          <p className="text-gray-400 max-w-3xl mx-auto text-lg">
             Track every candidate through your hiring pipeline with our intuitive Kanban workflow.
           </p>
         </motion.div>
@@ -114,7 +114,7 @@ export function PipelineSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
-              className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
+              className="bg-surface rounded-2xl border border-[#2C2C2E] overflow-hidden"
             >
               <div className={`${stage.bgColor} px-4 py-3 flex items-center justify-between`}>
                 <div className="flex items-center gap-2">
@@ -127,14 +127,14 @@ export function PipelineSection() {
               </div>
               <div className="p-3 space-y-2">
                 {stage.candidates.map((candidate) => (
-                  <div key={candidate.name} className="bg-gray-50 rounded-xl p-2.5 hover:bg-blue-50 transition-colors cursor-pointer">
+                  <div key={candidate.name} className="bg-elevated rounded-xl p-2.5 hover:bg-blue-500lue-50 transition-colors cursor-pointer">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-[10px] font-bold">
                           {candidate.name.charAt(0)}
                         </div>
                         <div>
-                          <div className="text-xs font-bold text-gray-800">{candidate.name}</div>
+                          <div className="text-xs font-bold text-gray-100">{candidate.name}</div>
                           <div className="text-[10px] text-gray-400">{candidate.role}</div>
                         </div>
                       </div>
@@ -143,7 +143,7 @@ export function PipelineSection() {
                   </div>
                 ))}
                 <div className="text-center pt-1">
-                  <button className="text-xs text-blue-600 font-medium hover:text-blue-800 transition-colors">
+                  <button className="text-xs text-blue-400lue-600 font-medium hover:text-blue-400lue-800 transition-colors">
                     + View all ({stage.count})
                   </button>
                 </div>
@@ -177,14 +177,14 @@ export function PipelineSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="bg-white rounded-2xl p-6 border border-gray-100 card-hover flex items-start gap-4"
+              className="bg-surface rounded-2xl p-6 border border-[#2C2C2E] card-hover flex items-start gap-4"
             >
-              <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
-                <feature.icon className="h-6 w-6 text-blue-600" />
+              <div className="h-12 w-12 rounded-2xl bg-blue-500lue-50 flex items-center justify-center shrink-0">
+                <feature.icon className="h-6 w-6 text-blue-400lue-600" />
               </div>
               <div>
-                <h4 className="font-bold text-gray-800 mb-1">{feature.title}</h4>
-                <p className="text-sm text-gray-500">{feature.description}</p>
+                <h4 className="font-bold text-gray-100 mb-1">{feature.title}</h4>
+                <p className="text-sm text-gray-400">{feature.description}</p>
               </div>
             </motion.div>
           ))}

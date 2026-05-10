@@ -42,10 +42,10 @@ function AnimatedCounter({ value, label, suffix = "", prefix = "" }: { value: nu
 
   return (
     <div ref={ref} className="text-center">
-      <div className="text-4xl md:text-5xl font-black text-gradient-electric mb-1">
+      <div className="text-4xl md:text-5xl font-black text-gradient mb-1">
         {prefix}{count.toLocaleString()}{suffix}
       </div>
-      <div className="text-sm text-gray-500 dark:text-blue-200/60 font-medium">{label}</div>
+      <div className="text-sm text-gray-400 text-gray-400 font-medium">{label}</div>
     </div>
   );
 }
@@ -132,7 +132,7 @@ function HeroSection() {
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-black leading-[0.9] mb-8">
               <span className="text-white">Connecting</span>
               <br />
-              <span className="text-gradient-electric">Talent</span>
+              <span className="text-gradient">Talent</span>
               <br />
               <span className="text-white/90">With Opportunity</span>
             </h1>
@@ -317,22 +317,22 @@ function MissionVisionSection() {
   ];
 
   return (
-    <section className="py-28 bg-white dark:bg-[#070B2E] relative overflow-hidden">
-      <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
+    <section className="py-28 bg-surface  relative overflow-hidden">
+      <div className="absolute inset-0 bg-grid-blue opacity-30 opacity-[0.03]" />
       <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-blue-200/20 to-transparent" />
       <div className="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-blue-200/20 to-transparent" />
       <div className="container mx-auto px-4 relative z-10">
         <FadeIn>
           <div className="text-center mb-16">
-            <Badge className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
+            <Badge className="bg-blue-50 bg-blue-500/10 text-blue-600 text-blue-400 border-blue-200 border-blue-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
               <Target className="h-4 w-4 mr-1" />
               Our Purpose
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-heading font-black mb-4 dark:text-white">
+            <h2 className="text-4xl md:text-5xl font-heading font-black mb-4 text-white">
               Mission &{" "}
               <span className="text-gradient-blue">Vision</span>
             </h2>
-            <p className="text-gray-500 dark:text-blue-200/60 max-w-2xl mx-auto text-lg">
+            <p className="text-gray-400 text-gray-400 max-w-2xl mx-auto text-lg">
               We're on a mission to make hiring fair, fast, and accessible — for everyone.
             </p>
           </div>
@@ -359,7 +359,7 @@ function MissionVisionSection() {
           </FadeIn>
 
           <FadeIn delay={0.2}>
-            <div className="group relative bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-900 dark:to-blue-950 rounded-3xl p-10 text-white overflow-hidden">
+            <div className="group relative bg-gradient-to-br from-gray-900 to-gray-800 from-gray-900 to-blue-950 rounded-3xl p-10 text-white overflow-hidden">
               <div className="absolute -top-20 -right-20 w-60 h-60 bg-blue-500/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-500/5 rounded-full blur-2xl" />
               <div className="relative z-10">
@@ -381,13 +381,13 @@ function MissionVisionSection() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {values.map((v, i) => (
             <FadeIn key={v.title} delay={0.1 * i}>
-              <Card className="border-gray-100 dark:border-white/10 card-hover h-full bg-white dark:bg-white/5">
+              <Card className="border-[#2C2C2E]  card-hover h-full bg-surface bg-white/5">
                 <CardContent className="p-6">
-                  <div className="h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center mb-4">
-                    <v.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  <div className="h-12 w-12 rounded-2xl bg-blue-50 bg-blue-500/10 flex items-center justify-center mb-4">
+                    <v.icon className="h-6 w-6 text-blue-600 text-blue-400" />
                   </div>
-                  <h3 className="font-bold text-gray-800 dark:text-white mb-2">{v.title}</h3>
-                  <p className="text-sm text-gray-500 dark:text-blue-200/60 leading-relaxed">{v.description}</p>
+                  <h3 className="font-bold text-gray-100 text-white mb-2">{v.title}</h3>
+                  <p className="text-sm text-gray-400 text-gray-400 leading-relaxed">{v.description}</p>
                 </CardContent>
               </Card>
             </FadeIn>
@@ -400,27 +400,27 @@ function MissionVisionSection() {
 
 function FounderStorySection() {
   return (
-    <section className="py-28 employer-gradient-light dark:bg-[#0A1628] relative overflow-hidden">
-      <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
+    <section className="py-28 employer-gradient-light  relative overflow-hidden">
+      <div className="absolute inset-0 bg-grid-blue opacity-30 opacity-[0.03]" />
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <FadeIn direction="left">
             <div className="relative">
-              <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-100 dark:bg-blue-500/10 rounded-3xl -z-10" />
-              <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-amber-100 dark:bg-amber-500/10 rounded-3xl -z-10" />
-              <div className="bg-white dark:bg-white/5 rounded-3xl p-10 border border-gray-100 dark:border-white/10 shadow-xl">
-                <div className="h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center mb-6">
-                  <Quote className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-100 bg-blue-500/10 rounded-3xl -z-10" />
+              <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-amber-100 bg-amber-500/10 rounded-3xl -z-10" />
+              <div className="bg-surface bg-white/5 rounded-3xl p-10 border border-[#2C2C2E]  shadow-xl">
+                <div className="h-12 w-12 rounded-2xl bg-blue-50 bg-blue-500/10 flex items-center justify-center mb-6">
+                  <Quote className="h-6 w-6 text-blue-600 text-blue-400" />
                 </div>
-                <Badge className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 rounded-full px-4 py-1 text-sm mb-6">
+                <Badge className="bg-blue-50 bg-blue-500/10 text-blue-600 text-blue-400 border-blue-200 border-blue-500/20 rounded-full px-4 py-1 text-sm mb-6">
                   <Rocket className="h-3.5 w-3.5 mr-1" />
                   Our Story
                 </Badge>
-                <h2 className="text-3xl md:text-4xl font-heading font-black mb-6 dark:text-white">
+                <h2 className="text-3xl md:text-4xl font-heading font-black mb-6 text-white">
                   Why We Built{" "}
                   <span className="text-gradient-blue">KeFeL Job Hub</span>
                 </h2>
-                <div className="space-y-4 text-gray-600 dark:text-blue-200/70 leading-relaxed">
+                <div className="space-y-4 text-gray-300 text-gray-400 leading-relaxed">
                   <p>
                     We saw talented people struggling to find trusted jobs while employers 
                     struggled to reach qualified candidates. The recruitment industry was 
@@ -431,8 +431,8 @@ function FounderStorySection() {
                     thousands on platforms that delivered unqualified leads. The Gulf 
                     region and Africa had no dedicated platform bridging this gap effectively.
                   </p>
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-500/5 dark:to-indigo-500/5 rounded-2xl p-6 border border-blue-100 dark:border-blue-500/10 my-6">
-                    <p className="text-gray-800 dark:text-white font-semibold text-lg italic">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 from-blue-500/5 to-indigo-500/5 rounded-2xl p-6 border border-blue-100 border-subtle my-6">
+                    <p className="text-gray-100 text-white font-semibold text-lg italic">
                       "KeFeL Job Hub was created to bridge this gap using technology, 
                       transparency, and intelligent recruitment systems."
                     </p>
@@ -450,33 +450,33 @@ function FounderStorySection() {
 
           <FadeIn direction="right">
             <div className="space-y-6">
-              <div className="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-100 dark:border-white/10 card-hover flex items-start gap-4">
-                <div className="h-14 w-14 rounded-2xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center shrink-0">
+              <div className="bg-surface bg-white/5 rounded-2xl p-6 border border-[#2C2C2E]  card-hover flex items-start gap-4">
+                <div className="h-14 w-14 rounded-2xl bg-rose-50 bg-rose-500/10 flex items-center justify-center shrink-0">
                   <span className="text-2xl">😟</span>
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-800 dark:text-white mb-1">The Challenge</h4>
-                  <p className="text-sm text-gray-500 dark:text-blue-200/60">87% of job seekers in Africa struggle to find verified employment opportunities. Employers spend 40%+ of their hiring budget on ineffective channels.</p>
+                  <h4 className="font-bold text-gray-100 text-white mb-1">The Challenge</h4>
+                  <p className="text-sm text-gray-400 text-gray-400">87% of job seekers in Africa struggle to find verified employment opportunities. Employers spend 40%+ of their hiring budget on ineffective channels.</p>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-100 dark:border-white/10 card-hover flex items-start gap-4">
-                <div className="h-14 w-14 rounded-2xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center shrink-0">
+              <div className="bg-surface bg-white/5 rounded-2xl p-6 border border-[#2C2C2E]  card-hover flex items-start gap-4">
+                <div className="h-14 w-14 rounded-2xl bg-amber-50 bg-amber-500/10 flex items-center justify-center shrink-0">
                   <span className="text-2xl">💡</span>
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-800 dark:text-white mb-1">The Insight</h4>
-                  <p className="text-sm text-gray-500 dark:text-blue-200/60">Technology could solve this. AI matching, intelligent verification, and automated workflows could make hiring fair, fast, and borderless.</p>
+                  <h4 className="font-bold text-gray-100 text-white mb-1">The Insight</h4>
+                  <p className="text-sm text-gray-400 text-gray-400">Technology could solve this. AI matching, intelligent verification, and automated workflows could make hiring fair, fast, and borderless.</p>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-white/5 rounded-2xl p-6 border border-gray-100 dark:border-white/10 card-hover flex items-start gap-4">
-                <div className="h-14 w-14 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <div className="bg-surface bg-white/5 rounded-2xl p-6 border border-[#2C2C2E]  card-hover flex items-start gap-4">
+                <div className="h-14 w-14 rounded-2xl bg-emerald-50 bg-emerald-500/10 flex items-center justify-center shrink-0">
                   <span className="text-2xl">🚀</span>
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-800 dark:text-white mb-1">The Solution</h4>
-                  <p className="text-sm text-gray-500 dark:text-blue-200/60">An AI-powered recruitment ecosystem connecting African talent to Gulf and global opportunities with full verification, deployment support, and smart matching.</p>
+                  <h4 className="font-bold text-gray-100 text-white mb-1">The Solution</h4>
+                  <p className="text-sm text-gray-400 text-gray-400">An AI-powered recruitment ecosystem connecting African talent to Gulf and global opportunities with full verification, deployment support, and smart matching.</p>
                 </div>
               </div>
 
@@ -516,7 +516,7 @@ function StatisticsSection() {
             </Badge>
             <h2 className="text-4xl md:text-5xl font-heading font-black text-white mb-4">
               Our platform by the{" "}
-              <span className="text-gradient-electric">numbers</span>
+              <span className="text-gradient">numbers</span>
             </h2>
             <p className="text-blue-200/60 max-w-2xl mx-auto text-lg">
               Real metrics showing the scale and impact of our recruitment ecosystem.
@@ -564,20 +564,20 @@ function HowItWorksSection() {
   ];
 
   return (
-    <section className="py-28 bg-white dark:bg-[#070B2E] relative overflow-hidden">
-      <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
+    <section className="py-28 bg-surface  relative overflow-hidden">
+      <div className="absolute inset-0 bg-grid-blue opacity-30 opacity-[0.03]" />
       <div className="container mx-auto px-4 relative z-10">
         <FadeIn>
           <div className="text-center mb-16">
-            <Badge className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
+            <Badge className="bg-blue-50 bg-blue-500/10 text-blue-600 text-blue-400 border-blue-200 border-blue-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
               <Layers className="h-4 w-4 mr-1" />
               How It Works
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-heading font-black mb-4 dark:text-white">
+            <h2 className="text-4xl md:text-5xl font-heading font-black mb-4 text-white">
               Simple workflows for{" "}
               <span className="text-gradient-blue">everyone</span>
             </h2>
-            <p className="text-gray-500 dark:text-blue-200/60 max-w-2xl mx-auto text-lg">
+            <p className="text-gray-400 text-gray-400 max-w-2xl mx-auto text-lg">
               Whether you're looking for a job or hiring talent, we've streamlined every step.
             </p>
           </div>
@@ -585,30 +585,30 @@ function HowItWorksSection() {
 
         <div className="grid lg:grid-cols-2 gap-10">
           <FadeIn>
-            <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-500/5 dark:to-indigo-500/5 rounded-3xl p-8 border border-blue-100 dark:border-blue-500/10 overflow-hidden">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-blue-200/20 dark:bg-blue-500/5 rounded-full blur-3xl" />
+            <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 from-blue-500/5 to-indigo-500/5 rounded-3xl p-8 border border-blue-100 border-subtle overflow-hidden">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-blue-200/20 bg-blue-500/5 rounded-full blur-3xl" />
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-600/25">
                     <Users className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">For Job Seekers</h3>
-                    <p className="text-sm text-gray-500 dark:text-blue-200/60">4 simple steps to your next role</p>
+                    <h3 className="text-xl font-bold text-gray-100 text-white">For Job Seekers</h3>
+                    <p className="text-sm text-gray-400 text-gray-400">4 simple steps to your next role</p>
                   </div>
                 </div>
                 <div className="space-y-6">
                   {seekerSteps.map((step, i) => (
                     <div key={step.title} className="flex gap-4 group">
                       <div className="flex flex-col items-center">
-                        <div className="h-12 w-12 rounded-2xl bg-white dark:bg-white/10 border-2 border-blue-200 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold shrink-0 group-hover:border-blue-400 dark:group-hover:border-blue-400 transition-colors">
+                        <div className="h-12 w-12 rounded-2xl bg-surface bg-white/10 border-2 border-blue-200 border-blue-500/30 flex items-center justify-center text-blue-600 text-blue-400 font-bold shrink-0 group-hover:border-blue-400 group-hover:border-blue-400 transition-colors">
                           <step.icon className="h-5 w-5" />
                         </div>
-                        {i < seekerSteps.length - 1 && <div className="w-0.5 h-8 bg-blue-200 dark:bg-blue-500/20 mt-1" />}
+                        {i < seekerSteps.length - 1 && <div className="w-0.5 h-8 bg-blue-200 bg-blue-500/20 mt-1" />}
                       </div>
                       <div className="pt-2">
-                        <h4 className="font-bold text-gray-800 dark:text-white">{step.title}</h4>
-                        <p className="text-sm text-gray-500 dark:text-blue-200/60">{step.desc}</p>
+                        <h4 className="font-bold text-gray-100 text-white">{step.title}</h4>
+                        <p className="text-sm text-gray-400 text-gray-400">{step.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -618,30 +618,30 @@ function HowItWorksSection() {
           </FadeIn>
 
           <FadeIn delay={0.2}>
-            <div className="relative bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-500/5 dark:to-orange-500/5 rounded-3xl p-8 border border-amber-100 dark:border-amber-500/10 overflow-hidden">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-amber-200/20 dark:bg-amber-500/5 rounded-full blur-3xl" />
+            <div className="relative bg-gradient-to-br from-amber-50 to-orange-50 from-amber-500/5 to-orange-500/5 rounded-3xl p-8 border border-amber-100 border-amber-500/10 overflow-hidden">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-amber-200/20 bg-amber-500/5 rounded-full blur-3xl" />
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-amber-600 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-600/25">
                     <Building2 className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">For Employers</h3>
-                    <p className="text-sm text-gray-500 dark:text-blue-200/60">Streamlined hiring in 4 steps</p>
+                    <h3 className="text-xl font-bold text-gray-100 text-white">For Employers</h3>
+                    <p className="text-sm text-gray-400 text-gray-400">Streamlined hiring in 4 steps</p>
                   </div>
                 </div>
                 <div className="space-y-6">
                   {employerSteps.map((step, i) => (
                     <div key={step.title} className="flex gap-4 group">
                       <div className="flex flex-col items-center">
-                        <div className="h-12 w-12 rounded-2xl bg-white dark:bg-white/10 border-2 border-amber-200 dark:border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 font-bold shrink-0 group-hover:border-amber-400 dark:group-hover:border-amber-400 transition-colors">
+                        <div className="h-12 w-12 rounded-2xl bg-surface bg-white/10 border-2 border-amber-200 border-amber-500/30 flex items-center justify-center text-amber-600 text-amber-400 font-bold shrink-0 group-hover:border-amber-400 group-hover:border-amber-400 transition-colors">
                           <step.icon className="h-5 w-5" />
                         </div>
-                        {i < employerSteps.length - 1 && <div className="w-0.5 h-8 bg-amber-200 dark:bg-amber-500/20 mt-1" />}
+                        {i < employerSteps.length - 1 && <div className="w-0.5 h-8 bg-amber-200 bg-amber-500/20 mt-1" />}
                       </div>
                       <div className="pt-2">
-                        <h4 className="font-bold text-gray-800 dark:text-white">{step.title}</h4>
-                        <p className="text-sm text-gray-500 dark:text-blue-200/60">{step.desc}</p>
+                        <h4 className="font-bold text-gray-100 text-white">{step.title}</h4>
+                        <p className="text-sm text-gray-400 text-gray-400">{step.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -670,20 +670,20 @@ function WhyChooseSection() {
   ];
 
   return (
-    <section className="py-28 employer-gradient-light dark:bg-[#0A1628] relative overflow-hidden">
-      <div className="absolute inset-0 bg-grid-blue opacity-50 dark:opacity-[0.03]" />
+    <section className="py-28 employer-gradient-light  relative overflow-hidden">
+      <div className="absolute inset-0 bg-grid-blue opacity-50 opacity-[0.03]" />
       <div className="container mx-auto px-4 relative z-10">
         <FadeIn>
           <div className="text-center mb-16">
-            <Badge className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
+            <Badge className="bg-blue-50 bg-blue-500/10 text-blue-600 text-blue-400 border-blue-200 border-blue-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
               <Star className="h-4 w-4 mr-1" />
               Why Choose KeFeL
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-heading font-black mb-4 dark:text-white">
+            <h2 className="text-4xl md:text-5xl font-heading font-black mb-4 text-white">
               Built for modern{" "}
               <span className="text-gradient-blue">recruitment</span>
             </h2>
-            <p className="text-gray-500 dark:text-blue-200/60 max-w-2xl mx-auto text-lg">
+            <p className="text-gray-400 text-gray-400 max-w-2xl mx-auto text-lg">
               Everything you need to hire or get hired — powered by AI and designed for results.
             </p>
           </div>
@@ -692,14 +692,14 @@ function WhyChooseSection() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {features.map((f, i) => (
             <FadeIn key={f.title} delay={i * 0.03}>
-              <Card className="border-gray-100 dark:border-white/10 card-hover h-full bg-white dark:bg-white/5 group overflow-hidden relative">
+              <Card className="border-[#2C2C2E]  card-hover h-full bg-surface bg-white/5 group overflow-hidden relative">
                 <div className={`absolute inset-0 bg-gradient-to-br ${f.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
                 <CardContent className="p-6 relative z-10">
                   <div className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${f.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                     <f.icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="font-bold text-gray-800 dark:text-white mb-2">{f.title}</h3>
-                  <p className="text-sm text-gray-500 dark:text-blue-200/60">{f.desc}</p>
+                  <h3 className="font-bold text-gray-100 text-white mb-2">{f.title}</h3>
+                  <p className="text-sm text-gray-400 text-gray-400">{f.desc}</p>
                 </CardContent>
               </Card>
             </FadeIn>
@@ -720,20 +720,20 @@ function TrustSection() {
   ];
 
   return (
-    <section className="py-28 bg-white dark:bg-[#070B2E] relative overflow-hidden">
-      <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
+    <section className="py-28 bg-surface  relative overflow-hidden">
+      <div className="absolute inset-0 bg-grid-blue opacity-30 opacity-[0.03]" />
       <div className="container mx-auto px-4">
         <FadeIn>
           <div className="text-center mb-16">
-            <Badge className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
+            <Badge className="bg-blue-50 bg-blue-500/10 text-blue-600 text-blue-400 border-blue-200 border-blue-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
               <ShieldCheck className="h-4 w-4 mr-1" />
               Trust & Credibility
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-heading font-black mb-4 dark:text-white">
+            <h2 className="text-4xl md:text-5xl font-heading font-black mb-4 text-white">
               Built on a foundation of{" "}
               <span className="text-gradient-blue">trust</span>
             </h2>
-            <p className="text-gray-500 dark:text-blue-200/60 max-w-2xl mx-auto text-lg">
+            <p className="text-gray-400 text-gray-400 max-w-2xl mx-auto text-lg">
               Every interaction on our platform is secured, verified, and transparent.
             </p>
           </div>
@@ -742,14 +742,14 @@ function TrustSection() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           {badges.map((b, i) => (
             <FadeIn key={b.label} delay={i * 0.1}>
-              <div className="group bg-gray-50 dark:bg-white/5 rounded-2xl p-6 text-center border border-gray-100 dark:border-white/10 card-hover relative overflow-hidden">
+              <div className="group bg-elevated bg-white/5 rounded-2xl p-6 text-center border border-[#2C2C2E]  card-hover relative overflow-hidden">
                 <div className={`absolute inset-0 bg-gradient-to-br ${b.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
                 <div className="relative z-10">
                   <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${b.color} bg-opacity-10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
                     <b.icon className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="font-bold text-gray-800 dark:text-white mb-1">{b.label}</h3>
-                  <p className="text-sm text-gray-500 dark:text-blue-200/60">{b.desc}</p>
+                  <h3 className="font-bold text-gray-100 text-white mb-1">{b.label}</h3>
+                  <p className="text-sm text-gray-400 text-gray-400">{b.desc}</p>
                 </div>
               </div>
             </FadeIn>
@@ -758,16 +758,16 @@ function TrustSection() {
 
         <FadeIn>
           <div className="text-center mb-8">
-            <p className="text-sm text-gray-400 dark:text-blue-300/50 uppercase tracking-widest font-bold mb-8">Trusted by leading companies across the Gulf & Africa</p>
+            <p className="text-sm text-gray-400 text-blue-300/50 uppercase tracking-widest font-bold mb-8">Trusted by leading companies across the Gulf & Africa</p>
           </div>
           <div className="grid grid-cols-3 md:grid-cols-6 gap-4 max-w-4xl mx-auto">
             {logos.map((name, i) => (
               <FadeIn key={name} delay={i * 0.03}>
-                <div className="group bg-gray-50 dark:bg-white/5 rounded-2xl p-4 text-center border border-gray-100 dark:border-white/10 hover:border-blue-300 dark:hover:border-blue-500/30 transition-all cursor-pointer">
+                <div className="group bg-elevated bg-white/5 rounded-2xl p-4 text-center border border-[#2C2C2E]  hover:border-blue-300 hover:border-blue-500/30 transition-all cursor-pointer">
                   <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
                     <span className="text-white font-bold text-sm">{name.charAt(0)}</span>
                   </div>
-                  <div className="text-xs font-bold text-gray-700 dark:text-blue-200/70 truncate">{name}</div>
+                  <div className="text-xs font-bold text-gray-700 text-gray-400 truncate">{name}</div>
                 </div>
               </FadeIn>
             ))}
@@ -803,20 +803,20 @@ function SuccessStoriesSection() {
   ];
 
   return (
-    <section className="py-28 employer-gradient-light dark:bg-[#0A1628] relative overflow-hidden">
-      <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
+    <section className="py-28 employer-gradient-light  relative overflow-hidden">
+      <div className="absolute inset-0 bg-grid-blue opacity-30 opacity-[0.03]" />
       <div className="container mx-auto px-4">
         <FadeIn>
           <div className="text-center mb-16">
-            <Badge className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
+            <Badge className="bg-blue-50 bg-blue-500/10 text-blue-600 text-blue-400 border-blue-200 border-blue-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
               <Star className="h-4 w-4 mr-1" />
               Success Stories
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-heading font-black mb-4 dark:text-white">
+            <h2 className="text-4xl md:text-5xl font-heading font-black mb-4 text-white">
               Real people, real{" "}
               <span className="text-gradient-blue">results</span>
             </h2>
-            <p className="text-gray-500 dark:text-blue-200/60 max-w-2xl mx-auto text-lg">
+            <p className="text-gray-400 text-gray-400 max-w-2xl mx-auto text-lg">
               Stories from job seekers and employers who found success on our platform.
             </p>
           </div>
@@ -825,7 +825,7 @@ function SuccessStoriesSection() {
         <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {stories.map((s, i) => (
             <FadeIn key={s.name} delay={i * 0.08}>
-              <Card className="border-gray-100 dark:border-white/10 card-hover h-full bg-white dark:bg-white/5 group relative overflow-hidden">
+              <Card className="border-[#2C2C2E]  card-hover h-full bg-surface bg-white/5 group relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
                 <CardContent className="p-7 relative z-10">
                   <div className="flex items-center justify-between mb-4">
@@ -834,24 +834,24 @@ function SuccessStoriesSection() {
                         <Star key={j} className="h-4 w-4 fill-amber-400 text-amber-400" />
                       ))}
                     </div>
-                    <Badge className={s.type === "Employer" ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20 text-xs rounded-full" : "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 text-xs rounded-full"}>
+                    <Badge className={s.type === "Employer" ? "bg-amber-50 bg-amber-500/10 text-amber-600 text-amber-400 border-amber-200 border-amber-500/20 text-xs rounded-full" : "bg-blue-50 bg-blue-500/10 text-blue-600 text-blue-400 border-blue-200 border-blue-500/20 text-xs rounded-full"}>
                       {s.type}
                     </Badge>
                   </div>
-                  <p className="text-gray-600 dark:text-blue-200/80 text-sm leading-relaxed mb-6 italic">
+                  <p className="text-gray-300 text-blue-200/80 text-sm leading-relaxed mb-6 italic">
                     &ldquo;{s.story}&rdquo;
                   </p>
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10">
+                  <div className="flex items-center justify-between pt-4 border-t border-[#2C2C2E] ">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
                         {s.avatar}
                       </div>
                       <div>
-                        <div className="font-bold text-gray-800 dark:text-white text-sm">{s.name}</div>
-                        <div className="text-xs text-gray-500 dark:text-blue-200/60">{s.role}, {s.company}</div>
+                        <div className="font-bold text-gray-100 text-white text-sm">{s.name}</div>
+                        <div className="text-xs text-gray-400 text-gray-400">{s.role}, {s.company}</div>
                       </div>
                     </div>
-                    <Badge className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20 text-xs rounded-full whitespace-nowrap">
+                    <Badge className="bg-emerald-50 bg-emerald-500/10 text-emerald-700 text-emerald-400 border-emerald-200 border-emerald-500/20 text-xs rounded-full whitespace-nowrap">
                       {s.achievement}
                     </Badge>
                   </div>
@@ -876,21 +876,21 @@ function ForEmployersSection() {
   ];
 
   return (
-    <section className="py-28 bg-white dark:bg-[#070B2E] relative overflow-hidden">
-      <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
+    <section className="py-28 bg-surface  relative overflow-hidden">
+      <div className="absolute inset-0 bg-grid-blue opacity-30 opacity-[0.03]" />
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-16 items-center mb-16">
           <FadeIn direction="left">
             <div>
-              <Badge className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
+              <Badge className="bg-blue-50 bg-blue-500/10 text-blue-600 text-blue-400 border-blue-200 border-blue-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
                 <Building2 className="h-4 w-4 mr-1" />
                 For Employers
               </Badge>
-              <h2 className="text-4xl md:text-5xl font-heading font-black mb-6 dark:text-white">
+              <h2 className="text-4xl md:text-5xl font-heading font-black mb-6 text-white">
                 Hire the best talent{" "}
                 <span className="text-gradient-blue">faster</span>
               </h2>
-              <p className="text-gray-500 dark:text-blue-200/60 text-lg mb-8 leading-relaxed">
+              <p className="text-gray-400 text-gray-400 text-lg mb-8 leading-relaxed">
                 Our AI-powered platform helps you find, screen, and hire verified candidates 
                 in record time. From posting a job to signing a contract — we've streamlined 
                 every step of the recruitment process.
@@ -963,14 +963,14 @@ function ForEmployersSection() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {benefits.map((b, i) => (
             <FadeIn key={b.title} delay={i * 0.05}>
-              <Card className="border-gray-100 dark:border-white/10 card-hover h-full bg-white dark:bg-white/5">
+              <Card className="border-[#2C2C2E]  card-hover h-full bg-surface bg-white/5">
                 <CardContent className="p-6 flex gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
-                    <b.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  <div className="h-12 w-12 rounded-2xl bg-blue-50 bg-blue-500/10 flex items-center justify-center shrink-0">
+                    <b.icon className="h-6 w-6 text-blue-600 text-blue-400" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-gray-800 dark:text-white text-sm mb-1">{b.title}</h4>
-                    <p className="text-xs text-gray-500 dark:text-blue-200/60 leading-relaxed">{b.desc}</p>
+                    <h4 className="font-bold text-gray-100 text-white text-sm mb-1">{b.title}</h4>
+                    <p className="text-xs text-gray-400 text-gray-400 leading-relaxed">{b.desc}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -993,8 +993,8 @@ function ForJobSeekersSection() {
   ];
 
   return (
-    <section className="py-28 employer-gradient-light dark:bg-[#0A1628] relative overflow-hidden">
-      <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
+    <section className="py-28 employer-gradient-light  relative overflow-hidden">
+      <div className="absolute inset-0 bg-grid-blue opacity-30 opacity-[0.03]" />
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-16 items-center mb-16">
           <FadeIn direction="left">
@@ -1030,15 +1030,15 @@ function ForJobSeekersSection() {
 
           <FadeIn direction="right">
             <div>
-              <Badge className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
+              <Badge className="bg-emerald-50 bg-emerald-500/10 text-emerald-600 text-emerald-400 border-emerald-200 border-emerald-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
                 <Users className="h-4 w-4 mr-1" />
                 For Job Seekers
               </Badge>
-              <h2 className="text-4xl md:text-5xl font-heading font-black mb-6 dark:text-white">
+              <h2 className="text-4xl md:text-5xl font-heading font-black mb-6 text-white">
                 Find your{" "}
                 <span className="text-gradient-blue">dream job</span>
               </h2>
-              <p className="text-gray-500 dark:text-blue-200/60 text-lg mb-8 leading-relaxed">
+              <p className="text-gray-400 text-gray-400 text-lg mb-8 leading-relaxed">
                 Whether you're looking for local opportunities in the Gulf or international 
                 remote roles, our AI-powered platform connects you with verified employers 
                 who value your skills and experience.
@@ -1056,14 +1056,14 @@ function ForJobSeekersSection() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {benefits.map((b, i) => (
             <FadeIn key={b.title} delay={i * 0.05}>
-              <Card className="border-gray-100 dark:border-white/10 card-hover h-full bg-white dark:bg-white/5">
+              <Card className="border-[#2C2C2E]  card-hover h-full bg-surface bg-white/5">
                 <CardContent className="p-6 flex gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center shrink-0">
-                    <b.icon className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                  <div className="h-12 w-12 rounded-2xl bg-emerald-50 bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <b.icon className="h-6 w-6 text-emerald-600 text-emerald-400" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-gray-800 dark:text-white text-sm mb-1">{b.title}</h4>
-                    <p className="text-xs text-gray-500 dark:text-blue-200/60 leading-relaxed">{b.desc}</p>
+                    <h4 className="font-bold text-gray-100 text-white text-sm mb-1">{b.title}</h4>
+                    <p className="text-xs text-gray-400 text-gray-400 leading-relaxed">{b.desc}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -1101,7 +1101,7 @@ function TechnologySection() {
             </Badge>
             <h2 className="text-4xl md:text-5xl font-heading font-black text-white mb-4">
               Technology behind{" "}
-              <span className="text-gradient-electric">KeFeL</span>
+              <span className="text-gradient">KeFeL</span>
             </h2>
             <p className="text-blue-200/60 max-w-2xl mx-auto text-lg">
               Built with cutting-edge technology to deliver a seamless, secure, and intelligent recruitment experience.
@@ -1136,7 +1136,7 @@ function TechnologySection() {
                 { label: "Average Response", value: "<100ms" },
               ].map((m) => (
                 <div key={m.label}>
-                  <div className="text-2xl font-black text-gradient-electric">{m.value}</div>
+                  <div className="text-2xl font-black text-gradient">{m.value}</div>
                   <div className="text-sm text-blue-300/60 mt-1">{m.label}</div>
                 </div>
               ))}
@@ -1157,20 +1157,20 @@ function TeamSection() {
   ];
 
   return (
-    <section className="py-28 bg-white dark:bg-[#070B2E] relative overflow-hidden">
-      <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
+    <section className="py-28 bg-surface  relative overflow-hidden">
+      <div className="absolute inset-0 bg-grid-blue opacity-30 opacity-[0.03]" />
       <div className="container mx-auto px-4">
         <FadeIn>
           <div className="text-center mb-16">
-            <Badge className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
+            <Badge className="bg-blue-50 bg-blue-500/10 text-blue-600 text-blue-400 border-blue-200 border-blue-500/20 rounded-full px-5 py-1.5 text-sm mb-6">
               <Users className="h-4 w-4 mr-1" />
               Our Team
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-heading font-black mb-4 dark:text-white">
+            <h2 className="text-4xl md:text-5xl font-heading font-black mb-4 text-white">
               Meet the people behind{" "}
               <span className="text-gradient-blue">KeFeL</span>
             </h2>
-            <p className="text-gray-500 dark:text-blue-200/60 max-w-2xl mx-auto text-lg">
+            <p className="text-gray-400 text-gray-400 max-w-2xl mx-auto text-lg">
               A dedicated team committed to transforming recruitment through technology.
             </p>
           </div>
@@ -1179,24 +1179,24 @@ function TeamSection() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
           {team.map((m, i) => (
             <FadeIn key={m.name} delay={i * 0.1}>
-              <Card className="border-gray-100 dark:border-white/10 card-hover text-center h-full bg-white dark:bg-white/5 group relative overflow-hidden">
+              <Card className="border-[#2C2C2E]  card-hover text-center h-full bg-surface bg-white/5 group relative overflow-hidden">
                 <div className={`absolute inset-0 bg-gradient-to-br ${m.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
                 <CardContent className="p-6 relative z-10">
                   <div className={`h-20 w-20 rounded-full bg-gradient-to-br ${m.gradient} flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
                     {m.initials}
                   </div>
-                  <h3 className="font-bold text-gray-800 dark:text-white">{m.name}</h3>
-                  <p className="text-sm text-blue-600 dark:text-blue-400 font-medium mb-3">{m.role}</p>
-                  <p className="text-xs text-gray-500 dark:text-blue-200/60 leading-relaxed">{m.bio}</p>
+                  <h3 className="font-bold text-gray-100 text-white">{m.name}</h3>
+                  <p className="text-sm text-blue-600 text-blue-400 font-medium mb-3">{m.role}</p>
+                  <p className="text-xs text-gray-400 text-gray-400 leading-relaxed">{m.bio}</p>
                   <div className="flex justify-center gap-3 mt-4">
-                    <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors cursor-pointer group/icon">
-                      <Linkedin className="h-4 w-4 text-gray-400 dark:text-blue-300/50 group-hover/icon:text-blue-600 dark:group-hover/icon:text-blue-400 transition-colors" />
+                    <div className="h-8 w-8 rounded-full bg-elevated bg-white/5 flex items-center justify-center hover:bg-blue-100 hover:bg-blue-500/20 transition-colors cursor-pointer group/icon">
+                      <Linkedin className="h-4 w-4 text-gray-400 text-blue-300/50 group-hover/icon:text-blue-600 group-hover/icon:text-blue-400 transition-colors" />
                     </div>
-                    <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors cursor-pointer group/icon">
-                      <Mail className="h-4 w-4 text-gray-400 dark:text-blue-300/50 group-hover/icon:text-blue-600 dark:group-hover/icon:text-blue-400 transition-colors" />
+                    <div className="h-8 w-8 rounded-full bg-elevated bg-white/5 flex items-center justify-center hover:bg-blue-100 hover:bg-blue-500/20 transition-colors cursor-pointer group/icon">
+                      <Mail className="h-4 w-4 text-gray-400 text-blue-300/50 group-hover/icon:text-blue-600 group-hover/icon:text-blue-400 transition-colors" />
                     </div>
-                    <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-white/5 flex items justify-center hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors cursor-pointer group/icon">
-                      <Twitter className="h-4 w-4 text-gray-400 dark:text-blue-300/50 group-hover/icon:text-blue-600 dark:group-hover/icon:text-blue-400 transition-colors" />
+                    <div className="h-8 w-8 rounded-full bg-elevated bg-white/5 flex items justify-center hover:bg-blue-100 hover:bg-blue-500/20 transition-colors cursor-pointer group/icon">
+                      <Twitter className="h-4 w-4 text-gray-400 text-blue-300/50 group-hover/icon:text-blue-600 group-hover/icon:text-blue-400 transition-colors" />
                     </div>
                   </div>
                 </CardContent>
@@ -1215,7 +1215,7 @@ function CTASection() {
       <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-800" />
       <div className="absolute inset-0 bg-grid-white opacity-[0.04] pointer-events-none" />
       <div className="absolute top-1/3 left-1/4 w-80 h-80 bg-white/5 rounded-full blur-[100px] animate-pulse-soft" />
-      <div className="absolute bottom-1/3 right-1/4 w-60 h-60 bg-amber-400/10 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: "1.5s" }} />
+      <div className="absolute bottom-1/3 right-1/4 w-60 h-60 bg-indigo-400/10 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: "1.5s" }} />
 
       <div className="container mx-auto px-4 relative z-10 text-center">
         <FadeIn>

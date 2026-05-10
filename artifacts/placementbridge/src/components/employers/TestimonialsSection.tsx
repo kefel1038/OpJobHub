@@ -60,14 +60,14 @@ export function TestimonialsSection() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-blue-600 font-bold text-sm tracking-widest uppercase mb-4 block">
+          <span className="text-blue-400lue-600 font-bold text-sm tracking-widest uppercase mb-4 block">
             Client Success
           </span>
           <h2 className="text-4xl md:text-5xl font-heading font-black mb-4">
             Trusted by industry{" "}
             <span className="text-gradient-blue">leaders</span>
           </h2>
-          <p className="text-gray-500 max-w-3xl mx-auto text-lg">
+          <p className="text-gray-400 max-w-3xl mx-auto text-lg">
             See how leading employers use KeFeL to build world-class teams.
           </p>
         </motion.div>
@@ -78,9 +78,9 @@ export function TestimonialsSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="bg-white rounded-3xl p-10 md:p-14 border border-gray-100 shadow-xl relative"
+            className="bg-surface rounded-3xl p-10 md:p-14 border border-[#2C2C2E] shadow-xl relative"
           >
-            <Quote className="h-12 w-12 text-blue-100 absolute top-8 left-8" />
+            <Quote className="h-12 w-12 text-blue-400lue-100 absolute top-8 left-8" />
 
             <div className="relative z-10">
               <div className="flex gap-1 mb-6">
@@ -99,22 +99,22 @@ export function TestimonialsSection() {
                     {t.author.split(" ").map(n => n[0]).join("")}
                   </div>
                   <div>
-                    <div className="font-bold text-gray-800 text-lg">{t.author}</div>
-                    <div className="text-sm text-gray-500">{t.role}</div>
-                    <div className="text-sm text-blue-600 font-medium">{t.company}</div>
+                    <div className="font-bold text-gray-100 text-lg">{t.author}</div>
+                    <div className="text-sm text-gray-400">{t.role}</div>
+                    <div className="text-sm text-blue-400lue-600 font-medium">{t.company}</div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setCurrent(current === 0 ? testimonials.length - 1 : current - 1)}
-                    className="h-12 w-12 rounded-full border border-gray-200 flex items-center justify-center hover:border-blue-300 hover:bg-blue-50 transition-all"
+                    className="h-12 w-12 rounded-full border border-[#2C2C2E] flex items-center justify-center hover:border-blue-300 hover:bg-blue-500lue-50 transition-all"
                   >
-                    <ArrowLeft className="h-5 w-5 text-gray-600" />
+                    <ArrowLeft className="h-5 w-5 text-gray-300" />
                   </button>
                   <button
                     onClick={() => setCurrent(current === testimonials.length - 1 ? 0 : current + 1)}
-                    className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center hover:bg-blue-700 transition-all"
+                    className="h-12 w-12 rounded-full bg-blue-500lue-600 flex items-center justify-center hover:bg-blue-500lue-700 transition-all"
                   >
                     <ArrowRight className="h-5 w-5 text-white" />
                   </button>
@@ -130,7 +130,7 @@ export function TestimonialsSection() {
                 key={i}
                 onClick={() => setCurrent(i)}
                 className={`h-2 rounded-full transition-all duration-300 ${
-                  i === current ? "w-8 bg-blue-600" : "w-2 bg-gray-300 hover:bg-gray-400"
+                  i === current ? "w-8 bg-blue-500lue-600" : "w-2 bg-gray-300 hover:bg-gray-400"
                 }`}
               />
             ))}

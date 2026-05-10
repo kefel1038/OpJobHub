@@ -139,7 +139,7 @@ export default function AIMatching() {
       <div className="pt-16 pb-12">
         <main className="container mx-auto px-4 py-8">
           {/* Hero */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-4xl mx-auto mb-10">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative pt-24 pb-16 overflow-hidden hero-gradient text-center max-w-4xl mx-auto mb-10">
             <Badge variant="secondary" className="mb-4 rounded-full px-4 py-1.5 text-xs font-medium gap-1.5 bg-primary/10 text-primary border-primary/20">
               <Sparkles className="h-3 w-3" />
               AI Job Matching Engine
@@ -154,7 +154,7 @@ export default function AIMatching() {
 
           {/* Search Form */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="max-w-3xl mx-auto mb-10">
-            <Card className="border-border/50 shadow-sm">
+            <Card className="bg-elevated border border-[#2C2C2E] rounded-2xl">
               <CardContent className="p-6 space-y-4">
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">Skills <span className="text-destructive">*</span></label>
@@ -368,7 +368,7 @@ export default function AIMatching() {
                           >
                             <Card
                               className={cn(
-                                "border-border/50 shadow-sm hover:border-primary/40 transition-all cursor-pointer group",
+                                "card-hover bg-surface border-border/50 shadow-sm hover:border-primary/40 transition-all cursor-pointer group",
                                 selectedJob?.jobId === match.jobId && "ring-1 ring-primary",
                               )}
                               onClick={() => setSelectedJob(selectedJob?.jobId === match.jobId ? null : match)}
@@ -521,7 +521,7 @@ export default function AIMatching() {
                           </div>
                         ) : (
                           matches.filter((m) => savedJobIds.has(m.jobId)).map((match) => (
-                            <Card key={match.jobId} className="border-border/50">
+                            <Card key={match.jobId} className="card-hover bg-surface border-border/50">
                               <CardContent className="p-5 flex items-start gap-4">
                                 <MatchScoreCircle score={match.matchScore} size="sm" />
                                 <div className="flex-1 min-w-0">

@@ -17,7 +17,7 @@ const stats = [
 
 const floatingMetrics = [
   { label: "AI Match Rate", value: "94%", color: "text-emerald-400" },
-  { label: "Avg. Hire Time", value: "48hrs", color: "text-blue-400" },
+  { label: "Avg. Hire Time", value: "48hrs", color: "text-blue-400lue-400" },
   { label: "Candidate Quality", value: "Top 5%", color: "text-amber-400" },
 ];
 
@@ -26,7 +26,7 @@ export function HeroSection() {
     <section className="relative min-h-screen hero-gradient-employer overflow-hidden">
       <div className="absolute inset-0 bg-grid-white opacity-[0.03] pointer-events-none" />
 
-      <div className="absolute top-40 -left-32 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] animate-pulse-soft" />
+      <div className="absolute top-40 -left-32 w-96 h-96 bg-blue-500lue-500/10 rounded-full blur-[100px] animate-pulse-soft" />
       <div className="absolute bottom-40 -right-32 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: "1s" }} />
 
       <div className="container mx-auto px-4 relative z-10 pt-28 pb-20">
@@ -43,38 +43,38 @@ export function HeroSection() {
               transition={{ delay: 0.2 }}
               className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 mb-8"
             >
-              <Sparkles className="h-4 w-4 text-blue-400" />
-              <span className="text-sm text-blue-300 font-medium">AI-Powered Recruitment Platform</span>
+              <Sparkles className="h-4 w-4 text-blue-400lue-400" />
+              <span className="text-sm text-blue-400lue-300 font-medium">AI-Powered Recruitment Platform</span>
             </motion.div>
 
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-black leading-[0.95] mb-8">
               <span className="text-white">Hire Verified</span>
               <br />
-              <span className="text-gradient-electric">Talent Faster</span>
+              <span className="text-gradient">Talent Faster</span>
               <br />
               <span className="text-white/80">Across Africa & The Gulf</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-blue-200/70 max-w-2xl mb-10 leading-relaxed font-medium">
+            <p className="text-lg md:text-xl text-blue-400lue-200/70 max-w-2xl mb-10 leading-relaxed font-medium">
               AI-powered workforce recruitment platform connecting employers with pre-screened,
               verified candidates across East Africa and the Gulf. Reduce hiring time by 70%
               with smart matching, automated screening, and end-to-end deployment support.
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-12">
-              <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white border-0 rounded-full px-10 h-14 text-base font-bold shadow-lg shadow-blue-600/25 group">
+              <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white border-0 rounded-full px-10 h-14 text-blue-400ase font-bold shadow-lg shadow-blue-600/25 group">
                 <Link href="/post-job">
                   Post a Job
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
-              <Button variant="outline" asChild className="border-blue-400/30 text-blue-300 hover:bg-blue-500/10 rounded-full px-10 h-14 text-base font-bold">
+              <Button variant="outline" asChild className="border-blue-400/30 text-blue-400lue-300 hover:bg-blue-500lue-500/10 rounded-full px-10 h-14 text-blue-400ase font-bold">
                 <Link href="/jobs?type=candidates">
                   <Users className="mr-2 h-5 w-5" />
                   Browse Candidates
                 </Link>
               </Button>
-              <Button variant="ghost" asChild className="text-blue-300 hover:text-white hover:bg-white/5 rounded-full px-6 h-14 text-base font-medium gap-2">
+              <Button variant="ghost" asChild className="text-blue-400lue-300 hover:text-white hover:bg-white/5 rounded-full px-6 h-14 text-blue-400ase font-medium gap-2">
                 <Link href="/contact">
                   <PlayCircle className="h-5 w-5" />
                   Book Consultation
@@ -100,7 +100,7 @@ export function HeroSection() {
                     <Star key={i} className="h-3.5 w-3.5 fill-amber-400" />
                   ))}
                 </div>
-                <p className="text-blue-300/70 font-medium">
+                <p className="text-blue-400lue-300/70 font-medium">
                   Trusted by <span className="text-white font-bold">500+</span> employers
                 </p>
               </div>
@@ -125,7 +125,7 @@ export function HeroSection() {
                       <div className="h-3 w-3 rounded-full bg-yellow-500/60" />
                       <div className="h-3 w-3 rounded-full bg-green-500/60" />
                     </div>
-                    <span className="text-xs text-blue-300/50 font-mono">Employer Dashboard</span>
+                    <span className="text-xs text-blue-400lue-300/50 font-mono">Employer Dashboard</span>
                   </div>
                   <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs px-3 py-0.5 rounded-full">
                     <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
@@ -145,9 +145,9 @@ export function HeroSection() {
                         transition={{ delay: 0.6 + i * 0.1 }}
                         className="bg-white/5 rounded-2xl p-4 border border-white/5"
                       >
-                        <stat.icon className="h-4 w-4 text-blue-400 mb-2" />
+                        <stat.icon className="h-4 w-4 text-blue-400lue-400 mb-2" />
                         <div className="text-2xl font-black text-white">{stat.value}</div>
-                        <div className="text-xs text-blue-300/50 mt-0.5">{stat.label}</div>
+                        <div className="text-xs text-blue-400lue-300/50 mt-0.5">{stat.label}</div>
                       </motion.div>
                     ))}
                   </div>
@@ -156,7 +156,7 @@ export function HeroSection() {
                   <div className="bg-gradient-to-r from-blue-600/10 to-indigo-600/10 rounded-2xl p-5 border border-blue-500/10">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-blue-400" />
+                        <Sparkles className="h-4 w-4 text-blue-400lue-400" />
                         <span className="text-sm font-semibold text-white">AI Smart Matching</span>
                       </div>
                       <span className="text-xs text-emerald-400 font-medium flex items-center gap-1">
@@ -179,11 +179,11 @@ export function HeroSection() {
                           className="flex items-center justify-between py-2 border-b border-white/5 last:border-0"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="h-2 w-2 rounded-full bg-blue-400" />
-                            <span className="text-sm text-blue-200">{item.role}</span>
+                            <div className="h-2 w-2 rounded-full bg-blue-500lue-400" />
+                            <span className="text-sm text-blue-400lue-200">{item.role}</span>
                           </div>
                           <div className="flex items-center gap-4">
-                            <span className="text-xs text-blue-300/60">{item.candidates} candidates</span>
+                            <span className="text-xs text-blue-400lue-300/60">{item.candidates} candidates</span>
                             <div className="flex items-center gap-1.5">
                               <div className="h-1.5 w-16 bg-white/10 rounded-full overflow-hidden">
                                 <div
@@ -209,8 +209,8 @@ export function HeroSection() {
                         transition={{ delay: 1.2 + i * 0.05 }}
                         className="text-center"
                       >
-                        <div className={`h-1.5 rounded-full mb-1.5 ${i <= 2 ? "bg-blue-500" : i <= 4 ? "bg-amber-500" : "bg-emerald-500"}`} />
-                        <div className="text-[10px] text-blue-300/50 font-medium truncate">{stage}</div>
+                        <div className={`h-1.5 rounded-full mb-1.5 ${i <= 2 ? "bg-blue-500lue-500" : i <= 4 ? "bg-amber-500" : "bg-emerald-500"}`} />
+                        <div className="text-[10px] text-blue-400lue-300/50 font-medium truncate">{stage}</div>
                       </motion.div>
                     ))}
                   </div>
@@ -232,7 +232,7 @@ export function HeroSection() {
                   }}
                 >
                   <div className={`text-lg font-black ${metric.color}`}>{metric.value}</div>
-                  <div className="text-[10px] text-blue-300/60 font-medium whitespace-nowrap">{metric.label}</div>
+                  <div className="text-[10px] text-blue-400lue-300/60 font-medium whitespace-nowrap">{metric.label}</div>
                 </motion.div>
               ))}
             </div>
@@ -249,7 +249,7 @@ export function HeroSection() {
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
               <div className="text-3xl md:text-4xl font-black text-white mb-1">{stat.value}</div>
-              <div className="text-sm text-blue-300/50 font-medium">{stat.label}</div>
+              <div className="text-sm text-blue-400lue-300/50 font-medium">{stat.label}</div>
             </div>
           ))}
         </motion.div>

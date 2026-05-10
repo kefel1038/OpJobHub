@@ -39,10 +39,10 @@ function AnimatedCounter({ value, label, suffix = "", prefix = "" }: { value: nu
 
   return (
     <div ref={ref} className="text-center">
-      <div className="text-4xl md:text-5xl font-black text-gradient-electric mb-1">
+      <div className="text-4xl md:text-5xl font-black text-gradient mb-1">
         {prefix}{count.toLocaleString()}{suffix}
       </div>
-      <div className="text-sm text-gray-500 dark:text-blue-200/60 font-medium">{label}</div>
+      <div className="text-sm text-gray-400 text-gray-400 font-medium">{label}</div>
     </div>
   );
 }
@@ -86,7 +86,7 @@ export default function Freelance() {
 
 function HeroSection() {
   return (
-    <section className="relative min-h-[90vh] hero-gradient-employer overflow-hidden">
+    <section className="relative pt-32 pb-24 overflow-hidden hero-gradient">
       <div className="absolute inset-0 bg-grid-white opacity-[0.03] pointer-events-none" />
       <div className="absolute top-40 -left-32 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] animate-pulse-soft" />
       <div className="absolute bottom-40 -right-32 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: "1s" }} />
@@ -111,7 +111,7 @@ function HeroSection() {
             <h1 className="text-5xl md:text-7xl font-heading font-black leading-[0.95] mb-6">
               <span className="text-white">Hire Top African</span>
               <br />
-              <span className="text-gradient-electric">Freelance Talent</span>
+              <span className="text-gradient">Freelance Talent</span>
               <br />
               <span className="text-white/80">For Global Projects</span>
             </h1>
@@ -213,7 +213,7 @@ function HeroSection() {
 
 function StatsSection() {
   return (
-    <section className="py-20 bg-white dark:bg-[#070B2E] relative overflow-hidden">
+    <section className="py-20 bg-surface  relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
@@ -236,7 +236,7 @@ function HowItWorksFreelancerSection() {
   ];
 
   return (
-    <section className="py-24 employer-gradient-light dark:bg-[#0A1628] relative overflow-hidden">
+    <section className="py-24 bg-default  relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
       <div className="container mx-auto px-4 relative z-10">
         <FadeIn>
@@ -246,7 +246,7 @@ function HowItWorksFreelancerSection() {
               How It{" "}
               <span className="text-gradient-blue">Works</span>
             </h2>
-            <p className="text-gray-500 dark:text-blue-200/60 max-w-2xl mx-auto text-lg">
+            <p className="text-gray-400 text-gray-400 max-w-2xl mx-auto text-lg">
               Start finding remote freelance opportunities from global employers in minutes.
             </p>
           </div>
@@ -256,13 +256,13 @@ function HowItWorksFreelancerSection() {
           {steps.map((step, i) => (
             <FadeIn key={step.title} delay={0.1 * i}>
               <div className="relative">
-                <div className="bg-white dark:bg-white/5 rounded-3xl p-8 border border-gray-100 dark:border-white/10 card-hover h-full">
+                <div className="bg-surface dark:bg-white/5 rounded-3xl p-8 border border-[#2C2C2E]  card-hover h-full">
                   <div className="h-14 w-14 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center mb-5">
                     <step.icon className="h-7 w-7 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="text-sm font-bold text-blue-600 dark:text-blue-400 mb-2">Step {i + 1}</div>
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-3">{step.title}</h3>
-                  <p className="text-sm text-gray-500 dark:text-blue-200/60 leading-relaxed">{step.description}</p>
+                  <h3 className="text-xl font-bold text-gray-100 dark:text-white mb-3">{step.title}</h3>
+                  <p className="text-sm text-gray-400 text-gray-400 leading-relaxed">{step.description}</p>
                 </div>
                 {i < steps.length - 1 && (
                   <div className="hidden md:block absolute top-1/2 -right-3 text-blue-300 dark:text-blue-500/30">
@@ -298,7 +298,7 @@ function HowItWorksEmployerSection() {
   ];
 
   return (
-    <section className="py-24 bg-white dark:bg-[#070B2E] relative overflow-hidden">
+    <section className="py-24 bg-surface  relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
       <div className="container mx-auto px-4 relative z-10">
         <FadeIn>
@@ -308,7 +308,7 @@ function HowItWorksEmployerSection() {
               How to{" "}
               <span className="text-gradient-blue">Hire Freelancers</span>
             </h2>
-            <p className="text-gray-500 dark:text-blue-200/60 max-w-2xl mx-auto text-lg">
+            <p className="text-gray-400 text-gray-400 max-w-2xl mx-auto text-lg">
               Access Africa's top freelance talent for your projects — fast, secure, and AI-powered.
             </p>
           </div>
@@ -318,13 +318,13 @@ function HowItWorksEmployerSection() {
           {steps.map((step, i) => (
             <FadeIn key={step.title} delay={0.1 * i}>
               <div className="relative">
-                <div className="bg-white dark:bg-white/5 rounded-3xl p-8 border border-gray-100 dark:border-white/10 card-hover h-full">
+                <div className="bg-surface dark:bg-white/5 rounded-3xl p-8 border border-[#2C2C2E]  card-hover h-full">
                   <div className="h-14 w-14 rounded-2xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center mb-5">
                     <step.icon className="h-7 w-7 text-amber-600 dark:text-amber-400" />
                   </div>
                   <div className="text-sm font-bold text-amber-600 dark:text-amber-400 mb-2">Step {i + 1}</div>
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-3">{step.title}</h3>
-                  <p className="text-sm text-gray-500 dark:text-blue-200/60 leading-relaxed">{step.description}</p>
+                  <h3 className="text-xl font-bold text-gray-100 dark:text-white mb-3">{step.title}</h3>
+                  <p className="text-sm text-gray-400 text-gray-400 leading-relaxed">{step.description}</p>
                 </div>
                 {i < steps.length - 1 && (
                   <div className="hidden md:block absolute top-1/2 -right-3 text-amber-300 dark:text-amber-500/30">
@@ -364,7 +364,7 @@ function CategoriesSection() {
   ];
 
   return (
-    <section className="py-24 employer-gradient-light dark:bg-[#0A1628] relative overflow-hidden">
+    <section className="py-24 bg-default  relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
       <div className="container mx-auto px-4 relative z-10">
         <FadeIn>
@@ -374,7 +374,7 @@ function CategoriesSection() {
               Explore{" "}
               <span className="text-gradient-blue">Freelance Categories</span>
             </h2>
-            <p className="text-gray-500 dark:text-blue-200/60 max-w-2xl mx-auto text-lg">
+            <p className="text-gray-400 text-gray-400 max-w-2xl mx-auto text-lg">
               Find expert freelancers across 20+ categories, all vetted and ready to work.
             </p>
           </div>
@@ -384,13 +384,13 @@ function CategoriesSection() {
           {categories.map((cat, i) => (
             <FadeIn key={cat.title} delay={0.05 * i}>
               <Link href={`/jobs?employmentType=Freelance&industry=${cat.title}`}>
-                <Card className="border-gray-100 dark:border-white/10 card-hover cursor-pointer bg-white dark:bg-white/5 h-full">
+                <Card className="border-[#2C2C2E]  card-hover cursor-pointer bg-surface dark:bg-white/5 h-full">
                   <CardContent className="p-6">
                     <div className="h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center mb-4">
                       <cat.icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <h3 className="font-bold text-gray-800 dark:text-white mb-1">{cat.title}</h3>
-                    <p className="text-sm text-gray-500 dark:text-blue-200/60 mb-3">{cat.desc}</p>
+                    <h3 className="font-bold text-gray-100 dark:text-white mb-1">{cat.title}</h3>
+                    <p className="text-sm text-gray-400 text-gray-400 mb-3">{cat.desc}</p>
                     <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{cat.gigs} gigs</span>
                   </CardContent>
                 </Card>
@@ -414,7 +414,7 @@ function FeaturedGigsSection() {
   ];
 
   return (
-    <section className="py-24 bg-white dark:bg-[#070B2E] relative overflow-hidden">
+    <section className="py-24 bg-surface  relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex items-end justify-between mb-12">
@@ -440,10 +440,10 @@ function FeaturedGigsSection() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {gigs.map((gig, i) => (
             <FadeIn key={gig.title} delay={0.05 * i}>
-              <Card className="border-gray-100 dark:border-white/10 card-hover bg-white dark:bg-white/5 h-full">
+              <Card className="border-[#2C2C2E]  card-hover bg-surface dark:bg-white/5 h-full">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
-                    <h3 className="font-bold text-gray-800 dark:text-white">{gig.title}</h3>
+                    <h3 className="font-bold text-gray-100 dark:text-white">{gig.title}</h3>
                     <Badge className={
                       gig.flag === "High Demand" ? "bg-red-500/10 text-red-500 border-red-500/20" :
                       gig.flag === "Urgent" ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
@@ -458,14 +458,14 @@ function FeaturedGigsSection() {
                       <DollarSign className="h-4 w-4" />
                       {gig.budget}
                     </span>
-                    <span className="flex items-center gap-1.5 text-gray-500 dark:text-blue-200/60">
+                    <span className="flex items-center gap-1.5 text-gray-400 text-gray-400">
                       <Clock className="h-4 w-4" />
                       {gig.duration}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {gig.skills.map((skill) => (
-                      <Badge key={skill} variant="secondary" className="text-xs bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-blue-200/70">{skill}</Badge>
+                      <Badge key={skill} variant="secondary" className="text-xs bg-elevated dark:bg-white/5 text-gray-300 text-gray-400">{skill}</Badge>
                     ))}
                   </div>
                 </CardContent>
@@ -505,7 +505,7 @@ function BenefitsSection() {
   ];
 
   return (
-    <section className="py-24 employer-gradient-light dark:bg-[#0A1628] relative overflow-hidden">
+    <section className="py-24 bg-default  relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
       <div className="container mx-auto px-4 relative z-10">
         <FadeIn>
@@ -515,7 +515,7 @@ function BenefitsSection() {
               Built for{" "}
               <span className="text-gradient-blue">Both Sides</span>
             </h2>
-            <p className="text-gray-500 dark:text-blue-200/60 max-w-2xl mx-auto text-lg">
+            <p className="text-gray-400 text-gray-400 max-w-2xl mx-auto text-lg">
               A platform designed to serve freelancers and employers equally.
             </p>
           </div>
@@ -523,7 +523,7 @@ function BenefitsSection() {
 
         <div className="grid lg:grid-cols-2 gap-12">
           <FadeIn direction="left">
-            <div className="bg-white dark:bg-white/5 rounded-3xl p-8 border border-gray-100 dark:border-white/10">
+            <div className="bg-surface dark:bg-white/5 rounded-3xl p-8 border border-[#2C2C2E] ">
               <div className="flex items-center gap-3 mb-8">
                 <div className="h-12 w-12 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
                   <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -537,8 +537,8 @@ function BenefitsSection() {
                       <b.icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-800 dark:text-white mb-1">{b.title}</h4>
-                      <p className="text-sm text-gray-500 dark:text-blue-200/60">{b.desc}</p>
+                      <h4 className="font-bold text-gray-100 dark:text-white mb-1">{b.title}</h4>
+                      <p className="text-sm text-gray-400 text-gray-400">{b.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -547,7 +547,7 @@ function BenefitsSection() {
           </FadeIn>
 
           <FadeIn direction="right">
-            <div className="bg-white dark:bg-white/5 rounded-3xl p-8 border border-gray-100 dark:border-white/10">
+            <div className="bg-surface dark:bg-white/5 rounded-3xl p-8 border border-[#2C2C2E] ">
               <div className="flex items-center gap-3 mb-8">
                 <div className="h-12 w-12 rounded-2xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
                   <Building2 className="h-6 w-6 text-amber-600 dark:text-amber-400" />
@@ -561,8 +561,8 @@ function BenefitsSection() {
                       <b.icon className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-800 dark:text-white mb-1">{b.title}</h4>
-                      <p className="text-sm text-gray-500 dark:text-blue-200/60">{b.desc}</p>
+                      <h4 className="font-bold text-gray-100 dark:text-white mb-1">{b.title}</h4>
+                      <p className="text-sm text-gray-400 text-gray-400">{b.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -601,7 +601,7 @@ function TestimonialsSection() {
   ];
 
   return (
-    <section className="py-24 bg-white dark:bg-[#070B2E] relative overflow-hidden">
+    <section className="py-24 bg-surface  relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
       <div className="container mx-auto px-4 relative z-10">
         <FadeIn>
@@ -617,21 +617,21 @@ function TestimonialsSection() {
         <div className="grid md:grid-cols-3 gap-8">
           {testimonials.map((t, i) => (
             <FadeIn key={t.name} delay={0.1 * i}>
-              <Card className="border-gray-100 dark:border-white/10 card-hover bg-white dark:bg-white/5 h-full">
+              <Card className="border-[#2C2C2E]  card-hover bg-surface dark:bg-white/5 h-full">
                 <CardContent className="p-8">
                   <div className="flex gap-1 mb-6">
                     {Array.from({ length: t.rating }).map((_, j) => (
                       <Star key={j} className="h-5 w-5 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <p className="text-gray-600 dark:text-blue-200/80 leading-relaxed mb-8 italic">"{t.quote}"</p>
+                  <p className="text-gray-300 dark:text-blue-200/80 leading-relaxed mb-8 italic">"{t.quote}"</p>
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-sm font-bold">
                       {t.name.split(" ").map(n => n[0]).join("")}
                     </div>
                     <div>
-                      <div className="font-bold text-gray-800 dark:text-white text-sm">{t.name}</div>
-                      <div className="text-xs text-gray-500 dark:text-blue-200/60">{t.role} · {t.location}</div>
+                      <div className="font-bold text-gray-100 dark:text-white text-sm">{t.name}</div>
+                      <div className="text-xs text-gray-400 text-gray-400">{t.role} · {t.location}</div>
                     </div>
                   </div>
                 </CardContent>
@@ -646,55 +646,47 @@ function TestimonialsSection() {
 
 function CTASection() {
   return (
-    <section className="py-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-800" />
-      <div className="absolute inset-0 bg-grid-white opacity-[0.04] pointer-events-none" />
-      <div className="absolute top-1/2 -left-32 w-96 h-96 bg-white/5 rounded-full blur-[100px]" />
-      <div className="absolute bottom-0 -right-32 w-80 h-80 bg-amber-400/10 rounded-full blur-[100px]" />
-
-      <div className="container mx-auto px-4 relative z-10 text-center">
+    <section className="py-24 relative overflow-hidden bg-default">
+      <div className="container mx-auto px-4">
         <FadeIn>
-          <Badge className="bg-white/10 text-white border-white/20 mb-6 text-sm px-5 py-2 rounded-full">
-            <Sparkles className="h-4 w-4 mr-2" />
-            Join 12,000+ Freelancers & 3,500+ Employers
-          </Badge>
-        </FadeIn>
+          <div className="bg-gradient-to-br from-blue-600/20 via-purple-600/10 to-blue-600/20 rounded-[2rem] p-12 md:p-20 text-center relative overflow-hidden border border-[#2C2C2E]">
+            <div className="absolute inset-0 bg-grid-white opacity-[0.03] pointer-events-none" />
+            <div className="absolute top-1/2 -left-32 w-96 h-96 bg-blue-500/5 rounded-full blur-[100px]" />
 
-        <FadeIn delay={0.1}>
-          <h2 className="text-4xl md:text-6xl font-heading font-black text-white mb-6 leading-[1.1] max-w-3xl mx-auto">
-            Ready to Build Your{" "}
-            <span className="text-gradient-white">Freelance Future?</span>
-          </h2>
-        </FadeIn>
+            <Badge className="bg-white/5 text-blue-300 border-blue-500/20 mb-6 text-sm px-5 py-2 rounded-full">
+              <Sparkles className="h-4 w-4 mr-2" />
+              Join 12,000+ Freelancers & 3,500+ Employers
+            </Badge>
 
-        <FadeIn delay={0.2}>
-          <p className="text-lg md:text-xl text-blue-100/70 max-w-2xl mx-auto mb-10">
-            Whether you're a freelancer looking for global opportunities or an employer 
-            seeking top African talent — KeFeL connects you with the right people.
-          </p>
-        </FadeIn>
+            <h2 className="text-4xl md:text-6xl font-heading font-black text-white mb-6 leading-[1.1] max-w-3xl mx-auto">
+              Ready to Find Your{" "}
+              <span className="text-gradient-white">Next Success Story?</span>
+            </h2>
 
-        <FadeIn delay={0.3}>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button asChild className="bg-white text-blue-700 hover:bg-blue-50 rounded-full px-10 h-14 text-base font-bold shadow-xl shadow-black/10 group">
-              <Link href="/register">
-                Get Started Free
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </Button>
-            <Button variant="outline" asChild className="border-white/30 text-white hover:bg-white/10 rounded-full px-10 h-14 text-base font-bold">
-              <Link href="/jobs?employmentType=Freelance">
-                Browse Gigs
-              </Link>
-            </Button>
-          </div>
-        </FadeIn>
+            <p className="text-lg md:text-xl text-blue-200/60 max-w-2xl mx-auto mb-10">
+              Whether you're a freelancer looking for global opportunities or an employer 
+              seeking top African talent — KeFeL connects you with the right people.
+            </p>
 
-        <FadeIn delay={0.4}>
-          <div className="flex items-center justify-center gap-8 mt-12 text-blue-200/50 text-sm">
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4" /> No setup fees</span>
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4" /> Free to join</span>
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4" /> Cancel anytime</span>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-full px-12 h-16 font-bold text-xl shadow-2xl shadow-blue-600/20 group">
+                <Link href="/register">
+                  Get Started Free
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </Button>
+              <Button variant="outline" asChild className="border-[#2C2C2E] text-blue-300 hover:bg-white/5 rounded-full px-10 h-14 text-base font-bold">
+                <Link href="/jobs?employmentType=Freelance">
+                  Browse Gigs
+                </Link>
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-center gap-8 mt-12 text-blue-200/40 text-sm">
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4" /> No setup fees</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4" /> Free to join</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4" /> Cancel anytime</span>
+            </div>
           </div>
         </FadeIn>
       </div>

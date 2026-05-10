@@ -56,7 +56,7 @@ export default function Terms() {
 
   return (
     <Layout>
-      <section className="relative min-h-[40vh] hero-gradient-employer overflow-hidden">
+      <section className="relative min-h-[40vh] hero-gradient overflow-hidden">
         <div className="absolute inset-0 bg-grid-white opacity-[0.03] pointer-events-none" />
         <div className="container mx-auto px-4 relative z-10 pt-32 pb-16">
           <motion.div
@@ -65,15 +65,15 @@ export default function Terms() {
             transition={{ duration: 0.6 }}
             className="max-w-3xl"
           >
-            <Badge className="bg-white/10 text-blue-300 border-white/20 rounded-full px-5 py-1.5 text-sm mb-6">
+            <Badge className="bg-white/5 text-blue-300 border-white/10 rounded-full px-5 py-1.5 text-sm mb-6">
               <Scale className="h-4 w-4 mr-1" />
               Legal
             </Badge>
-            <h1 className="text-5xl md:text-6xl font-heading font-black text-white mb-4">
+            <h1 className="text-5xl md:text-6xl font-heading font-bold text-white mb-4">
               Terms of{" "}
-              <span className="text-gradient-electric">Service</span>
+              <span className="text-gradient">Service</span>
             </h1>
-            <p className="text-lg text-blue-200/60 max-w-2xl">
+            <p className="text-lg text-gray-400 max-w-2xl">
               Last updated: May 2026. Please read these terms carefully before using KeFeL Job Hub.
             </p>
           </motion.div>
@@ -81,8 +81,8 @@ export default function Terms() {
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
       </section>
 
-      <section className="py-16 bg-white dark:bg-[#070B2E] relative">
-        <div className="absolute inset-0 bg-grid-blue opacity-30 dark:opacity-[0.03]" />
+      <section className="py-16 bg-default relative">
+        <div className="absolute inset-0 bg-grid-white opacity-[0.02]" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto">
             <motion.div
@@ -92,13 +92,13 @@ export default function Terms() {
             >
               <div className="grid sm:grid-cols-3 gap-4 mb-10">
                 {[
-                  { icon: CheckCircle2, label: "Last Updated", value: "May 2026", color: "text-blue-600 dark:text-blue-400" },
-                  { icon: AlertCircle, label: "Jurisdiction", value: "Qatar", color: "text-amber-600 dark:text-amber-400" },
-                  { icon: Scale, label: "Governing Law", value: "Qatar Law", color: "text-emerald-600 dark:text-emerald-400" },
+                  { icon: CheckCircle2, label: "Last Updated", value: "May 2026", color: "text-blue-400" },
+                  { icon: AlertCircle, label: "Jurisdiction", value: "Qatar", color: "text-amber-400" },
+                  { icon: Scale, label: "Governing Law", value: "Qatar Law", color: "text-emerald-400" },
                 ].map((stat) => (
-                  <div key={stat.label} className="bg-blue-50 dark:bg-blue-500/5 rounded-2xl p-4 border border-blue-100 dark:border-blue-500/10 text-center">
+                  <div key={stat.label} className="bg-elevated rounded-2xl p-4 border border-subtle text-center">
                     <stat.icon className={`h-5 w-5 ${stat.color} mx-auto mb-2`} />
-                    <div className="text-xs text-gray-500 dark:text-blue-300/60">{stat.label}</div>
+                    <div className="text-xs text-gray-500">{stat.label}</div>
                     <div className={`font-bold text-sm ${stat.color}`}>{stat.value}</div>
                   </div>
                 ))}
@@ -113,24 +113,24 @@ export default function Terms() {
                   className="mb-10"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="h-8 w-8 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-sm font-bold text-amber-600 dark:text-amber-400">{String(i + 1).padStart(2, "0")}</span>
+                    <div className="h-8 w-8 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-sm font-bold text-amber-400">{String(i + 1).padStart(2, "0")}</span>
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-3">{section.title}</h2>
-                      <p className="text-gray-600 dark:text-blue-200/70 leading-relaxed">{section.content}</p>
+                      <h2 className="text-xl font-bold text-gray-100 mb-3">{section.title}</h2>
+                      <p className="text-gray-400 leading-relaxed">{section.content}</p>
                     </div>
                   </div>
                 </motion.div>
               ))}
 
-              <div className="mt-12 pt-8 border-t border-gray-200 dark:border-white/10">
+              <div className="mt-12 pt-8 border-t border-subtle">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <p className="text-sm text-gray-500 dark:text-blue-300/60">
+                  <p className="text-sm text-gray-500">
                     Questions about these terms? Contact our legal team.
                   </p>
                   <div className="flex gap-3">
-                    <Button asChild variant="outline" className="rounded-full border-blue-400/30 text-blue-600 dark:text-blue-400">
+                    <Button asChild variant="outline" className="rounded-full border-blue-400/30 text-blue-400">
                       <Link href="/privacy">
                         View Privacy Policy
                       </Link>

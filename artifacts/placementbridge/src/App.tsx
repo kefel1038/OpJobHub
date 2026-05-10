@@ -52,7 +52,7 @@ function Router() {
 
 function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
       <TooltipProvider>
         <GoogleTranslateInit />
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
