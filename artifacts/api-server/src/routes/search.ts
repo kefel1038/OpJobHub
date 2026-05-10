@@ -8,15 +8,23 @@ router.get("/", async (req: Request, res: Response) => {
   const {
     q,
     location,
+    locations,
     industry,
+    categories: categoryParams,
     employmentType,
     experienceLevel,
+    experienceLevels,
+    workTypes,
+    skills,
+    nationality,
+    nationalities,
+    datePosted,
+    aiMatchScore,
     salaryMin,
     salaryMax,
     visaSponsored,
     isRemote,
     isUrgent,
-    nationality,
     source,
     sort = "newest",
     page = "1",
@@ -48,28 +56,86 @@ router.get("/", async (req: Request, res: Response) => {
     conditions.push(ilike(jobs.location, `%${location}%`));
   }
 
-  if (industry) {
-    const industries = industry.split(",");
+  if (locations) {
+    const locs = locations.split(",").map((l: string) => l.trim()).filter(Boolean);
+    if (locs.length > 0) {
+      conditions.push(or(...locs.map((loc: string) => ilike(jobs.location, `%${loc}%`))));
+    }
+  }
+
+  const industryFilter = industry || categoryParams;
+  if (industryFilter) {
+    const industries = industryFilter.split(",").map((i: string) => i.trim()).filter(Boolean);
     if (industries.length === 1) {
       conditions.push(ilike(jobs.industry, `%${industries[0]}%`));
     } else {
       conditions.push(
-        or(...industries.map((ind) => ilike(jobs.industry, `%${ind}%`))),
+        or(...industries.map((ind: string) => ilike(jobs.industry, `%${ind}%`))),
       );
     }
   }
 
   if (employmentType) {
-    const types = employmentType.split(",");
+    const types = employmentType.split(",").map((t: string) => t.trim()).filter(Boolean);
     if (types.length === 1) {
       conditions.push(ilike(jobs.employmentType, `%${types[0]}%`));
     } else {
-      conditions.push(or(...types.map((t) => ilike(jobs.employmentType, `%${t}%`))));
+      conditions.push(or(...types.map((t: string) => ilike(jobs.employmentType, `%${t}%`))));
     }
   }
 
-  if (experienceLevel) {
-    conditions.push(ilike(jobs.experienceLevel, `%${experienceLevel}%`));
+  const expFilter = experienceLevels || experienceLevel;
+  if (expFilter) {
+    const levels = expFilter.split(",").map((l: string) => l.trim()).filter(Boolean);
+    if (levels.length === 1) {
+      conditions.push(ilike(jobs.experienceLevel, `%${levels[0]}%`));
+    } else {
+      conditions.push(or(...levels.map((l: string) => ilike(jobs.experienceLevel, `%${l}%`))));
+    }
+  }
+
+  if (workTypes) {
+    const types = workTypes.split(",").map((t: string) => t.trim().toLowerCase()).filter(Boolean);
+    const workTypeConditions = types.map((type: string) => {
+      if (type === "remote") return eq(jobs.isRemote, true);
+      if (type === "on-site" || type === "onsite") return eq(jobs.isRemote, false);
+      return null;
+    }).filter(Boolean) as any[];
+    if (workTypeConditions.length > 0) {
+      conditions.push(or(...workTypeConditions));
+    }
+  }
+
+  if (skills) {
+    const skillList = skills.split(",").map((s: string) => s.trim()).filter(Boolean);
+    if (skillList.length > 0) {
+      conditions.push(or(...skillList.map((skill: string) => ilike(jobs.skills, `%${skill}%`))));
+    }
+  }
+
+  if (nationalities) {
+    const natList = nationalities.split(",").map((n: string) => n.trim()).filter(Boolean);
+    if (natList.length > 0) {
+      conditions.push(or(...natList.map((nat: string) => ilike(jobs.nationalityFriendly, `%${nat}%`))));
+    }
+  }
+
+  if (nationality) {
+    conditions.push(ilike(jobs.nationalityFriendly, `%${nationality}%`));
+  }
+
+  if (datePosted) {
+    switch (datePosted) {
+      case "24h": conditions.push(gte(jobs.createdAt, sql`NOW() - INTERVAL '24 hours'`)); break;
+      case "3d": conditions.push(gte(jobs.createdAt, sql`NOW() - INTERVAL '3 days'`)); break;
+      case "7d": conditions.push(gte(jobs.createdAt, sql`NOW() - INTERVAL '7 days'`)); break;
+      case "14d": conditions.push(gte(jobs.createdAt, sql`NOW() - INTERVAL '14 days'`)); break;
+      case "30d": conditions.push(gte(jobs.createdAt, sql`NOW() - INTERVAL '30 days'`)); break;
+    }
+  }
+
+  if (aiMatchScore) {
+    conditions.push(gte(jobs.aiMatchScore, parseInt(aiMatchScore)));
   }
 
   if (salaryMin) {

@@ -1,16 +1,19 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Briefcase, Loader2, SlidersHorizontal, ChevronDown, ChevronUp,
-  Search, X, ArrowUp, Clock, Bell, ShieldCheck, Sparkles, Users
+  Briefcase, Loader2, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight,
+  Search, X, ArrowUp, Clock, Bell, ShieldCheck, Sparkles, Users, AlertCircle, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { api, type Job } from "@/lib/api";
+import { type Job } from "@/lib/api";
+import { useJobSearch, type JobSearchApiParams } from "@/hooks/use-jobs-query";
+import { useDebounce } from "@/hooks/use-debounce";
 import { JobsNavbar } from "@/components/jobs/JobsNavbar";
 import { JobsHero } from "@/components/jobs/JobsHero";
-import { JobsFilterSidebar, defaultFilterState, type FilterState } from "@/components/jobs/JobsFilterSidebar";
+import { JobsFilterSidebar } from "@/components/jobs/JobsFilterSidebar";
 import { JobCard } from "@/components/jobs/JobCard";
 import { JobDetailPanel } from "@/components/jobs/JobDetailPanel";
 import { FeaturedJobsCarousel } from "@/components/jobs/FeaturedJobsCarousel";
@@ -20,129 +23,137 @@ import { AIChatbot } from "@/components/jobs/AIChatbot";
 import { ResumeUploadCTA } from "@/components/jobs/ResumeUploadCTA";
 import { Footer } from "@/components/layout/Footer";
 
-export default function Jobs() {
-  const [allJobs, setAllJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState<{ totalJobs: number; recentJobs: number }>({ totalJobs: 0, recentJobs: 0 });
+const PAGE_SIZE = 15;
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [locationQuery, setLocationQuery] = useState("");
-  const [jobType, setJobType] = useState("");
-  const [filters, setFilters] = useState<FilterState>(defaultFilterState);
-  const [filterMobileOpen, setFilterMobileOpen] = useState(false);
+const JOB_TABS = [
+  { id: "", label: "All Jobs" },
+  { id: "Engineering", label: "Engineering" },
+  { id: "Driver", label: "Driver" },
+  { id: "Hospitality", label: "Hospitality" },
+  { id: "Oil & Gas", label: "Oil & Gas" },
+  { id: "Security", label: "Security" },
+  { id: "Healthcare", label: "Healthcare" },
+  { id: "IT", label: "IT" },
+  { id: "Construction", label: "Construction" },
+  { id: "Nursing", label: "Nursing" },
+];
+
+interface URLParams {
+  q: string;
+  location: string;
+  employmentType: string;
+  categories: string;
+  locations: string;
+  experienceLevels: string;
+  workTypes: string;
+  skills: string;
+  nationalities: string;
+  datePosted: string;
+  salaryMin: string;
+  salaryMax: string;
+  visaSponsored: boolean;
+  isRemote: boolean;
+  isUrgent: boolean;
+  aiMatchScore: string;
+  sort: string;
+  page: number;
+}
+
+function parseURLParams(location: string): URLParams {
+  const sp = new URLSearchParams(location.split("?")[1] || "");
+  return {
+    q: sp.get("q") || "",
+    location: sp.get("location") || "",
+    employmentType: sp.get("type") || "",
+    categories: sp.get("categories") || "",
+    locations: sp.get("locations") || "",
+    experienceLevels: sp.get("exp") || "",
+    workTypes: sp.get("workType") || "",
+    skills: sp.get("skills") || "",
+    nationalities: sp.get("nationality") || "",
+    datePosted: sp.get("posted") || "",
+    salaryMin: sp.get("salaryMin") || "",
+    salaryMax: sp.get("salaryMax") || "",
+    visaSponsored: sp.get("visa") === "true",
+    isRemote: sp.get("remote") === "true",
+    isUrgent: sp.get("urgent") === "true",
+    aiMatchScore: sp.get("matchScore") || "",
+    sort: sp.get("sort") || "newest",
+    page: parseInt(sp.get("page") || "1", 10),
+  };
+}
+
+function paramsToAPI(p: URLParams, debouncedQ: string): JobSearchApiParams {
+  const api: JobSearchApiParams = {
+    sort: p.sort,
+    page: p.page,
+    limit: PAGE_SIZE,
+  };
+  if (debouncedQ) api.q = debouncedQ;
+  if (p.location) api.location = p.location;
+  if (p.categories) api.categories = p.categories;
+  if (p.employmentType) api.employmentType = p.employmentType;
+  if (p.locations) api.locations = p.locations;
+  if (p.experienceLevels) api.experienceLevels = p.experienceLevels;
+  if (p.workTypes) api.workTypes = p.workTypes;
+  if (p.skills) api.skills = p.skills;
+  if (p.nationalities) api.nationalities = p.nationalities;
+  if (p.datePosted) api.datePosted = p.datePosted;
+  if (p.salaryMin) api.salaryMin = Number(p.salaryMin);
+  if (p.salaryMax) api.salaryMax = Number(p.salaryMax);
+  if (p.visaSponsored) api.visaSponsored = true;
+  if (p.isRemote) api.isRemote = true;
+  if (p.isUrgent) api.isUrgent = true;
+  if (p.aiMatchScore) api.aiMatchScore = Number(p.aiMatchScore);
+  return api;
+}
+
+function buildURL(base: string, updates: Record<string, string | number | boolean | null | undefined>, location: string): string {
+  const sp = new URLSearchParams(location.split("?")[1] || "");
+  for (const [key, value] of Object.entries(updates)) {
+    if (value === null || value === undefined || value === "" || value === false) {
+      sp.delete(key);
+    } else {
+      sp.set(key, String(value));
+    }
+  }
+  const qs = sp.toString();
+  return qs ? `${base}?${qs}` : base;
+}
+
+export default function Jobs() {
+  const [loc, setLocation] = useLocation();
+  const basePath = loc.split("?")[0];
+
+  const params = useMemo(() => parseURLParams(loc), [loc]);
+
+  const debouncedQ = useDebounce(params.q, 400);
+
+  const apiParams = useMemo(() => paramsToAPI(params, debouncedQ), [params, debouncedQ]);
+
+  const { data, isLoading, isFetching, error } = useJobSearch(apiParams);
+  const jobs = data?.jobs ?? [];
+  const pagination = data?.pagination ?? { page: 1, total: 0, totalPages: 0, hasMore: false, limit: PAGE_SIZE };
+
+  const setParams = useCallback((updates: Record<string, string | number | boolean | null | undefined>) => {
+    let resetPage = true;
+    for (const key of Object.keys(updates)) {
+      if (key === "page") { resetPage = false; break; }
+    }
+    setLocation(buildURL(basePath, { ...(resetPage ? { page: null } : {}), ...updates }, loc), { replace: true });
+  }, [basePath, loc, setLocation]);
 
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
-
-  const [sortBy, setSortBy] = useState<"newest" | "match" | "salary">("newest");
+  const [filterMobileOpen, setFilterMobileOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [showJobAlerts, setShowJobAlerts] = useState(false);
-  const pageSize = 15;
-
-  useEffect(() => {
-    Promise.all([
-      api.listJobs(),
-      api.searchStats().catch(() => ({ totalJobs: 0, recentJobs: 0 })),
-    ])
-      .then(([jobs, s]) => {
-        setAllJobs(jobs);
-        setStats(s);
-        setLoading(false);
-      })
-      .catch((e) => {
-        setError(e.message);
-        setLoading(false);
-      });
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => setShowBackToTop(window.scrollY > 600);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const filtered = useMemo(() => {
-    let result = [...allJobs];
-
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(
-        (j) =>
-          j.title.toLowerCase().includes(q) ||
-          j.company.toLowerCase().includes(q) ||
-          (j.description || "").toLowerCase().includes(q) ||
-          (j.skills || []).some((s) => s.toLowerCase().includes(q)) ||
-          (j.industry || "").toLowerCase().includes(q),
-      );
-    }
-    if (locationQuery) {
-      const l = locationQuery.toLowerCase();
-      result = result.filter((j) => j.location.toLowerCase().includes(l));
-    }
-    if (jobType) {
-      result = result.filter((j) => (j.employmentType || "Full-Time").toLowerCase() === jobType.toLowerCase());
-    }
-
-    if (filters.locations.length > 0) {
-      result = result.filter((j) =>
-        filters.locations.some((loc) => j.location.toLowerCase().includes(loc.toLowerCase()))
-      );
-    }
-    if (filters.categories.length > 0) {
-      result = result.filter((j) =>
-        filters.categories.some((cat) =>
-          (j.industry || j.title).toLowerCase().includes(cat.toLowerCase().slice(0, 4))
-        )
-      );
-    }
-    if (filters.workTypes.length > 0) {
-      result = result.filter((j) => {
-        const wt = j.isRemote ? "Remote" : "On-site";
-        return filters.workTypes.some((fw) => wt.toLowerCase().includes(fw.toLowerCase()));
-      });
-    }
-    if (filters.skills.length > 0) {
-      result = result.filter((j) =>
-        filters.skills.some((s) => (j.skills || []).some((js) => js.toLowerCase().includes(s.toLowerCase())))
-      );
-    }
-    if (filters.visaSponsored) {
-      result = result.filter((j) => j.visaSponsored === true);
-    }
-    if (filters.isRemote) {
-      result = result.filter((j) => j.isRemote === true);
-    }
-    if (filters.isUrgent) {
-      result = result.filter((j) => j.isUrgent === true);
-    }
-    if (filters.aiMatchScore > 0) {
-      result = result.filter((j) => (j.aiMatchScore ?? 0) >= filters.aiMatchScore);
-    }
-    if (filters.salaryRange[0] > 0) {
-      result = result.filter((j) => (j.salaryMax ?? 999999) >= filters.salaryRange[0]);
-    }
-
-    switch (sortBy) {
-      case "match":
-        result.sort((a, b) => (b.aiMatchScore ?? 0) - (a.aiMatchScore ?? 0));
-        break;
-      case "salary":
-        result.sort((a, b) => (b.salaryMax ?? 0) - (a.salaryMax ?? 0));
-        break;
-      default:
-        result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    }
-
-    return result;
-  }, [allJobs, searchQuery, locationQuery, jobType, filters, sortBy]);
-
-  const paginatedJobs = filtered.slice(0, currentPage * pageSize);
-  const hasMore = paginatedJobs.length < filtered.length;
-
-  const handleSearch = useCallback(() => setCurrentPage(1), []);
-  const loadMore = useCallback(() => setCurrentPage((prev) => prev + 1), []);
 
   const handleSelectJob = useCallback((job: Job) => {
     setSelectedJob(job);
@@ -156,24 +167,99 @@ export default function Jobs() {
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
+  const hasActiveFilters = useMemo(() => {
+    return !!(params.q || params.location || params.categories || params.employmentType ||
+      params.locations || params.experienceLevels || params.workTypes || params.skills ||
+      params.nationalities || params.datePosted || params.salaryMin || params.salaryMax ||
+      params.visaSponsored || params.isRemote || params.isUrgent || params.aiMatchScore);
+  }, [params]);
+
+  const clearAllFilters = useCallback(() => {
+    setLocation(basePath, { replace: true });
+  }, [basePath, setLocation]);
+
+  const handleTabClick = useCallback((tabId: string) => {
+    setParams({ categories: tabId || null });
+  }, [setParams]);
+
+  const activeTab = params.categories || "";
+
   const now = new Date();
   const qatarTime = now.toLocaleString("en-US", {
     hour: "numeric", minute: "2-digit", hour12: true,
     timeZone: "Asia/Qatar",
   });
 
+  const totalPages = pagination.totalPages;
+  const currentPage = params.page;
+
+  function renderPagination() {
+    if (totalPages <= 1) return null;
+    const pages: (number | "...")[] = [];
+    const maxVisible = 5;
+    if (totalPages <= maxVisible + 2) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      let start = Math.max(2, currentPage - 1);
+      let end = Math.min(totalPages - 1, currentPage + 1);
+      if (currentPage <= 3) { start = 2; end = Math.min(maxVisible - 1, totalPages - 1); }
+      if (currentPage >= totalPages - 2) { start = Math.max(2, totalPages - maxVisible + 2); end = totalPages - 1; }
+      if (start > 2) pages.push("...");
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (end < totalPages - 1) pages.push("...");
+      pages.push(totalPages);
+    }
+    return (
+      <div className="flex items-center justify-center gap-1.5 mt-8">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={currentPage <= 1}
+          onClick={() => setParams({ page: currentPage - 1 })}
+          className="rounded-full h-9 px-3"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <span className="hidden sm:inline ml-1">Prev</span>
+        </Button>
+        {pages.map((p, i) =>
+          p === "..." ? (
+            <span key={`e${i}`} className="px-2 text-muted-foreground text-sm">...</span>
+          ) : (
+            <Button
+              key={p}
+              variant={p === currentPage ? "default" : "outline"}
+              size="sm"
+              onClick={() => setParams({ page: p })}
+              className="rounded-full h-9 w-9 p-0"
+            >
+              {p}
+            </Button>
+          )
+        )}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={currentPage >= totalPages}
+          onClick={() => setParams({ page: currentPage + 1 })}
+          className="rounded-full h-9 px-3"
+        >
+          <span className="hidden sm:inline mr-1">Next</span>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <JobsNavbar />
 
       <JobsHero
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        locationQuery={locationQuery}
-        setLocationQuery={setLocationQuery}
-        jobType={jobType}
-        setJobType={setJobType}
-        onSearch={handleSearch}
+        q={params.q}
+        onQChange={(q) => setParams({ q: q || null })}
+        location={params.location}
+        onLocationChange={(loc) => setParams({ location: loc || null })}
       />
 
       <ResumeUploadCTA />
@@ -186,21 +272,27 @@ export default function Jobs() {
             <div>
               <div className="flex items-center gap-3">
                 <h2 className="text-2xl md:text-3xl font-heading font-black">
-                  {loading ? "Loading jobs..." : `${filtered.length} Jobs in Qatar`}
+                  {isLoading ? "Loading jobs..." : `${pagination.total.toLocaleString()} Jobs in Qatar`}
                 </h2>
-                {!loading && filtered.length > 0 && (
+                {!isLoading && pagination.total > 0 && (
                   <Badge variant="secondary" className="rounded-full text-xs px-3 py-1">
                     Updated {qatarTime}
                   </Badge>
                 )}
               </div>
               <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                {searchQuery && <span>"{searchQuery}"</span>}
-                {locationQuery && <span>in {locationQuery}</span>}
-                {stats.recentJobs > 0 && (
+                {params.q && <span>"{params.q}"</span>}
+                {params.location && <span>in {params.location}</span>}
+                {!isLoading && !isFetching && pagination.total > 0 && (
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3 text-primary" />
-                    {stats.recentJobs} new today
+                    Page {currentPage} of {totalPages}
+                  </span>
+                )}
+                {isFetching && !isLoading && (
+                  <span className="flex items-center gap-1 text-primary">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Updating...
                   </span>
                 )}
               </div>
@@ -227,13 +319,13 @@ export default function Jobs() {
               <div className="hidden sm:flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 rounded-full px-3 py-1.5">
                 <ChevronDown className="h-3.5 w-3.5" />
                 <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  value={params.sort}
+                  onChange={(e) => setParams({ sort: e.target.value })}
                   className="bg-transparent border-0 text-sm focus:outline-none cursor-pointer"
                 >
                   <option value="newest">Newest</option>
-                  <option value="match">Best Match</option>
                   <option value="salary">Highest Salary</option>
+                  <option value="views">Most Viewed</option>
                 </select>
               </div>
             </div>
@@ -241,19 +333,37 @@ export default function Jobs() {
 
           <div className="flex gap-6">
             <JobsFilterSidebar
-              filters={filters}
-              setFilters={setFilters}
+              params={params}
+              setParams={setParams}
               isMobileOpen={filterMobileOpen}
               setIsMobileOpen={setFilterMobileOpen}
             />
 
             <div className="flex-1 min-w-0">
-              {loading ? (
+              <div className="overflow-x-auto scrollbar-thin -mx-4 px-4 mb-6">
+                <div className="flex gap-1.5 min-w-max pb-1">
+                  {JOB_TABS.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => handleTabClick(tab.id)}
+                      className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all border ${
+                        activeTab === tab.id
+                          ? "bg-primary text-primary-foreground border-primary shadow-md"
+                          : "bg-card text-muted-foreground hover:text-foreground border-border/60 hover:border-primary/30"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {isLoading ? (
                 <div className="space-y-4">
                   {[...Array(5)].map((_, i) => (
                     <div key={i} className="rounded-2xl border border-border/60 p-5">
                       <div className="flex items-start gap-4">
-                        <Skeleton className="h-14 w-14 rounded-xl" />
+                        <Skeleton className="h-14 w-14 rounded-xl shrink-0" />
                         <div className="flex-1 space-y-3">
                           <Skeleton className="h-5 w-3/4" />
                           <Skeleton className="h-4 w-1/2" />
@@ -263,6 +373,10 @@ export default function Jobs() {
                             <Skeleton className="h-6 w-16 rounded-full" />
                           </div>
                           <Skeleton className="h-4 w-full" />
+                          <div className="flex gap-3 pt-2">
+                            <Skeleton className="h-3 flex-1" />
+                            <Skeleton className="h-8 w-24 rounded-lg" />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -271,40 +385,68 @@ export default function Jobs() {
               ) : error ? (
                 <div className="text-center py-20">
                   <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-                    <X className="h-8 w-8 text-destructive" />
+                    <AlertCircle className="h-8 w-8 text-destructive" />
                   </div>
                   <p className="text-destructive font-medium mb-2">Failed to load jobs</p>
-                  <p className="text-sm text-muted-foreground mb-4">{error}</p>
-                  <Button variant="outline" onClick={() => window.location.reload()} className="rounded-full">
-                    Try Again
-                  </Button>
-                </div>
-              ) : filtered.length === 0 ? (
-                <div className="text-center py-20">
-                  <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                    <Search className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <p className="text-xl font-bold mb-2">No jobs found</p>
-                  <p className="text-muted-foreground mb-4 max-w-md mx-auto">
-                    Try adjusting your search terms or filters to find more opportunities in Qatar.
-                  </p>
+                  <p className="text-sm text-muted-foreground mb-4">{(error as Error)?.message || "Something went wrong"}</p>
                   <div className="flex items-center justify-center gap-3">
-                    <Button
-                      variant="outline"
-                      onClick={() => { setSearchQuery(""); setLocationQuery(""); setFilters(defaultFilterState); }}
-                      className="rounded-full"
-                    >
-                      Clear all filters
+                    <Button variant="outline" onClick={() => window.location.reload()} className="rounded-full gap-2">
+                      <RefreshCw className="h-4 w-4" /> Try Again
                     </Button>
                     <Button variant="default" className="rounded-full gap-2" onClick={() => setShowJobAlerts(true)}>
                       <Bell className="h-4 w-4" /> Get Job Alerts
                     </Button>
                   </div>
                 </div>
+              ) : jobs.length === 0 ? (
+                <div className="text-center py-20">
+                  <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                    <Search className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-xl font-bold mb-2">No jobs found</p>
+                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                    {hasActiveFilters
+                      ? "Try adjusting your search terms or filters to find more opportunities in Qatar."
+                      : "No active job listings right now. Check back later or set up job alerts."}
+                  </p>
+                  <div className="flex items-center justify-center gap-3">
+                    {hasActiveFilters && (
+                      <Button variant="outline" onClick={clearAllFilters} className="rounded-full">
+                        Clear all filters
+                      </Button>
+                    )}
+                    <Button variant="default" className="rounded-full gap-2" onClick={() => setShowJobAlerts(true)}>
+                      <Bell className="h-4 w-4" /> Get Job Alerts
+                    </Button>
+                  </div>
+                  {hasActiveFilters && (
+                    <div className="mt-8 text-left max-w-md mx-auto">
+                      <p className="text-sm font-medium text-muted-foreground mb-3">Suggestions:</p>
+                      <ul className="space-y-2 text-sm text-muted-foreground">
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary mt-0.5">•</span>
+                          Check your spelling for search terms
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary mt-0.5">•</span>
+                          Try more general keywords or different categories
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary mt-0.5">•</span>
+                          Expand your location or salary range
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary mt-0.5">•</span>
+                          Remove some filters to see more results
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <>
                   <div className="space-y-3">
-                    {paginatedJobs.map((job, i) => (
+                    {jobs.map((job, i) => (
                       <JobCard
                         key={job.id}
                         job={job}
@@ -315,27 +457,13 @@ export default function Jobs() {
                     ))}
                   </div>
 
-                  {hasMore && (
-                    <div className="flex justify-center mt-8">
-                      <Button
-                        variant="outline"
-                        onClick={loadMore}
-                        className="rounded-full px-8 gap-2"
-                      >
-                        <ChevronDown className="h-4 w-4" />
-                        Load More Jobs
-                        <span className="text-xs text-muted-foreground">
-                          ({filtered.length - paginatedJobs.length} remaining)
-                        </span>
-                      </Button>
-                    </div>
-                  )}
+                  {renderPagination()}
 
-                  {!hasMore && paginatedJobs.length > 0 && (
-                    <div className="text-center py-10">
-                      <div className="h-px bg-border/60 max-w-xs mx-auto mb-6" />
+                  {pagination.total > 0 && (
+                    <div className="text-center py-6">
+                      <div className="h-px bg-border/60 max-w-xs mx-auto mb-4" />
                       <p className="text-sm text-muted-foreground">
-                        Showing all {filtered.length} Qatar jobs
+                        Showing page {currentPage} of {totalPages} ({pagination.total.toLocaleString()} total jobs)
                       </p>
                     </div>
                   )}

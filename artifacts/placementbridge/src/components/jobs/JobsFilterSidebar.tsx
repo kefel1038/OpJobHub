@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronUp, SlidersHorizontal, RotateCcw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,15 @@ const skills = [
   "HVAC", "Electrical", "Plumbing", "Welding"
 ];
 
-const companySizes = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"];
 const datePosted = ["Last 24 hours", "Last 3 days", "Last 7 days", "Last 14 days", "Last 30 days"];
+const datePostedValues: Record<string, string> = {
+  "Last 24 hours": "24h",
+  "Last 3 days": "3d",
+  "Last 7 days": "7d",
+  "Last 14 days": "14d",
+  "Last 30 days": "30d",
+};
+
 const salaryRanges = [
   { label: "QAR 1k - 3k", min: 1000, max: 3000 },
   { label: "QAR 3k - 5k", min: 3000, max: 5000 },
@@ -38,6 +45,42 @@ const nationalities = [
   "Any Nationality", "Indian", "Pakistani", "Bangladeshi", "Filipino",
   "Egyptian", "Nepali", "Sri Lankan", "Kenyan", "Ugandan"
 ];
+
+function toggleCSV(current: string, value: string): string {
+  const arr = current ? current.split(",") : [];
+  const idx = arr.indexOf(value);
+  if (idx >= 0) {
+    arr.splice(idx, 1);
+    return arr.join(",");
+  }
+  arr.push(value);
+  return arr.join(",");
+}
+
+function hasCSV(current: string, value: string): boolean {
+  return current ? current.split(",").includes(value) : false;
+}
+
+interface URLFilterParams {
+  q: string;
+  location: string;
+  employmentType: string;
+  categories: string;
+  locations: string;
+  experienceLevels: string;
+  workTypes: string;
+  skills: string;
+  nationalities: string;
+  datePosted: string;
+  salaryMin: string;
+  salaryMax: string;
+  visaSponsored: boolean;
+  isRemote: boolean;
+  isUrgent: boolean;
+  aiMatchScore: string;
+  sort: string;
+  page: number;
+}
 
 interface FilterSectionProps {
   title: string;
@@ -81,10 +124,9 @@ interface FilterCheckboxProps {
   label: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
-  count?: number;
 }
 
-function FilterCheckbox({ label, checked, onChange, count }: FilterCheckboxProps) {
+function FilterCheckbox({ label, checked, onChange }: FilterCheckboxProps) {
   return (
     <label className="flex items-center gap-2.5 px-1 py-1.5 cursor-pointer group rounded-md hover:bg-muted/50 transition-colors">
       <input
@@ -94,79 +136,54 @@ function FilterCheckbox({ label, checked, onChange, count }: FilterCheckboxProps
         className="h-4 w-4 rounded border-border text-primary focus:ring-primary/30 accent-primary"
       />
       <span className="text-sm flex-1 group-hover:text-foreground transition-colors text-muted-foreground">{label}</span>
-      {count !== undefined && (
-        <span className="text-xs text-muted-foreground/60">({count})</span>
-      )}
     </label>
   );
 }
 
-export interface FilterState {
-  categories: string[];
-  experienceLevels: string[];
-  workTypes: string[];
-  employmentTypes: string[];
-  locations: string[];
-  skills: string[];
-  companySizes: string[];
-  nationalities: string[];
-  salaryRange: [number, number];
-  datePosted: string;
-  visaSponsored: boolean;
-  isRemote: boolean;
-  isUrgent: boolean;
-  aiMatchScore: number;
-}
-
 interface JobsFilterSidebarProps {
-  filters: FilterState;
-  setFilters: (f: FilterState) => void;
+  params: URLFilterParams;
+  setParams: (updates: Record<string, string | number | boolean | null | undefined>) => void;
   isMobileOpen: boolean;
   setIsMobileOpen: (o: boolean) => void;
 }
 
-export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobileOpen }: JobsFilterSidebarProps) {
-  const toggleArrayFilter = (key: keyof FilterState, value: string) => {
-    const arr = filters[key] as string[];
-    setFilters({
-      ...filters,
-      [key]: arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value],
-    });
-  };
-
-  const clearAll = () => {
-    setFilters({
-      categories: [],
-      experienceLevels: [],
-      workTypes: [],
-      employmentTypes: [],
-      locations: [],
-      skills: [],
-      companySizes: [],
-      nationalities: [],
-      salaryRange: [0, 999999],
-      datePosted: "Anytime",
-      visaSponsored: false,
-      isRemote: false,
-      isUrgent: false,
-      aiMatchScore: 0,
-    });
-  };
+export function JobsFilterSidebar({ params, setParams, isMobileOpen, setIsMobileOpen }: JobsFilterSidebarProps) {
+  const toggleFilter = useCallback((key: string, value: string, isCSV: boolean = true) => {
+    if (isCSV) {
+      const current = (params as any)[key] as string || "";
+      setParams({ [key]: toggleCSV(current, value) || null });
+    }
+  }, [params, setParams]);
 
   const activeCount = [
-    ...filters.categories,
-    ...filters.experienceLevels,
-    ...filters.workTypes,
-    ...filters.employmentTypes,
-    ...filters.locations,
-    ...filters.skills,
-    ...filters.companySizes,
-    ...filters.nationalities,
-    filters.visaSponsored ? "Visa Sponsored" : null,
-    filters.isRemote ? "Remote" : null,
-    filters.isUrgent ? "Urgent" : null,
-    filters.datePosted !== "Anytime" ? filters.datePosted : null,
+    ...(params.categories ? params.categories.split(",") : []),
+    ...(params.experienceLevels ? params.experienceLevels.split(",") : []),
+    ...(params.workTypes ? params.workTypes.split(",") : []),
+    ...(params.employmentType ? params.employmentType.split(",") : []),
+    ...(params.locations ? params.locations.split(",") : []),
+    ...(params.skills ? params.skills.split(",") : []),
+    params.visaSponsored ? "Visa Sponsored" : null,
+    params.isRemote ? "Remote" : null,
+    params.isUrgent ? "Urgent" : null,
+    params.datePosted || null,
+    params.salaryMin ? "Salary" : null,
   ].filter(Boolean).length;
+
+  const clearAll = useCallback(() => {
+    setIsMobileOpen(false);
+    setParams({
+      q: null, location: null, employmentType: null, categories: null,
+      locations: null, experienceLevels: null, workTypes: null, skills: null,
+      nationalities: null, datePosted: null, salaryMin: null, salaryMax: null,
+      visaSponsored: null, isRemote: null, isUrgent: null, aiMatchScore: null,
+      sort: null, page: null,
+    });
+  }, [setParams, setIsMobileOpen]);
+
+  const isSalaryActive = (min: number, max: number) =>
+    Number(params.salaryMin) === min && Number(params.salaryMax) === max;
+
+  const postedValue = datePostedValues[params.datePosted] ? params.datePosted : "";
 
   const sidebarContent = (
     <div className="space-y-1">
@@ -194,8 +211,8 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
             <span className="text-sm text-muted-foreground">Visa Sponsored</span>
             <input
               type="checkbox"
-              checked={filters.visaSponsored}
-              onChange={(e) => setFilters({ ...filters, visaSponsored: e.target.checked })}
+              checked={params.visaSponsored}
+              onChange={(e) => setParams({ visa: e.target.checked || null })}
               className="h-4 w-4 rounded accent-primary"
             />
           </label>
@@ -203,8 +220,8 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
             <span className="text-sm text-muted-foreground">Remote Only</span>
             <input
               type="checkbox"
-              checked={filters.isRemote}
-              onChange={(e) => setFilters({ ...filters, isRemote: e.target.checked })}
+              checked={params.isRemote}
+              onChange={(e) => setParams({ remote: e.target.checked || null })}
               className="h-4 w-4 rounded accent-primary"
             />
           </label>
@@ -212,8 +229,8 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
             <span className="text-sm text-muted-foreground">Urgent Hiring</span>
             <input
               type="checkbox"
-              checked={filters.isUrgent}
-              onChange={(e) => setFilters({ ...filters, isUrgent: e.target.checked })}
+              checked={params.isUrgent}
+              onChange={(e) => setParams({ urgent: e.target.checked || null })}
               className="h-4 w-4 rounded accent-primary"
             />
           </label>
@@ -225,8 +242,8 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
           <FilterCheckbox
             key={loc}
             label={loc}
-            checked={filters.locations.includes(loc)}
-            onChange={() => toggleArrayFilter("locations", loc)}
+            checked={hasCSV(params.locations, loc)}
+            onChange={() => toggleFilter("locations", loc)}
           />
         ))}
       </FilterSection>
@@ -236,8 +253,8 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
           <FilterCheckbox
             key={cat}
             label={cat}
-            checked={filters.categories.includes(cat)}
-            onChange={() => toggleArrayFilter("categories", cat)}
+            checked={hasCSV(params.categories, cat)}
+            onChange={() => toggleFilter("categories", cat)}
           />
         ))}
       </FilterSection>
@@ -249,8 +266,11 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
               <input
                 type="radio"
                 name="salaryRange"
-                checked={filters.salaryRange[0] === range.min && filters.salaryRange[1] === range.max}
-                onChange={() => setFilters({ ...filters, salaryRange: [range.min, range.max] })}
+                checked={isSalaryActive(range.min, range.max)}
+                onChange={() => setParams({
+                  salaryMin: range.min,
+                  salaryMax: range.max,
+                })}
                 className="h-4 w-4 text-primary accent-primary"
               />
               <span className="text-sm text-muted-foreground group-hover:text-foreground">{range.label}</span>
@@ -264,8 +284,8 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
           <FilterCheckbox
             key={level}
             label={level}
-            checked={filters.experienceLevels.includes(level)}
-            onChange={() => toggleArrayFilter("experienceLevels", level)}
+            checked={hasCSV(params.experienceLevels, level)}
+            onChange={() => toggleFilter("experienceLevels", level)}
           />
         ))}
       </FilterSection>
@@ -275,8 +295,8 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
           <FilterCheckbox
             key={type}
             label={type}
-            checked={filters.workTypes.includes(type)}
-            onChange={() => toggleArrayFilter("workTypes", type)}
+            checked={hasCSV(params.workTypes, type)}
+            onChange={() => toggleFilter("workTypes", type)}
           />
         ))}
       </FilterSection>
@@ -286,8 +306,8 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
           <FilterCheckbox
             key={type}
             label={type}
-            checked={filters.employmentTypes.includes(type)}
-            onChange={() => toggleArrayFilter("employmentTypes", type)}
+            checked={hasCSV(params.employmentType, type)}
+            onChange={() => toggleFilter("employmentType", type)}
           />
         ))}
       </FilterSection>
@@ -297,10 +317,10 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
           {skills.map((skill) => (
             <button
               key={skill}
-              onClick={() => toggleArrayFilter("skills", skill)}
+              onClick={() => toggleFilter("skills", skill)}
               className={cn(
                 "px-2.5 py-1 rounded-full text-xs font-medium border transition-all",
-                filters.skills.includes(skill)
+                hasCSV(params.skills, skill)
                   ? "bg-primary/10 border-primary/30 text-primary"
                   : "bg-muted/50 border-border/50 text-muted-foreground hover:border-primary/30 hover:text-foreground"
               )}
@@ -316,25 +336,28 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
           <FilterCheckbox
             key={nat}
             label={nat}
-            checked={filters.nationalities.includes(nat)}
-            onChange={() => toggleArrayFilter("nationalities", nat)}
+            checked={hasCSV(params.nationalities, nat)}
+            onChange={() => toggleFilter("nationalities", nat)}
           />
         ))}
       </FilterSection>
 
       <FilterSection title="Date Posted">
-        {datePosted.map((date) => (
-          <label key={date} className="flex items-center gap-2.5 px-1 py-1.5 cursor-pointer group rounded-md hover:bg-muted/50 transition-colors">
-            <input
-              type="radio"
-              name="datePosted"
-              checked={filters.datePosted === date}
-              onChange={() => setFilters({ ...filters, datePosted: date })}
-              className="h-4 w-4 text-primary focus:ring-primary/30 accent-primary"
-            />
-            <span className="text-sm group-hover:text-foreground transition-colors text-muted-foreground">{date}</span>
-          </label>
-        ))}
+        {datePosted.map((date) => {
+          const val = datePostedValues[date];
+          return (
+            <label key={date} className="flex items-center gap-2.5 px-1 py-1.5 cursor-pointer group rounded-md hover:bg-muted/50 transition-colors">
+              <input
+                type="radio"
+                name="datePosted"
+                checked={params.datePosted === val}
+                onChange={() => setParams({ posted: val })}
+                className="h-4 w-4 text-primary focus:ring-primary/30 accent-primary"
+              />
+              <span className="text-sm group-hover:text-foreground transition-colors text-muted-foreground">{date}</span>
+            </label>
+          );
+        })}
       </FilterSection>
 
       <FilterSection title="AI Match Score">
@@ -344,18 +367,21 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
             min={0}
             max={100}
             step={5}
-            value={filters.aiMatchScore}
-            onChange={(e) => setFilters({ ...filters, aiMatchScore: Number(e.target.value) })}
+            value={Number(params.aiMatchScore) || 0}
+            onChange={(e) => setParams({ matchScore: Number(e.target.value) || null })}
             className="w-full accent-primary"
           />
           <div className="flex justify-between mt-1">
-            <span className="text-xs text-muted-foreground">Min: {filters.aiMatchScore}%</span>
+            <span className="text-xs text-muted-foreground">Min: {Number(params.aiMatchScore) || 0}%</span>
             <span className="text-xs text-muted-foreground">100%</span>
           </div>
         </div>
       </FilterSection>
 
-      <Button className="w-full mt-4 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
+      <Button
+        className="w-full mt-4 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
+        onClick={() => setIsMobileOpen(false)}
+      >
         Apply Filters
       </Button>
     </div>
@@ -398,20 +424,3 @@ export function JobsFilterSidebar({ filters, setFilters, isMobileOpen, setIsMobi
     </>
   );
 }
-
-export const defaultFilterState: FilterState = {
-  categories: [],
-  experienceLevels: [],
-  workTypes: [],
-  employmentTypes: [],
-  locations: [],
-  skills: [],
-  companySizes: [],
-  nationalities: [],
-  salaryRange: [0, 999999],
-  datePosted: "Anytime",
-  visaSponsored: false,
-  isRemote: false,
-  isUrgent: false,
-  aiMatchScore: 0,
-};

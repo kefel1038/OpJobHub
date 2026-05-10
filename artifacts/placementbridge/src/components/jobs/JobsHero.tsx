@@ -28,16 +28,13 @@ const quickCategories = [
 ];
 
 interface JobsHeroProps {
-  searchQuery: string;
-  setSearchQuery: (q: string) => void;
-  locationQuery: string;
-  setLocationQuery: (q: string) => void;
-  jobType: string;
-  setJobType: (t: string) => void;
-  onSearch: () => void;
+  q: string;
+  onQChange: (q: string) => void;
+  location: string;
+  onLocationChange: (loc: string) => void;
 }
 
-export function JobsHero({ searchQuery, setSearchQuery, locationQuery, setLocationQuery, jobType, setJobType, onSearch }: JobsHeroProps) {
+export function JobsHero({ q, onQChange, location, onLocationChange }: JobsHeroProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [stats, setStats] = useState<{ totalJobs: number; recentJobs: number }>({ totalJobs: 0, recentJobs: 0 });
 
@@ -125,36 +122,36 @@ export function JobsHero({ searchQuery, setSearchQuery, locationQuery, setLocati
             <div className="flex flex-col lg:flex-row gap-2">
               <div className="flex-1 relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Job title, keyword, or company..."
-                  value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
-                  onFocus={() => setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  className="w-full h-14 pl-11 pr-4 bg-transparent border-0 rounded-xl text-base placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-                {showSuggestions && searchQuery && (
-                  <div className="absolute top-full left-0 right-0 mt-2 rounded-xl border bg-background shadow-2xl z-50 overflow-hidden">
-                    {suggestions.filter(s => s.toLowerCase().includes(searchQuery.toLowerCase())).map((s) => (
-                      <button
-                        key={s}
-                        onMouseDown={() => { setSearchQuery(s); setShowSuggestions(false); }}
-                        className="w-full px-4 py-3 text-left text-sm hover:bg-muted flex items-center gap-3 transition-colors"
-                      >
-                        <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                  <input
+                    type="text"
+                    placeholder="Job title, keyword, or company..."
+                    value={q}
+                    onChange={(e) => { onQChange(e.target.value); setShowSuggestions(true); }}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    className="w-full h-14 pl-11 pr-4 bg-transparent border-0 rounded-xl text-base placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                  {showSuggestions && q && (
+                    <div className="absolute top-full left-0 right-0 mt-2 rounded-xl border bg-background shadow-2xl z-50 overflow-hidden">
+                      {suggestions.filter(s => s.toLowerCase().includes(q.toLowerCase())).map((s) => (
+                        <button
+                          key={s}
+                          onMouseDown={() => { onQChange(s); setShowSuggestions(false); }}
+                          className="w-full px-4 py-3 text-left text-sm hover:bg-muted flex items-center gap-3 transition-colors"
+                        >
+                          <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
               </div>
 
               <div className="relative lg:w-52">
                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <select
-                  value={locationQuery}
-                  onChange={(e) => setLocationQuery(e.target.value)}
+                  value={location}
+                  onChange={(e) => onLocationChange(e.target.value)}
                   className="w-full h-14 pl-11 pr-8 bg-transparent border-0 rounded-xl text-base appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
                   <option value="">All Qatar</option>
@@ -164,23 +161,8 @@ export function JobsHero({ searchQuery, setSearchQuery, locationQuery, setLocati
                 </select>
               </div>
 
-              <div className="relative lg:w-44">
-                <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                <select
-                  value={jobType}
-                  onChange={(e) => setJobType(e.target.value)}
-                  className="w-full h-14 pl-11 pr-8 bg-transparent border-0 rounded-xl text-base appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/30"
-                >
-                  <option value="">All Types</option>
-                  <option value="Full-Time">Full-Time</option>
-                  <option value="Part-Time">Part-Time</option>
-                  <option value="Contract">Contract</option>
-                  <option value="Temporary">Temporary</option>
-                </select>
-              </div>
-
               <Button
-                onClick={onSearch}
+                onClick={() => onQChange(q)}
                 size="lg"
                 className="h-14 px-8 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-base gap-2 shadow-lg"
               >
@@ -202,7 +184,7 @@ export function JobsHero({ searchQuery, setSearchQuery, locationQuery, setLocati
             {trendingTags.slice(0, 6).map((tag) => (
               <button
                 key={tag}
-                onClick={() => { setSearchQuery(tag); onSearch(); }}
+                onClick={() => { onQChange(tag); }}
                 className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted hover:bg-primary/10 hover:text-primary transition-all border border-border/50"
               >
                 {tag}
@@ -214,7 +196,7 @@ export function JobsHero({ searchQuery, setSearchQuery, locationQuery, setLocati
             {quickCategories.map((cat) => (
               <button
                 key={cat.label}
-                onClick={() => { setSearchQuery(cat.label); onSearch(); }}
+                onClick={() => { onQChange(cat.label); }}
                 className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium bg-primary/5 hover:bg-primary/15 text-primary hover:text-primary transition-all border border-primary/10"
               >
                 <span>{cat.icon}</span>

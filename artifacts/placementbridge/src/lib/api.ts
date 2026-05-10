@@ -240,8 +240,17 @@ export const api = {
     q?: string;
     location?: string;
     industry?: string;
+    categories?: string;
     employmentType?: string;
     experienceLevel?: string;
+    experienceLevels?: string;
+    workTypes?: string;
+    skills?: string;
+    nationality?: string;
+    nationalities?: string;
+    datePosted?: string;
+    aiMatchScore?: number;
+    locations?: string;
     salaryMin?: number;
     salaryMax?: number;
     visaSponsored?: boolean;
