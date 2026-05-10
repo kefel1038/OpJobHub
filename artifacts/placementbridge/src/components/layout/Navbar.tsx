@@ -1,9 +1,10 @@
 import { Link, useLocation } from "wouter";
-import { Shield, Menu, Sparkles, Building2, Briefcase, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { Shield, Menu, Sparkles, Building2, Briefcase, ChevronDown, Languages, Globe, Check } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
+import { LANGUAGES, changeLanguage } from "@/components/GoogleTranslate";
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -66,6 +67,7 @@ export function Navbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
+          <LanguageDropdown />
           {user ? (
             <>
               <Badge variant="secondary" className="capitalize font-medium">
@@ -165,6 +167,9 @@ export function Navbar() {
                 Dashboard
               </Link>
             )}
+            <div className="px-3 py-2">
+              <MobileLanguageSelector />
+            </div>
             <div className="border-t border-border my-2" />
             {user ? (
               <button
@@ -195,5 +200,85 @@ export function Navbar() {
         </div>
       )}
     </header>
+  );
+}
+
+function LanguageDropdown() {
+  const [open, setOpen] = useState(false);
+  const [current, setCurrent] = useState("en");
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const lang = LANGUAGES.find((l) => l.code === current) || LANGUAGES[0];
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-foreground/70 hover:text-foreground hover:bg-muted transition-colors"
+      >
+        <Globe className="h-4 w-4" />
+        <span className="hidden lg:inline">{lang.native}</span>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-popover border border-border shadow-xl shadow-black/20 z-50 max-h-80 overflow-y-auto">
+          <div className="p-1.5">
+            {LANGUAGES.map((l) => (
+              <button
+                key={l.code}
+                onClick={() => {
+                  changeLanguage(l.code);
+                  setCurrent(l.code);
+                  setOpen(false);
+                }}
+                className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                  current === l.code
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "text-foreground/80 hover:bg-muted"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-base leading-none">{l.code === "en" ? "🇬🇧" : l.code === "ar" ? "🇸🇦" : l.code === "fr" ? "🇫🇷" : l.code === "sw" ? "🇹🇿" : l.code === "ur" ? "🇵🇰" : l.code === "hi" ? "🇮🇳" : l.code === "bn" ? "🇧🇩" : l.code === "tl" ? "🇵🇭" : l.code === "ml" ? "🇮🇳" : l.code === "ta" ? "🇮🇳" : l.code === "ne" ? "🇳🇵" : l.code === "so" ? "🇸🇴" : l.code === "am" ? "🇪🇹" : l.code === "tr" ? "🇹🇷" : l.code === "fa" ? "🇮🇷" : l.code === "id" ? "🇮🇩" : l.code === "ps" ? "🇦🇫" : "🇮🇶"}</span>
+                  <span>{l.native}</span>
+                </div>
+                {current === l.code && <Check className="h-4 w-4" />}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MobileLanguageSelector() {
+  const [current, setCurrent] = useState("en");
+
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground mb-2 font-medium">Language</p>
+      <select
+        value={current}
+        onChange={(e) => {
+          changeLanguage(e.target.value);
+          setCurrent(e.target.value);
+        }}
+        className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground"
+      >
+        {LANGUAGES.map((l) => (
+          <option key={l.code} value={l.code}>
+            {l.native} ({l.label})
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
