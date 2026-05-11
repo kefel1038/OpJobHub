@@ -7,13 +7,22 @@ import { serializeDates } from "../lib/serialize";
 const router: IRouter = Router();
 
 router.get("/jobs", async (_req: Request, res: Response) => {
-  const allJobs = await db
-    .select()
-    .from(jobs)
-    .where(eq(jobs.status, "active"))
-    .orderBy(desc(jobs.isFeatured), desc(jobs.createdAt));
+  try {
+    const allJobs = await db
+      .select()
+      .from(jobs)
+      .where(eq(jobs.status, "active"))
+      .orderBy(desc(jobs.isFeatured), desc(jobs.createdAt));
+    res.json(serializeDates(allJobs));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    // Try sending error — if Express 5 error handler doesn't work, this ensures a body
+    res.status(500).json({ error: msg, _caught: true });
+  }
+});
 
-  res.json(serializeDates(allJobs));
+router.get("/jobs/ping", (_req: Request, res: Response) => {
+  res.json({ ok: true, msg: "jobs router works" });
 });
 
 router.get("/jobs/featured", async (_req: Request, res: Response) => {
