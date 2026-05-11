@@ -30,6 +30,7 @@ export default async function handler(
       next?: (err?: unknown) => void,
     ) => void;
 
+    // Intercept ServerResponse.end to detect when Express finishes
     await new Promise<void>((resolve) => {
       if ((res as ServerResponse).writableEnded) {
         resolve();
@@ -37,20 +38,23 @@ export default async function handler(
       }
 
       let responded = false;
-      let settleTimer: NodeJS.Timeout | null = null;
 
-      const done = () => {
-        if (responded) return;
+      const nativeEnd = (res as ServerResponse).end.bind(res);
+      (res as ServerResponse).end = function (this: ServerResponse, ...args: unknown[]) {
+        if (!responded && this.statusCode >= 500 && args.length === 0) {
+          // Express ended response with 5xx but no body — our fallback
+          this.writeHead(this.statusCode, { "content-type": "application/json" });
+          return nativeEnd(JSON.stringify({ error: "Internal server error (empty body)" }));
+        }
         responded = true;
-        if (settleTimer) clearTimeout(settleTimer);
-        resolve();
+        return nativeEnd(...args as Parameters<ServerResponse["end"]>);
       };
 
-      res.once("finish", done);
-      res.once("close", done);
+      res.once("finish", () => { responded = true; resolve(); });
+      res.once("close", () => { if (!responded) resolve(); });
 
-      // Safety net — if Express hangs for 25s, send fallback response
-      settleTimer = setTimeout(() => {
+      // Safety net — if Express hangs, respond anyway
+      const timeout = setTimeout(() => {
         if (!responded) {
           responded = true;
           json(res, 500, { error: "Express did not send a response within 25s" });
@@ -59,15 +63,16 @@ export default async function handler(
       }, 25000);
 
       fullApp(req, res, (err?: unknown) => {
-        if (!responded) {
-          if (err) {
-            const message = err instanceof Error ? err.message : String(err);
-            json(res, 500, { error: "Unhandled error", message });
-          } else {
-            json(res, 404, { error: "Not found" });
-          }
-          done();
+        if (responded) return;
+        clearTimeout(timeout);
+        if (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          json(res, 500, { error: "Unhandled error", message });
+        } else {
+          json(res, 404, { error: "Not found" });
         }
+        responded = true;
+        resolve();
       });
     });
   } catch (err) {
