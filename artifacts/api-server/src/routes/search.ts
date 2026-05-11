@@ -44,8 +44,8 @@ router.get("/", async (req: Request, res: Response) => {
         ilike(jobs.title, searchTerm),
         ilike(jobs.company, searchTerm),
         ilike(jobs.description, searchTerm),
-        ilike(jobs.tags, searchTerm),
-        ilike(jobs.skills, searchTerm),
+        ilike(sql`${jobs.tags}::text`, searchTerm),
+        ilike(sql`${jobs.skills}::text`, searchTerm),
         ilike(jobs.category, searchTerm),
         ilike(jobs.industry, searchTerm),
       ),
@@ -109,19 +109,19 @@ router.get("/", async (req: Request, res: Response) => {
   if (skills) {
     const skillList = skills.split(",").map((s: string) => s.trim()).filter(Boolean);
     if (skillList.length > 0) {
-      conditions.push(or(...skillList.map((skill: string) => ilike(jobs.skills, `%${skill}%`))));
+      conditions.push(or(...skillList.map((skill: string) => ilike(sql`${jobs.skills}::text`, `%${skill}%`))));
     }
   }
 
   if (nationalities) {
     const natList = nationalities.split(",").map((n: string) => n.trim()).filter(Boolean);
     if (natList.length > 0) {
-      conditions.push(or(...natList.map((nat: string) => ilike(jobs.nationalityFriendly, `%${nat}%`))));
+      conditions.push(or(...natList.map((nat: string) => ilike(sql`${jobs.nationalityFriendly}::text`, `%${nat}%`))));
     }
   }
 
   if (nationality) {
-    conditions.push(ilike(jobs.nationalityFriendly, `%${nationality}%`));
+    conditions.push(ilike(sql`${jobs.nationalityFriendly}::text`, `%${nationality}%`));
   }
 
   if (datePosted) {
