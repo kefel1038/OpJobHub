@@ -1,6 +1,6 @@
 import { Router } from "express";
 import multer from "multer";
-import { openai, getEmbedding } from "../lib/openai";
+import { openrouter, getEmbedding } from "../lib/openai";
 import { extractTextFromFile } from "../lib/extractor";
 import { db, resumes, resumeEmbeddings, atsReports, jobs, jobEmbeddings } from "@workspace/db";
 import { eq, sql, and } from "drizzle-orm";
@@ -24,8 +24,8 @@ router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (r
     const text = await extractTextFromFile(req.file.buffer, req.file.mimetype);
     
     // 1. Semantic Extraction & ATS Scoring via GPT
-    const completion = await openai().chat.completions.create({
-      model: "gpt-4o",
+    const completion = await openrouter().chat.completions.create({
+      model: "openai/gpt-4o",
       messages: [
         {
           role: "system",

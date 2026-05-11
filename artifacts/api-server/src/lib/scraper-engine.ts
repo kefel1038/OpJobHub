@@ -1,7 +1,7 @@
 import { db, jobs, jobSources, scrapeLogs, companies } from "@workspace/db";
 import { eq, and, sql, gte, lt, desc, inArray } from "drizzle-orm";
 import { logger } from "./logger";
-import { openai } from "./openai";
+import { openrouter } from "./openai";
 
 export interface ScrapedJob {
   title: string;
@@ -253,8 +253,8 @@ export async function aiCategorizeJob(job: {
   description: string;
 }) {
   try {
-    const completion = await openai().chat.completions.create({
-      model: "gpt-4o-mini",
+    const completion = await openrouter().chat.completions.create({
+      model: "openai/gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -292,8 +292,8 @@ export async function aiDetectScam(job: {
   salary?: string;
 }): Promise<{ isScam: boolean; confidence: number; reasons: string[] }> {
   try {
-    const completion = await openai().chat.completions.create({
-      model: "gpt-4o-mini",
+    const completion = await openrouter().chat.completions.create({
+      model: "openai/gpt-4o-mini",
       messages: [
         {
           role: "system",
