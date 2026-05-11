@@ -1,47 +1,70 @@
-import express from "express";
+import { IncomingMessage, ServerResponse } from "node:http";
 
-const app = express();
+function json(res: ServerResponse, status: number, body: unknown) {
+  res.writeHead(status, { "content-type": "application/json" });
+  res.end(JSON.stringify(body));
+}
 
-app.get("/api/healthz", (_req, res) => {
-  res.json({ status: "ok" });
-});
+export default async function handler(
+  req: IncomingMessage & { query?: Record<string, string>; body?: unknown },
+  res: ServerResponse,
+) {
+  const path = req.url ?? "/";
 
-app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", version: "1.0.0" });
-});
-
-// Lazy-load and mount the full Express app on first non-health request
-let fullAppLoaded = false;
-
-app.use(async (req, res, next) => {
-  if (req.path === "/api/healthz" || req.path === "/api/health") {
-    next();
+  // Health endpoints respond immediately without importing the full app
+  if (path === "/api/healthz") {
+    json(res, 200, { status: "ok" });
     return;
   }
 
-  if (!fullAppLoaded) {
-    try {
-      const mod = await import("../artifacts/api-server/dist/vercel-handler.mjs");
-      const fullApp = mod.default as express.Express;
-      app.use(fullApp);
-      fullAppLoaded = true;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      res.status(500).json({
-        error: "App load failed",
-        message,
-        stack: err instanceof Error ? err.stack?.split("\n").slice(0, 5).join("\n") : undefined,
-      });
-      return;
-    }
+  if (path === "/api/health") {
+    json(res, 200, { status: "ok", version: "1.0.0" });
+    return;
   }
 
-  next();
-});
+  try {
+    const mod = await import("../artifacts/api-server/dist/vercel-handler.mjs");
+    const fullApp = mod.default as (
+      req: IncomingMessage,
+      res: ServerResponse,
+      next?: (err?: unknown) => void,
+    ) => void;
 
-// Catch-all 404 (only reached if full app doesn't handle the route)
-app.use((_req, res) => {
-  res.status(404).json({ error: "Not found" });
-});
+    // Let Express process the request. Wrap in a promise so Vercel
+    // waits for the full response before considering this invocation done.
+    await new Promise<void>((resolve, reject) => {
+      if ((res as ServerResponse).writableEnded) {
+        resolve();
+        return;
+      }
 
-export default app;
+      let responded = false;
+
+      res.once("finish", () => {
+        responded = true;
+        resolve();
+      });
+      res.once("close", () => {
+        if (!responded) resolve();
+      });
+
+      // Express 5 automatically catches async route rejections and
+      // forwards them to the error handler defined in app.ts.
+      fullApp(req, res, (err?: unknown) => {
+        // No route matched (default 404)
+        if (!responded) {
+          json(res, 404, { error: "Not found" });
+          responded = true;
+          resolve();
+        }
+      });
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    json(res, 500, {
+      error: "App load failed",
+      message,
+      stack: err instanceof Error ? err.stack?.split("\n").slice(0, 5).join("\n") : undefined,
+    });
+  }
+}
