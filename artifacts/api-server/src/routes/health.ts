@@ -232,8 +232,30 @@ router.get("/db-check", async (_req, res) => {
     res.json({ db: "connected" });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    res.json({ db: "error", message: msg });
+    const code = err instanceof Error && "code" in err ? (err as any).code : undefined;
+    const stack = err instanceof Error ? err.stack : undefined;
+    res.json({ db: "error", message: msg, code, stack, name: err instanceof Error ? err.name : typeof err });
   }
+});
+
+router.get("/db-debug", async (_req, res) => {
+  const results: Record<string, any> = {};
+  try {
+    const { Pool } = require("pg");
+    const url = process.env.DATABASE_URL || "postgresql://postgres:Lovr_1990_Lovr@db.fmcblciptvnagrpsrzcw.supabase.co:5432/postgres";
+    results.url_masked = url.replace(/\/\/([^:]+):([^@]+)@/, "//$1:***@");
+    results.url_defined = !!process.env.DATABASE_URL;
+    const pool = new Pool({ connectionString: url, connectionTimeoutMillis: 5000, ssl: { rejectUnauthorized: false } });
+    const client = await pool.connect();
+    results.connected = true;
+    const r = await client.query("SELECT 1 as val");
+    results.query_result = r.rows;
+    client.release();
+    await pool.end();
+  } catch (err) {
+    results.error = err instanceof Error ? { message: err.message, code: (err as any).code, stack: err.stack?.split("\n").slice(0, 3).join("\n") } : String(err);
+  }
+  res.json(results);
 });
 
 router.post("/migrate", async (_req, res) => {
