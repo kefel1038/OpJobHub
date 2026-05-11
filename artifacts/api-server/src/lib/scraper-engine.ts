@@ -254,7 +254,7 @@ export async function aiCategorizeJob(job: {
 }) {
   try {
     const completion = await openrouter().chat.completions.create({
-      model: "google/gemini-2.0-flash-001:free",
+      model: "meta-llama/llama-3.3-70b-instruct:free",
       messages: [
         {
           role: "system",
@@ -293,7 +293,7 @@ export async function aiDetectScam(job: {
 }): Promise<{ isScam: boolean; confidence: number; reasons: string[] }> {
   try {
     const completion = await openrouter().chat.completions.create({
-      model: "google/gemini-2.0-flash-001:free",
+      model: "meta-llama/llama-3.3-70b-instruct:free",
       messages: [
         {
           role: "system",
