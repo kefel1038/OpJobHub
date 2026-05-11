@@ -48,13 +48,15 @@ export default async function handler(
         if (!responded) resolve();
       });
 
-      // Express 5 automatically catches async route rejections and
-      // forwards them to the error handler defined in app.ts.
       fullApp(req, res, (err?: unknown) => {
-        // No route matched (default 404)
         if (!responded) {
-          json(res, 404, { error: "Not found" });
           responded = true;
+          if (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            json(res, 500, { error: "Unhandled error", message });
+          } else {
+            json(res, 404, { error: "Not found" });
+          }
           resolve();
         }
       });
