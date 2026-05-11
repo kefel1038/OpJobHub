@@ -254,7 +254,7 @@ export async function aiCategorizeJob(job: {
 }) {
   try {
     const completion = await openrouter().chat.completions.create({
-      model: "openai/gpt-4o-mini",
+      model: "meta-llama/llama-3.3-70b-instruct:free",
       messages: [
         {
           role: "system",
@@ -293,7 +293,7 @@ export async function aiDetectScam(job: {
 }): Promise<{ isScam: boolean; confidence: number; reasons: string[] }> {
   try {
     const completion = await openrouter().chat.completions.create({
-      model: "openai/gpt-4o-mini",
+      model: "meta-llama/llama-3.3-70b-instruct:free",
       messages: [
         {
           role: "system",
