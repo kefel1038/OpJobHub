@@ -3,13 +3,12 @@ import { Pool } from "pg";
 import * as schema from "./schema";
 
 function getPool(): Pool {
-  if (!process.env.DATABASE_URL) {
-    throw new Error(
-      "DATABASE_URL must be set. Did you forget to provision a database?",
-    );
-  }
+  const url =
+    process.env.DATABASE_URL ||
+    // Fallback for when DATABASE_URL hasn't been set in Vercel dashboard
+    "postgresql://postgres:Lovr_1990_Lovr@db.fmcblciptvnagrpsrzcw.supabase.co:5432/postgres";
   return new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: url,
     max: 5,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
