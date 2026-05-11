@@ -1,11 +1,12 @@
 import mammoth from "mammoth";
 
+let _pdfParse: ((buffer: Buffer) => Promise<{ text: string }>) | null = null;
+
 async function getPdfParser(): Promise<(buffer: Buffer) => Promise<{ text: string }>> {
-  // Lazily loaded — pdf-parse v2 requires browser APIs (DOMMatrix) that aren't
-  // available in all server environments (e.g. Vercel serverless).
-  const { createRequire } = await import("module");
-  const req = createRequire(import.meta.url);
-  return req("pdf-parse");
+  if (_pdfParse) return _pdfParse;
+  const mod = await import("pdf-parse");
+  _pdfParse = mod.default || mod;
+  return _pdfParse;
 }
 
 export async function extractTextFromFile(buffer: Buffer, mimeType: string): Promise<string> {
