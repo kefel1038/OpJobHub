@@ -1,27 +1,35 @@
-import express from "express";
+import { IncomingMessage, ServerResponse } from "node:http";
 
-const app = express();
+function json(res: ServerResponse, status: number, body: unknown) {
+  res.writeHead(status, { "content-type": "application/json" });
+  res.end(JSON.stringify(body));
+}
 
-app.get("/api/healthz", (_req: any, res: any) => {
-  res.json({ status: "ok" });
-});
+export default async function handler(
+  req: IncomingMessage & { query?: Record<string, string>; body?: unknown },
+  res: ServerResponse,
+) {
+  const path = req.url ?? "/";
 
-app.get("/api/health", (_req: any, res: any) => {
-  res.json({ status: "ok", version: "1.0.0" });
-});
+  if (path === "/api/healthz") {
+    json(res, 200, { status: "ok" });
+    return;
+  }
 
-app.all("*", async (req: any, res: any) => {
+  if (path === "/api/health") {
+    json(res, 200, { status: "ok", version: "1.0.0" });
+    return;
+  }
+
   try {
     const mod = await import("../artifacts/api-server/src/app");
     return mod.default(req, res);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    res.status(500).json({
+    json(res, 500, {
       error: "App load failed",
       message,
       stack: err instanceof Error ? err.stack?.split("\n").slice(0, 5).join("\n") : undefined,
     });
   }
-});
-
-export default app;
+}
