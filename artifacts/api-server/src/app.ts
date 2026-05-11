@@ -29,6 +29,11 @@ app.use(cors({ origin: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Diagnostic: does a simple route through the sub-app work?
+app.get("/api/_ping", (_req, res) => {
+  res.json({ pong: true });
+});
+
 app.use("/api", router);
 
 // Global error handler — always returns JSON

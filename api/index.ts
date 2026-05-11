@@ -30,34 +30,43 @@ export default async function handler(
       next?: (err?: unknown) => void,
     ) => void;
 
-    // Let Express process the request. Wrap in a promise so Vercel
-    // waits for the full response before considering this invocation done.
-    await new Promise<void>((resolve, reject) => {
+    await new Promise<void>((resolve) => {
       if ((res as ServerResponse).writableEnded) {
         resolve();
         return;
       }
 
       let responded = false;
+      let settleTimer: NodeJS.Timeout | null = null;
 
-      res.once("finish", () => {
+      const done = () => {
+        if (responded) return;
         responded = true;
+        if (settleTimer) clearTimeout(settleTimer);
         resolve();
-      });
-      res.once("close", () => {
-        if (!responded) resolve();
-      });
+      };
+
+      res.once("finish", done);
+      res.once("close", done);
+
+      // Safety net — if Express hangs for 25s, send fallback response
+      settleTimer = setTimeout(() => {
+        if (!responded) {
+          responded = true;
+          json(res, 500, { error: "Express did not send a response within 25s" });
+          resolve();
+        }
+      }, 25000);
 
       fullApp(req, res, (err?: unknown) => {
         if (!responded) {
-          responded = true;
           if (err) {
             const message = err instanceof Error ? err.message : String(err);
             json(res, 500, { error: "Unhandled error", message });
           } else {
             json(res, 404, { error: "Not found" });
           }
-          resolve();
+          done();
         }
       });
     });
