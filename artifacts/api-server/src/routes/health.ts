@@ -242,7 +242,7 @@ router.get("/db-debug", async (_req, res) => {
   const results: Record<string, any> = {};
   try {
     const { Pool } = require("pg");
-    const url = process.env.DATABASE_URL || "postgresql://postgres:Lovr_1990_Lovr@db.fmcblciptvnagrpsrzcw.supabase.co:5432/postgres";
+    const url = process.env.DATABASE_URL || "postgresql://postgres.fmcblciptvnagrpsrzcw:Lovr_1990_Lovr@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres";
     results.url_masked = url.replace(/\/\/([^:]+):([^@]+)@/, "//$1:***@");
     results.url_defined = !!process.env.DATABASE_URL;
     const pool = new Pool({ connectionString: url, connectionTimeoutMillis: 5000, ssl: { rejectUnauthorized: false } });

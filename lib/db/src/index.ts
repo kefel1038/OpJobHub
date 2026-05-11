@@ -6,7 +6,7 @@ function getPool(): Pool {
   const url =
     process.env.DATABASE_URL ||
     // Fallback for when DATABASE_URL hasn't been set in Vercel dashboard
-    "postgresql://postgres:Lovr_1990_Lovr@db.fmcblciptvnagrpsrzcw.supabase.co:5432/postgres";
+    "postgresql://postgres.fmcblciptvnagrpsrzcw:Lovr_1990_Lovr@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres";
   return new Pool({
     connectionString: url,
     max: 5,
