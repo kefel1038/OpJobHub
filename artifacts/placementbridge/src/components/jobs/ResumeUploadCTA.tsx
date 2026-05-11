@@ -1,13 +1,57 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Upload, FileText, Sparkles, ChevronRight, CheckCircle2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { api, getToken } from "@/lib/api";
+import { Upload, FileText, Sparkles, ChevronRight, CheckCircle2, AlertCircle, Loader2, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ACCEPTED_TYPES = {
+  "application/pdf": [".pdf"],
+  "application/msword": [".doc"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+  "text/plain": [".txt"],
+};
+
 export function ResumeUploadCTA() {
+  const { isAuthenticated } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [uploaded, setUploaded] = useState(false);
+  const [uploadState, setUploadState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleFile = async (file: File) => {
+    setErrorMsg("");
+
+    if (!ACCEPTED_TYPES[file.type as keyof typeof ACCEPTED_TYPES] && !file.name.match(/\.(pdf|doc|docx|txt)$/i)) {
+      setErrorMsg("Invalid file type. Please upload PDF, DOCX, DOC, or TXT files.");
+      setUploadState("error");
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      setErrorMsg("File is too large. Maximum size is 5MB.");
+      setUploadState("error");
+      return;
+    }
+
+    if (!isAuthenticated) {
+      setErrorMsg("Please sign in to upload your resume.");
+      setUploadState("error");
+      return;
+    }
+
+    try {
+      setUploadState("loading");
+      await api.analyzeResume(file);
+      setUploadState("success");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Upload failed. Please try again.";
+      setErrorMsg(message);
+      setUploadState("error");
+    }
+  };
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -17,7 +61,14 @@ export function ResumeUploadCTA() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    setUploaded(true);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFile(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
@@ -54,27 +105,73 @@ export function ResumeUploadCTA() {
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
               onDrop={handleDrop}
+              onClick={() => uploadState === "idle" && fileInputRef.current?.click()}
               className={cn(
-                "relative z-10 w-full lg:w-72 h-48 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 transition-all duration-300 cursor-pointer",
-                uploaded
-                  ? "border-emerald-500/50 bg-emerald-500/5"
-                  : isDragging
-                    ? "border-primary bg-primary/5 scale-[1.02]"
-                    : "border-border/60 hover:border-primary/40 hover:bg-muted/30"
+                "relative z-10 w-full lg:w-72 h-48 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-3 transition-all duration-300",
+                uploadState === "success"
+                  ? "border-emerald-500/50 bg-emerald-500/5 cursor-default"
+                  : uploadState === "error"
+                    ? "border-red-500/50 bg-red-500/5"
+                    : uploadState === "loading"
+                      ? "border-primary/50 bg-primary/5 cursor-default"
+                      : isDragging
+                        ? "border-primary bg-primary/5 scale-[1.02] cursor-pointer"
+                        : "border-border/60 hover:border-primary/40 hover:bg-muted/30 cursor-pointer"
               )}
             >
-              {uploaded ? (
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.docx,.doc,.txt"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+
+              {uploadState === "loading" ? (
+                <>
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Loader2 className="h-6 w-6 text-primary animate-spin" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold">Uploading & Analyzing...</p>
+                    <p className="text-xs text-muted-foreground mt-1">Processing your resume</p>
+                  </div>
+                </>
+              ) : uploadState === "success" ? (
                 <>
                   <div className="h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center">
                     <CheckCircle2 className="h-6 w-6 text-emerald-500" />
                   </div>
                   <div className="text-center">
                     <p className="text-sm font-semibold text-emerald-500">Resume Uploaded!</p>
-                    <p className="text-xs text-muted-foreground mt-1">Analysis in progress...</p>
+                    <p className="text-xs text-muted-foreground mt-1">Analysis complete</p>
                   </div>
-                  <Button size="sm" variant="outline" className="rounded-full text-xs h-8 mt-1">
-                    View Analysis <ChevronRight className="h-3 w-3 ml-1" />
-                  </Button>
+                  <a href="/ai-matching">
+                    <Button size="sm" variant="outline" className="rounded-full text-xs h-8 mt-1">
+                      View Analysis <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </a>
+                </>
+              ) : uploadState === "error" ? (
+                <>
+                  <div className="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center">
+                    <AlertCircle className="h-6 w-6 text-red-500" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-red-500">{errorMsg.includes("sign in") ? "Sign In Required" : "Upload Failed"}</p>
+                    <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">{errorMsg}</p>
+                  </div>
+                  {errorMsg.includes("sign in") ? (
+                    <a href="/login">
+                      <Button size="sm" className="rounded-full text-xs h-8 mt-1 gap-1">
+                        <LogIn className="h-3 w-3" /> Sign In
+                      </Button>
+                    </a>
+                  ) : (
+                    <Button size="sm" variant="outline" className="rounded-full text-xs h-8 mt-1" onClick={() => setUploadState("idle")}>
+                      Try Again
+                    </Button>
+                  )}
                 </>
               ) : (
                 <>
