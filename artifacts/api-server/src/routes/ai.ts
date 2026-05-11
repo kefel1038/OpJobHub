@@ -8,7 +8,7 @@ import { logger } from "../lib/logger";
 import { authMiddleware } from "../lib/auth";
 
 const router = Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (req, res) => {
   try {
