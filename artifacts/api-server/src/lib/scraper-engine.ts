@@ -253,7 +253,7 @@ export async function aiCategorizeJob(job: {
   description: string;
 }) {
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await openai().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -292,7 +292,7 @@ export async function aiDetectScam(job: {
   salary?: string;
 }): Promise<{ isScam: boolean; confidence: number; reasons: string[] }> {
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await openai().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {

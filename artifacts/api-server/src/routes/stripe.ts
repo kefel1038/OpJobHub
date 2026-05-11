@@ -2,11 +2,17 @@ import { Router, type IRouter } from "express";
 import Stripe from "stripe";
 import { authMiddleware, requireRole } from "../lib/auth";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("STRIPE_SECRET_KEY must be set.");
-}
+let _stripe: Stripe | null = null;
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+function getStripe(): Stripe {
+  if (!_stripe) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error("STRIPE_SECRET_KEY must be set.");
+    }
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  }
+  return _stripe;
+}
 
 const router: IRouter = Router();
 
@@ -20,6 +26,7 @@ router.post(
       `${req.protocol}://${req.get("host")}`;
 
     try {
+      const stripe = getStripe();
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: [

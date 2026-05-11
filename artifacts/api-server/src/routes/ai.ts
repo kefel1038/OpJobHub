@@ -24,7 +24,7 @@ router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (r
     const text = await extractTextFromFile(req.file.buffer, req.file.mimetype);
     
     // 1. Semantic Extraction & ATS Scoring via GPT
-    const completion = await openai.chat.completions.create({
+    const completion = await openai().chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
