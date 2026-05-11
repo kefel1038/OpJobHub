@@ -1,10 +1,16 @@
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const pdf = require("pdf-parse");
 import mammoth from "mammoth";
+
+async function getPdfParser(): Promise<(buffer: Buffer) => Promise<{ text: string }>> {
+  // Lazily loaded — pdf-parse v2 requires browser APIs (DOMMatrix) that aren't
+  // available in all server environments (e.g. Vercel serverless).
+  const { createRequire } = await import("module");
+  const req = createRequire(import.meta.url);
+  return req("pdf-parse");
+}
 
 export async function extractTextFromFile(buffer: Buffer, mimeType: string): Promise<string> {
   if (mimeType === "application/pdf") {
+    const pdf = await getPdfParser();
     const data = await pdf(buffer);
     return data.text;
   } else if (
