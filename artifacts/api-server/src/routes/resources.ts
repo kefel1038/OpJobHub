@@ -4,6 +4,34 @@ import { eq, and, ilike, sql, desc } from "drizzle-orm";
 
 const router: IRouter = Router();
 
+router.post("/seed", async (_req: Request, res: Response) => {
+  try {
+    const existing = await db.select({ count: sql<number>`count(*)` }).from(resources);
+    if (Number(existing[0]?.count ?? 0) > 0) {
+      res.json({ ok: true, message: "Resources already seeded" });
+      return;
+    }
+    const seedData = [
+      { title: "Electrical Engineering Handbook", description: "Professional engineering learning material", category: "Engineering", url: "https://example.com/resource1.pdf", featured: true },
+      { title: "Telecommunications Guide", description: "Networking and telecom fundamentals", category: "Technology", url: "https://example.com/resource2.pdf", featured: false },
+      { title: "Career Development Guide", description: "Career preparation and interview support", category: "Career", url: "https://example.com/resource3.pdf", featured: true },
+      { title: "Resume Writing for Gulf Jobs", description: "Tips and templates for GCC resumes", category: "Resume & CV", url: "https://example.com/resume-guide.pdf", featured: false },
+      { title: "Common Interview Questions", description: "Top 50 interview questions with answers", category: "Interview Prep", url: "https://example.com/interview-qa.pdf", featured: false },
+      { title: "Qatar Labor Law Guide", description: "Complete guide to worker rights in Qatar", category: "Labor Laws", url: "https://example.com/qatar-labor.pdf", featured: true },
+      { title: "Work Visa Application Steps", description: "Step-by-step visa guide for Gulf countries", category: "Visa Guides", url: "https://example.com/visa-guide.pdf", featured: false },
+      { title: "AI Tools for Job Seekers", description: "Leverage AI to optimize your job search", category: "AI Tools", url: "https://example.com/ai-tools.pdf", featured: false },
+      { title: "Video Interview Tips", description: "Master remote interviews with these tips", category: "Videos", url: "https://example.com/video-tips", featured: false },
+    ];
+    for (const item of seedData) {
+      await db.insert(resources).values(item);
+    }
+    res.status(201).json({ ok: true, message: `Seeded ${seedData.length} resources` });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: msg });
+  }
+});
+
 router.get("/", async (req: Request, res: Response) => {
   try {
     const { category, search, featured, page = "1", limit = "20" } = req.query as Record<string, string>;
