@@ -1,8 +1,12 @@
-import { IncomingMessage, ServerResponse } from "node:http";
+import { IncomingMessage, ServerResponse, createServer } from "node:http";
 
 function json(res: ServerResponse, status: number, body: unknown) {
-  res.writeHead(status, { "content-type": "application/json" });
-  res.end(JSON.stringify(body));
+  try {
+    res.writeHead(status, { "content-type": "application/json" });
+    res.end(JSON.stringify(body));
+  } catch {
+    /* response already sent or connection closed */
+  }
 }
 
 export default async function handler(
@@ -11,7 +15,6 @@ export default async function handler(
 ) {
   const path = req.url ?? "/";
 
-  // Health endpoints respond immediately without importing the full app
   if (path === "/api/healthz") {
     json(res, 200, { status: "ok" });
     return;
@@ -30,7 +33,6 @@ export default async function handler(
       next?: (err?: unknown) => void,
     ) => void;
 
-    // Intercept ServerResponse.end to detect when Express finishes
     await new Promise<void>((resolve) => {
       if ((res as ServerResponse).writableEnded) {
         resolve();
@@ -39,32 +41,22 @@ export default async function handler(
 
       let responded = false;
 
-      const nativeEnd = (res as ServerResponse).end.bind(res);
-      (res as ServerResponse).end = function (this: ServerResponse, ...args: unknown[]) {
-        if (!responded && this.statusCode >= 500 && args.length === 0) {
-          // Express ended response with 5xx but no body — our fallback
-          this.writeHead(this.statusCode, { "content-type": "application/json" });
-          return nativeEnd(JSON.stringify({ error: "Internal server error (empty body)" }));
-        }
-        responded = true;
-        return nativeEnd(...args as Parameters<ServerResponse["end"]>);
-      };
-
       res.once("finish", () => { responded = true; resolve(); });
       res.once("close", () => { if (!responded) resolve(); });
 
-      // Safety net — if Express hangs, respond anyway
       const timeout = setTimeout(() => {
         if (!responded) {
           responded = true;
-          json(res, 500, { error: "Express did not send a response within 25s" });
+          json(res, 500, { error: "Handler did not respond within 25s" });
           resolve();
         }
       }, 25000);
 
-      fullApp(req, res, (err?: unknown) => {
-        if (responded) return;
+      // Use app.handle() which is the proper way to manually dispatch through Express.
+      // Setting the next callback allows Express to call us when done.
+      (fullApp as any).handle(req, res, (err?: unknown) => {
         clearTimeout(timeout);
+        if (responded) return;
         if (err) {
           const message = err instanceof Error ? err.message : String(err);
           json(res, 500, { error: "Unhandled error", message });
