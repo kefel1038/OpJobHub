@@ -8,16 +8,27 @@ const router: IRouter = Router();
 
 router.get("/jobs", async (_req: Request, res: Response) => {
   try {
-    const allJobs = await db
-      .select()
-      .from(jobs)
-      .where(eq(jobs.status, "active"))
-      .orderBy(desc(jobs.isFeatured), desc(jobs.createdAt));
-    res.json(serializeDates(allJobs));
+    let result;
+    try {
+      result = await db
+        .select()
+        .from(jobs)
+        .where(eq(jobs.status, "active"))
+        .orderBy(desc(jobs.isFeatured), desc(jobs.createdAt));
+    } catch (dbErr) {
+      const msg = dbErr instanceof Error ? dbErr.message : String(dbErr);
+      // Return error as 200 (not 500) to see if Vercel strips 5xx bodies
+      res.json({ _dbError: msg, _hint: "DATABASE_URL might be missing or connection failed" });
+      return;
+    }
+    res.json(serializeDates(result));
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    // Try sending error — if Express 5 error handler doesn't work, this ensures a body
-    res.status(500).json({ error: msg, _caught: true });
+    // Final fallback — raw Node.js response write
+    if (!res.writableEnded) {
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({ _outerError: msg }));
+    }
   }
 });
 
