@@ -1,46 +1,46 @@
-import { IncomingMessage, ServerResponse } from "node:http";
+import express from "express";
 
-function json(res: ServerResponse, status: number, body: unknown) {
-  res.writeHead(status, { "content-type": "application/json" });
-  res.end(JSON.stringify(body));
-}
+const app = express();
 
-export default async function handler(
-  req: IncomingMessage & { query?: Record<string, string>; body?: unknown },
-  res: ServerResponse,
-) {
-  const path = req.url ?? "/";
+// Health endpoints respond immediately without loading the full app
+app.get("/api/healthz", (_req, res) => {
+  res.json({ status: "ok" });
+});
 
-  if (path === "/api/healthz") {
-    json(res, 200, { status: "ok" });
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok", version: "1.0.0" });
+});
+
+// Lazy-load and mount the full Express app for all other routes
+let fullApp: express.Express | null = null;
+
+app.use(async (req, res, next) => {
+  if (req.path === "/api/healthz" || req.path === "/api/health") {
+    next();
     return;
   }
 
-  if (path === "/api/health") {
-    json(res, 200, { status: "ok", version: "1.0.0" });
-    return;
+  if (!fullApp) {
+    try {
+      const mod = await import("../artifacts/api-server/dist/vercel-handler.mjs");
+      fullApp = mod.default;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      res.status(500).json({
+        error: "App load failed",
+        message,
+        stack: err instanceof Error ? err.stack?.split("\n").slice(0, 5).join("\n") : undefined,
+      });
+      return;
+    }
   }
 
-  try {
-    const mod = await import("../artifacts/api-server/dist/vercel-handler.mjs");
-    const app = mod.default;
-    // Wait for Express to finish before resolving the handler —
-    // otherwise Vercel cuts off the response body.
-    await new Promise<void>((resolve) => {
-      const sr = res as ServerResponse;
-      if (sr.writableEnded) {
-        resolve();
-      } else {
-        sr.once("finish", resolve);
-      }
-      app(req, res);
-    });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    json(res, 500, {
-      error: "App load failed",
-      message,
-      stack: err instanceof Error ? err.stack?.split("\n").slice(0, 5).join("\n") : undefined,
-    });
-  }
-}
+  fullApp(req, res);
+});
+
+// Not strictly needed — Express returns 404 by default, but keep for explicitness
+app.use((_req, res) => {
+  res.status(404).json({ error: "Not found" });
+});
+
+export default app;
