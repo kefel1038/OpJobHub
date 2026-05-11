@@ -261,7 +261,13 @@ router.post("/migrate", async (_req, res) => {
     const client = await pool.connect();
     try {
       for (const statement of statements) {
-        await client.query(statement);
+        try {
+          await client.query(statement);
+        } catch (stmtErr) {
+          const stmtMsg = stmtErr instanceof Error ? stmtErr.message : String(stmtErr);
+          if (stmtMsg.includes("already exists")) continue;
+          throw stmtErr;
+        }
       }
     } finally {
       client.release();
@@ -269,11 +275,7 @@ router.post("/migrate", async (_req, res) => {
     res.json({ ok: true, message: "Migrations applied" });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    if (msg.includes("already exists")) {
-      res.json({ ok: true, message: "Tables already exist" });
-    } else {
-      res.status(500).json({ ok: false, message: msg });
-    }
+    res.status(500).json({ ok: false, message: msg });
   } finally {
     await pool.end();
   }
