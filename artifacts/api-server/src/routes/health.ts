@@ -259,10 +259,20 @@ router.get("/db-debug", async (_req, res) => {
 });
 
 router.post("/migrate", async (_req, res) => {
+  const { Pool } = require("pg");
+  const url =
+    process.env.DATABASE_URL ||
+    "postgresql://postgres.fmcblciptvnagrpsrzcw:Lovr_1990_Lovr@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres";
+  const pool = new Pool({ connectionString: url, ssl: { rejectUnauthorized: false } });
   try {
     const statements = MIGRATION_SQL.split("--> statement-breakpoint").map((s) => s.trim()).filter(Boolean);
-    for (const statement of statements) {
-      await db.execute(sql.raw(statement));
+    const client = await pool.connect();
+    try {
+      for (const statement of statements) {
+        await client.query(statement);
+      }
+    } finally {
+      client.release();
     }
     res.json({ ok: true, message: "Migrations applied" });
   } catch (err) {
@@ -272,6 +282,8 @@ router.post("/migrate", async (_req, res) => {
     } else {
       res.status(500).json({ ok: false, message: msg });
     }
+  } finally {
+    await pool.end();
   }
 });
 
