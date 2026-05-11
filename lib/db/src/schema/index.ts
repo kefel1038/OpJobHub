@@ -8,3 +8,4 @@ export * from "./job-alerts";
 export * from "./applications";
 export * from "./scrape-logs";
 export * from "./ai";
+export * from "./resources";

@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react"
-import { Link } from "wouter"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { motion } from "framer-motion"
 import {
   Search, BookOpen, FileText, Video, Award, Code, Globe, Shield,
   TrendingUp, Star, ChevronRight, Download, Users, Sparkles,
@@ -13,28 +13,8 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
 import { Navbar } from "@/components/navbar"
-
-const categories = [
-  { icon: FileText, label: "Resume Writing", color: "from-blue-500 to-blue-600", count: 24 },
-  { icon: MessageCircle, label: "Interview Preparation", color: "from-purple-500 to-purple-600", count: 31 },
-  { icon: TrendingUp, label: "Career Growth", color: "from-green-500 to-green-600", count: 18 },
-  { icon: Globe, label: "Remote Jobs", color: "from-cyan-500 to-cyan-600", count: 15 },
-  { icon: GraduationCap, label: "Scholarships", color: "from-pink-500 to-pink-600", count: 12 },
-  { icon: Award, label: "Certifications", color: "from-amber-500 to-amber-600", count: 28 },
-  { icon: Code, label: "Coding Skills", color: "from-indigo-500 to-indigo-600", count: 22 },
-  { icon: Briefcase, label: "Engineering", color: "from-orange-500 to-orange-600", count: 19 },
-  { icon: Building2, label: "Telecom Careers", color: "from-teal-500 to-teal-600", count: 11 },
-  { icon: BarChart3, label: "Business & Entrepreneurship", color: "from-red-500 to-red-600", count: 16 },
-  { icon: Plane, label: "Visa & Relocation", color: "from-violet-500 to-violet-600", count: 27 },
-  { icon: Users, label: "Freelancing", color: "from-lime-500 to-lime-600", count: 14 },
-  { icon: Scale, label: "Gulf Labor Laws", color: "from-yellow-500 to-yellow-600", count: 43 },
-  { icon: Shield, label: "Worker Rights", color: "from-rose-500 to-rose-600", count: 36 },
-  { icon: AlertTriangle, label: "Scam Awareness", color: "from-orange-600 to-red-600", count: 9 },
-  { icon: Zap, label: "AI & Automation", color: "from-sky-500 to-sky-600", count: 21 },
-]
+import { api, type Resource } from "@/lib/api"
 
 const trendingResources = [
   { title: "Qatar Labor Law Explained for Foreign Workers", category: "Labor Law", views: "12.4K", tag: "Hot" },
@@ -136,19 +116,19 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 }
 
-function SearchBar({ placeholder = "Search resources, guides, tools..." }: { placeholder?: string }) {
-  const [query, setQuery] = useState("")
+function SearchBar({ value, onChange, onSearch, placeholder = "Search resources, guides, tools..." }: { value: string; onChange: (v: string) => void; onSearch: () => void; placeholder?: string }) {
   return (
     <div className="relative w-full max-w-2xl mx-auto">
       <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" />
       <input
         type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter") onSearch() }}
         placeholder={placeholder}
         className="w-full pl-12 pr-4 py-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl text-white placeholder:text-white/40 text-lg focus:outline-none focus:ring-2 focus:ring-[#FFBF00]/50 focus:border-transparent transition-all"
       />
-      <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#FFBF00] text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-[#FFBF00]/90 transition-all">
+      <button onClick={onSearch} className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#FFBF00] text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-[#FFBF00]/90 transition-all">
         Search
       </button>
     </div>
@@ -178,6 +158,7 @@ function GlassCard({ children, className = "" }: { children: React.ReactNode; cl
 export default function Resources() {
   const [activeCategory, setActiveCategory] = useState("All")
   const [activeCountry, setActiveCountry] = useState("Qatar")
+  const [searchQuery, setSearchQuery] = useState("")
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -185,6 +166,18 @@ export default function Resources() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  const { data: resourcesData, isLoading, error } = useQuery({
+    queryKey: ["resources", activeCategory, searchQuery],
+    queryFn: () =>
+      api.listResources({
+        category: activeCategory === "All" ? undefined : activeCategory,
+        search: searchQuery || undefined,
+      }),
+  })
+
+  const resourcesList = resourcesData?.resources ?? []
+  const paginationInfo = resourcesData?.pagination
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
@@ -241,7 +234,7 @@ export default function Resources() {
             </motion.p>
 
             <motion.div variants={itemVariants}>
-              <SearchBar />
+              <SearchBar value={searchQuery} onChange={setSearchQuery} onSearch={() => {}} />
             </motion.div>
 
             <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-2 mt-8">
@@ -273,39 +266,74 @@ export default function Resources() {
         </div>
       </section>
 
-      {/* RESOURCE CATEGORIES */}
+      {/* RESOURCE CARDS */}
       <section className="py-24 relative">
         <div className="container mx-auto px-4">
           <SectionHeader
-            title="Explore Resources"
-            subtitle="16 categories covering everything from resume writing to Gulf labor laws"
-            action={
-              <div className="flex gap-2">
-                <button className="p-2 rounded-full border hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"><ChevronLeft className="h-5 w-5" /></button>
-                <button className="p-2 rounded-full border hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"><ChevronRight className="h-5 w-5" /></button>
-              </div>
-            }
+            title={searchQuery ? `Results for "${searchQuery}"` : "Explore Resources"}
+            subtitle={isLoading ? "Loading..." : error ? "Failed to load resources" : `${paginationInfo?.total ?? 0} resource${paginationInfo?.total !== 1 ? "s" : ""} available`}
           />
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-            {categories.map((cat, i) => (
-              <motion.div
-                key={cat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.03 }}
-                className="group cursor-pointer"
-              >
-                <GlassCard className="p-5 text-center hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                  <div className={`w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center`}>
-                    <cat.icon className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="text-sm font-bold leading-tight mb-1">{cat.label}</h3>
-                  <p className="text-xs text-muted-foreground">{cat.count} resources</p>
-                </GlassCard>
-              </motion.div>
-            ))}
-          </div>
+
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/30 dark:border-zinc-700/30 rounded-2xl p-6 animate-pulse">
+                  <div className="h-4 bg-zinc-200 dark:bg-zinc-700 rounded w-3/4 mb-3" />
+                  <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded w-full mb-2" />
+                  <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <AlertTriangle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+              <p className="text-lg font-bold text-red-400 mb-2">Failed to load resources</p>
+              <p className="text-muted-foreground">Please try again later.</p>
+            </div>
+          ) : resourcesList.length === 0 ? (
+            <div className="text-center py-12">
+              <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg font-bold mb-2">No resources found</p>
+              <p className="text-muted-foreground">{searchQuery ? `No resources matching "${searchQuery}"` : "Check back later for new resources."}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {resourcesList.map((resource, i) => (
+                <motion.div
+                  key={resource.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.03 }}
+                >
+                  <GlassCard className="p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
+                    <div className="flex items-start justify-between mb-3">
+                      {resource.featured && (
+                        <Badge className="bg-[#FFBF00] text-black font-bold text-xs">Featured</Badge>
+                      )}
+                      {resource.category && (
+                        <Badge variant="outline" className="text-xs">{resource.category}</Badge>
+                      )}
+                    </div>
+                    <h3 className="font-bold text-lg leading-snug mb-2">{resource.title}</h3>
+                    {resource.description && (
+                      <p className="text-sm text-muted-foreground mb-4 flex-1">{resource.description}</p>
+                    )}
+                    {resource.url && (
+                      <a
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[#FFBF00] font-bold text-sm group"
+                      >
+                        Open Resource <ArrowUpRight className="h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      </a>
+                    )}
+                  </GlassCard>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

@@ -205,6 +205,18 @@ CREATE TABLE "scrape_logs" (
 \t"metadata" jsonb DEFAULT '{}'::jsonb
 );
 --> statement-breakpoint
+CREATE TABLE "resources" (
+\t"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+\t"title" text NOT NULL,
+\t"description" text,
+\t"category" text,
+\t"url" text,
+\t"thumbnail" text,
+\t"featured" boolean DEFAULT false,
+\t"status" text DEFAULT 'active',
+\t"created_at" timestamp DEFAULT now()
+);
+--> statement-breakpoint
 ALTER TABLE "ats_reports" ADD CONSTRAINT "ats_reports_resume_id_resumes_id_fk" FOREIGN KEY ("resume_id") REFERENCES "public"."resumes"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "career_insights" ADD CONSTRAINT "career_insights_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "job_embeddings" ADD CONSTRAINT "job_embeddings_job_id_jobs_id_fk" FOREIGN KEY ("job_id") REFERENCES "public"."jobs"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

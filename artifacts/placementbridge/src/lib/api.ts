@@ -51,6 +51,18 @@ export interface Job {
   updatedAt?: string;
 }
 
+export interface Resource {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string | null;
+  url: string | null;
+  thumbnail: string | null;
+  featured: boolean;
+  status: string | null;
+  createdAt: string;
+}
+
 export interface SearchResult {
   jobs: Job[];
   pagination: {
@@ -413,6 +425,20 @@ export const api = {
   },
   getFreelanceCategories() {
     return request<Array<{ category: string; count: number }>>("/freelance/categories");
+  },
+
+  // ─── Resources ──────────────────────────────────────────────────
+  listResources(params?: { category?: string; search?: string; featured?: string; page?: number; limit?: number }) {
+    const qs = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          qs.set(key, String(value));
+        }
+      });
+    }
+    const queryStr = qs.toString();
+    return request<{ resources: Resource[]; pagination: { page: number; limit: number; total: number; totalPages: number; hasMore: boolean } }>(`/resources${queryStr ? `?${queryStr}` : ""}`);
   },
 
   // ─── Employer-Specific APIs ─────────────────────────────────────

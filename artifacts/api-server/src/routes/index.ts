@@ -7,6 +7,7 @@ import adminRouter from "./admin";
 import aiRouter from "./ai";
 import scraperRouter from "./scraper";
 import searchRouter from "./search";
+import resourcesRouter from "./resources";
 import employerRouter from "./employer";
 import freelanceRouter from "./freelance";
 
@@ -20,6 +21,7 @@ router.use(adminRouter);
 router.use("/ai", aiRouter);
 router.use("/scraper", scraperRouter);
 router.use("/search", searchRouter);
+router.use("/resources", resourcesRouter);
 router.use(employerRouter);
 router.use(freelanceRouter);
 
