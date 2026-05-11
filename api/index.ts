@@ -1,4 +1,4 @@
-import { IncomingMessage, ServerResponse, createServer } from "node:http";
+import { IncomingMessage, ServerResponse } from "node:http";
 
 function json(res: ServerResponse, status: number, body: unknown) {
   try {
