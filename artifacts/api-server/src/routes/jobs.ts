@@ -17,7 +17,12 @@ router.get("/jobs", async (req: Request, res: Response) => {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const stack = err instanceof Error ? err.stack?.split("\n").slice(0, 6).join(" | ") : "";
-    res.status(400).json({ error: "DB query failed", message: msg, stack });
+    // Use raw response methods to bypass any Vercel body stripping on 4xx/5xx
+    const sr = res as any;
+    if (!sr.writableEnded) {
+      sr.writeHead(200, { "content-type": "application/json" });
+      sr.end(JSON.stringify({ error: "DB query failed", message: msg, stack }));
+    }
   }
 });
 
