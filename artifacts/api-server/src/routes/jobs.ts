@@ -6,7 +6,7 @@ import { serializeDates } from "../lib/serialize";
 
 const router: IRouter = Router();
 
-router.get("/jobs", async (_req: Request, res: Response) => {
+router.get("/jobs", async (req: Request, res: Response) => {
   try {
     const allJobs = await db
       .select()
@@ -16,7 +16,8 @@ router.get("/jobs", async (_req: Request, res: Response) => {
     res.json(serializeDates(allJobs));
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    res.status(500).json({ error: msg });
+    const stack = err instanceof Error ? err.stack?.split("\n").slice(0, 6).join(" | ") : "";
+    res.status(400).json({ error: "DB query failed", message: msg, stack });
   }
 });
 
