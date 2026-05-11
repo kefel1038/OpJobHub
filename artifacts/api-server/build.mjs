@@ -17,6 +17,7 @@ async function buildAll() {
   await esbuild({
     entryPoints: [
       path.resolve(artifactDir, "src/index.ts"),
+      path.resolve(artifactDir, "src/vercel-handler.ts"),
       path.resolve(artifactDir, "src/scripts/scrape-all.ts"),
       path.resolve(artifactDir, "src/scripts/cleanup-jobs.ts"),
     ],

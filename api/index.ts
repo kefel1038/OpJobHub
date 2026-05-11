@@ -22,7 +22,7 @@ export default async function handler(
   }
 
   try {
-    const mod = await import("../artifacts/api-server/src/app");
+    const mod = await import("../artifacts/api-server/dist/vercel-handler.mjs");
     return mod.default(req, res);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
