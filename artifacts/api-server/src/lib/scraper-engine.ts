@@ -254,7 +254,7 @@ export async function aiCategorizeJob(job: {
 }) {
   try {
     const completion = await openrouter().chat.completions.create({
-      model: "nvidia/nemotron-3-super:free",
+      model: "nvidia/nemotron-3-super-120b-a12b:free",
       messages: [
         {
           role: "system",
@@ -292,7 +292,7 @@ export async function aiDetectScam(job: {
 }): Promise<{ isScam: boolean; confidence: number; reasons: string[] }> {
   try {
     const completion = await openrouter().chat.completions.create({
-      model: "nvidia/nemotron-3-super:free",
+      model: "nvidia/nemotron-3-super-120b-a12b:free",
       messages: [
         {
           role: "system",
