@@ -57,7 +57,7 @@ const articlesByCountry: Record<string, Array<{ title: string; reads: string; di
     { title: "Indian Embassy Qatar - Working Abroad", reads: "1.9K", difficulty: "Advanced", url: "https://www.indianembassyqatar.gov.in/working_abroad" },
     { title: "MWO Qatar - For Filipino Workers", reads: "1.5K", difficulty: "Intermediate", url: "https://www.mwoqatar.org/" },
     { title: "Labour Reforms in Qatar", reads: "2.7K", difficulty: "Intermediate", url: "https://www.mol.gov.qa/En/Pages/default.aspx" },
-    { title: "Overseas Workers Resource Centre", reads: "1.1K", difficulty: "Beginner", url: "https://www.indianembassyqatar.gov.in/OWRC" },
+    { title: "MADAD - Indian Worker Grievance Portal", reads: "1.1K", difficulty: "Beginner", url: "https://www.madad.gov.in" },
     { title: "Migrant Rights Research - Qatar", reads: "4.2K", difficulty: "Beginner", url: "https://www.mrrors.org/category/qatar/" },
     { title: "Ashghal Safety Certification - Qatar", reads: "3.8K", difficulty: "Intermediate", url: "https://www.ashghal.gov.qa/en/QualityCertificates/Pages/SafetyCertificationProgram.aspx" },
   ],

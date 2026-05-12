@@ -39,7 +39,7 @@ router.post("/seed", async (_req: Request, res: Response) => {
       { title: "NEBOSH IGC - Gulf Construction Safety", description: "Most required HSE certification for GCC construction jobs", category: "Learning Paths", url: "https://www.smartqhse.com/safety-blog/best-hse-certifications-gcc-professionals", featured: false },
       { title: "Migrant-Rights.org", description: "Migrant worker rights information and resources for the Gulf", category: "Worker Rights", url: "https://www.migrant-rights.org/", featured: true },
       { title: "MRRORS - Migrant Rights Research", description: "Research repository on migrant worker rights in the Gulf", category: "Worker Rights", url: "https://www.mrrors.org/", featured: false },
-      { title: "Indian Embassy Qatar - OWRC", description: "Overseas Workers Resource Centre for Indian workers in Qatar", category: "Embassy", url: "https://www.indianembassyqatar.gov.in/OWRC", featured: true },
+      { title: "Indian Embassy Qatar - Working Abroad", description: "Indian embassy resources for workers in Qatar", category: "Embassy", url: "https://www.indianembassyqatar.gov.in/working_abroad", featured: true },
       { title: "MADAD - Indian Government Portal", description: "Indian government grievance portal for overseas workers", category: "Embassy", url: "https://www.madad.gov.in", featured: false },
       { title: "Philippine Migrant Workers Office Qatar", description: "MWO Qatar - support for Filipino workers in Qatar", category: "Embassy", url: "https://www.mwoqatar.org/", featured: false },
       { title: "UAE Labour Law - 10 Things Employers Must Know", description: "YouTube explainer on UAE Labour Law 2026", category: "Videos", url: "https://www.youtube.com/watch?v=bPKPJW3GAOw", featured: false },
