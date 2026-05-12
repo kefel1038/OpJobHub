@@ -372,7 +372,7 @@ export default function Resources() {
                       </a>
                     )}
                 </GlassCard>
-              </motion.a>
+              </motion.div>
             ))}
             </div>
           )}
@@ -395,14 +395,15 @@ export default function Resources() {
           />
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {aiTools.map((tool, i) => (
-              <motion.div
+              <motion.a
                 key={tool.name}
+                href={tool.url}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
+                className="group block"
               >
-                <Link href={tool.url}>
                   <GlassCard className={`p-6 h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer relative ${tool.popular ? "ring-2 ring-[#FFBF00]" : ""}`}>
                     {tool.popular && (
                       <span className="absolute -top-2.5 -right-2.5 bg-[#FFBF00] text-black text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -418,8 +419,7 @@ export default function Resources() {
                       Try Now <ArrowRight className="h-4 w-4" />
                     </div>
                   </GlassCard>
-                </Link>
-              </motion.div>
+              </motion.a>
             ))}
           </div>
         </div>
@@ -696,7 +696,7 @@ export default function Resources() {
                     </div>
                   </div>
                 </GlassCard>
-              </motion.div>
+              </motion.a>
             ))}
           </div>
         </div>
