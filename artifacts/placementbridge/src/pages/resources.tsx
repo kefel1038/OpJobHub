@@ -104,23 +104,23 @@ const articlesByCountry: Record<string, Array<{ title: string; reads: string; di
 }
 
 const learningPaths = [
-  { title: "Frontend Developer", steps: 6, jobs: 3400, salary: "QAR 15-25K", color: "from-blue-500 to-cyan-400", icon: Code, url: "https://www.coursera.org/learn/introduction-to-front-end-development?specialization=meta-front-end-developer" },
-  { title: "Electrical Engineering", steps: 5, jobs: 2100, salary: "QAR 12-20K", color: "from-orange-500 to-yellow-400", icon: Zap, url: "https://www.edx.org/learn/front-end-web-development" },
-  { title: "Telecom Technician", steps: 4, jobs: 1800, salary: "QAR 8-15K", color: "from-purple-500 to-pink-400", icon: Building2, url: "https://www.smartqhse.com/safety-blog/best-hse-certifications-gcc-professionals" },
-  { title: "Cybersecurity", steps: 7, jobs: 1500, salary: "QAR 20-35K", color: "from-red-500 to-rose-400", icon: Shield, url: "https://www.coursera.org/google-certificates/google-cybersecurity" },
-  { title: "AI / Machine Learning", steps: 8, jobs: 1200, salary: "QAR 25-45K", color: "from-indigo-500 to-violet-400", icon: Brain, url: "https://www.coursera.org/professional-certificates/google-ai" },
-  { title: "Gulf Construction", steps: 4, jobs: 5600, salary: "QAR 6-18K", color: "from-amber-500 to-orange-400", icon: Briefcase, url: "https://www.ashghal.gov.qa/en/QualityCertificates/Pages/SafetyCertificationProgram.aspx" },
+  { title: "Frontend Developer", steps: 6, jobs: 3400, salary: "QAR 15-25K", color: "from-blue-500 to-cyan-400", icon: Code, url: "/ai-matching" },
+  { title: "Electrical Engineering", steps: 5, jobs: 2100, salary: "QAR 12-20K", color: "from-orange-500 to-yellow-400", icon: Zap, url: "/ai-matching" },
+  { title: "Telecom Technician", steps: 4, jobs: 1800, salary: "QAR 8-15K", color: "from-purple-500 to-pink-400", icon: Building2, url: "/ai-matching" },
+  { title: "Cybersecurity", steps: 7, jobs: 1500, salary: "QAR 20-35K", color: "from-red-500 to-rose-400", icon: Shield, url: "/ai-matching" },
+  { title: "AI / Machine Learning", steps: 8, jobs: 1200, salary: "QAR 25-45K", color: "from-indigo-500 to-violet-400", icon: Brain, url: "/ai-matching" },
+  { title: "Gulf Construction", steps: 4, jobs: 5600, salary: "QAR 6-18K", color: "from-amber-500 to-orange-400", icon: Briefcase, url: "/ai-matching" },
 ]
 
 const downloads = [
-  { name: "ATS-Optimized CV Template", format: "Canva", size: "Online", downloads: "12.4K", url: "https://www.canva.com/resumes/templates/" },
-  { name: "Professional Cover Letter Template", format: "Canva", size: "Online", downloads: "9.8K", url: "https://www.canva.com/resumes/templates/" },
-  { name: "Interview Preparation Cheat Sheet", format: "Online", size: "101 Qs", downloads: "8.1K", url: "https://www.ihire.com/resourcecenter/jobseeker/pages/interview-cheat-sheet-101-common-interview-questions" },
-  { name: "Microsoft Resume Templates", format: "DOCX", size: "Online", downloads: "6.5K", url: "https://create.microsoft.com/en-us/grow-a-business" },
-  { name: "UAE Know Your Rights Guide", format: "PDF", size: "1.8 MB", downloads: "7.3K", url: "https://mohre.gov.ae/assets/download/618ff6ec/Know%20Your%20Rights%20-%20English_638924921038367080.pdf.aspx" },
-  { name: "Qatar Labour Law (ILO PDF)", format: "PDF", size: "2.1 MB", downloads: "5.2K", url: "https://natlex.ilo.org/dyn/natlex2/natlex2/files/download/67387/QAT67387%20Eng.pdf" },
-  { name: "Saudi Labour Law (Official PDF)", format: "PDF", size: "1.8 MB", downloads: "4.8K", url: "https://www.hrsd.gov.sa/sites/default/files/2023-02/Labor.pdf" },
-  { name: "Oman Labour Law (English PDF)", format: "PDF", size: "640 KB", downloads: "3.9K", url: "https://amcham.om/wp-content/uploads/2025/02/OMAN-LABOUR-LAW-532023.pdf" },
+  { name: "AI Resume Optimizer", format: "AI", size: "Free", downloads: "12.4K", url: "/ai-matching" },
+  { name: "AI Cover Letter Generator", format: "AI", size: "Free", downloads: "9.8K", url: "/ai-matching" },
+  { name: "AI Interview Coach", format: "AI", size: "Free", downloads: "8.1K", url: "/ai-matching" },
+  { name: "AI Skill Gap Analyzer", format: "AI", size: "Free", downloads: "6.5K", url: "/ai-matching" },
+  { name: "AI Salary Estimator", format: "AI", size: "Free", downloads: "7.3K", url: "/ai-matching" },
+  { name: "AI Career Path Finder", format: "AI", size: "Free", downloads: "5.2K", url: "/ai-matching" },
+  { name: "AI Contract Reviewer", format: "AI", size: "Free", downloads: "4.8K", url: "/ai-matching" },
+  { name: "AI Job Match Scoring", format: "AI", size: "Free", downloads: "3.9K", url: "/ai-matching" },
 ]
 
 const videos = [
@@ -572,21 +572,19 @@ export default function Resources() {
                 Career Learning Paths
               </span>
             }
-            subtitle="Structured roadmaps from beginner to hired — with certifications, resources, and salary benchmarks"
-            action={<Button variant="outline" className="rounded-full font-bold">View All Paths <ArrowRight className="h-4 w-4 ml-1" /></Button>}
+            subtitle="AI generates personalized career roadmaps — with skill gap analysis, certifications, and salary benchmarks"
+            action={<Link href="/ai-matching"><Button variant="outline" className="rounded-full font-bold">View All Paths <ArrowRight className="h-4 w-4 ml-1" /></Button></Link>}
           />
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {learningPaths.map((path, i) => (
-              <motion.a
+              <motion.div
                 key={path.title}
-                href={path.url}
-                target="_blank"
-                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
               >
+                <Link href={path.url}>
                 <GlassCard className="p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group overflow-hidden relative">
                   <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${path.color} opacity-5 rounded-bl-full`} />
                   <div className="flex items-start justify-between mb-6">
@@ -609,7 +607,8 @@ export default function Resources() {
                     Start Path <ArrowRight className="h-4 w-4" />
                   </div>
                 </GlassCard>
-              </motion.a>
+              </Link>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -625,20 +624,18 @@ export default function Resources() {
                 Free Downloads
               </span>
             }
-            subtitle="Professional templates, cheat sheets, and planning tools"
+            subtitle="AI-powered tools — free for all Gulf job seekers"
           />
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {downloads.map((item, i) => (
-              <motion.a
+              <motion.div
                 key={item.name}
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.03 }}
               >
+                <Link href={item.url}>
                 <GlassCard className="p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group flex items-start gap-4">
                   <div className="w-10 h-10 rounded-lg bg-[#FFBF00]/10 flex items-center justify-center flex-shrink-0">
                     <FileText className="h-5 w-5 text-[#FFBF00]" />
@@ -652,7 +649,8 @@ export default function Resources() {
                     </div>
                   </div>
                 </GlassCard>
-              </motion.a>
+              </Link>
+              </motion.div>
             ))}
           </div>
         </div>
