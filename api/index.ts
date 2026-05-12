@@ -46,18 +46,7 @@ export default async function handler(
       res.once("finish", () => { responded = true; resolve(); });
       res.once("close", () => { if (!responded) resolve(); });
 
-      const timeout = setTimeout(() => {
-        if (!responded) {
-          responded = true;
-          json(res, 500, { error: "Handler did not respond within 50s" });
-          resolve();
-        }
-      }, 50000);
-
-      // Use app.handle() which is the proper way to manually dispatch through Express.
-      // Setting the next callback allows Express to call us when done.
       (fullApp as any).handle(req, res, (err?: unknown) => {
-        clearTimeout(timeout);
         if (responded) return;
         if (err) {
           const message = err instanceof Error ? err.message : String(err);
