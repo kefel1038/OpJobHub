@@ -10,6 +10,30 @@ import { authMiddleware } from "../lib/auth";
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
+async function runAiAnalysis(text: string) {
+  const completion = await openrouter().chat.completions.create({
+    model: "meta-llama/llama-3.1-8b-instruct:free",
+    messages: [
+      {
+        role: "system",
+        content: "You are an expert ATS and Career Intelligence AI. Return ONLY valid JSON.",
+      },
+      {
+        role: "user",
+        content: `Analyze this resume text:\n\n${text.slice(0, 3000)}\n\nReturn JSON:
+{
+  "parsed": { "fullName": "", "headline": "", "skills": [], "experience": [], "education": [] },
+  "scores": { "ats": 0-100, "keyword": 0-100, "readability": 0-100, "skills": 0-100, "market": 0-100 },
+  "suggestions": { "missingKeywords": [], "weakAreas": [], "optimizationTips": [] },
+  "marketPosition": { "rank": "", "demand": "High/Medium/Low", "salaryRange": "" }
+}`,
+      },
+    ],
+  });
+
+  return JSON.parse(completion.choices[0].message.content || "{}");
+}
+
 router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (req, res) => {
   try {
     if (!req.file) {
@@ -22,47 +46,52 @@ router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (r
     }
 
     const text = await extractTextFromFile(req.file.buffer, req.file.mimetype);
-    
-    // 1. Semantic Extraction & ATS Scoring via GPT
-    const completion = await openrouter().chat.completions.create({
-      model: "meta-llama/llama-3.1-8b-instruct:free",
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert ATS (Applicant Tracking System) and Career Intelligence AI. Analyze the provided resume text and extract structured information, calculate ATS scores, and provide optimization suggestions. Return ONLY valid JSON.",
-        },
-        {
-          role: "user",
-          content: `Analyze this resume text:\n\n${text.slice(0, 3000)}\n\nReturn JSON with following structure:
-          {
-            "parsed": { "fullName": "", "headline": "", "skills": [], "experience": [], "education": [] },
-            "scores": { "ats": 0-100, "keyword": 0-100, "readability": 0-100, "skills": 0-100, "market": 0-100 },
-            "suggestions": { "missingKeywords": [], "weakAreas": [], "optimizationTips": [] },
-            "marketPosition": { "rank": "", "demand": "High/Medium/Low", "salaryRange": "" }
-          }`
-        }
-      ],
-    });
 
-    const analysis = JSON.parse(completion.choices[0].message.content || "{}");
-
-    // 2. Store Resume
     const [resume] = await db.insert(resumes).values({
       userId,
       fileName: req.file.originalname,
-      fileUrl: "internal://resumes/" + req.file.originalname, // Placeholder
+      fileUrl: "internal://resumes/" + req.file.originalname,
       rawText: text,
-      parsedData: analysis.parsed,
     }).returning();
 
-    // 3. Generate Embedding & Store
-    const embedding = await getEmbedding(text);
-    await db.insert(resumeEmbeddings).values({
-      resumeId: resume.id,
-      embedding,
-    });
+    let analysis: any;
+    try {
+      analysis = await Promise.race([
+        runAiAnalysis(text),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("TIMEOUT")), 25000)
+        ),
+      ]);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg === "TIMEOUT") {
+        res.status(202).json({ resumeId: resume.id, status: "processing" });
 
-    // 4. Store ATS Report
+        try {
+          analysis = await runAiAnalysis(text);
+        } catch (bgErr) {
+          logger.error({ err: bgErr }, "Background AI analysis failed");
+          await db.update(resumes).set({ parsedData: { error: "Analysis failed" } }).where(eq(resumes.id, resume.id));
+          return;
+        }
+
+        await db.update(resumes).set({ parsedData: analysis.parsed }).where(eq(resumes.id, resume.id));
+        const embedding = await getEmbedding(text);
+        await db.insert(resumeEmbeddings).values({ resumeId: resume.id, embedding });
+        await db.insert(atsReports).values({
+          resumeId: resume.id,
+          scores: analysis.scores,
+          suggestions: analysis.suggestions,
+          marketPosition: analysis.marketPosition,
+        });
+        return;
+      }
+      throw err;
+    }
+
+    await db.update(resumes).set({ parsedData: analysis.parsed }).where(eq(resumes.id, resume.id));
+    const embedding = await getEmbedding(text);
+    await db.insert(resumeEmbeddings).values({ resumeId: resume.id, embedding });
     await db.insert(atsReports).values({
       resumeId: resume.id,
       scores: analysis.scores,
@@ -70,8 +99,6 @@ router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (r
       marketPosition: analysis.marketPosition,
     });
 
-    // 5. Semantic Job Matching (using pgvector)
-    // Find top 5 matching jobs
     const matches = await db.execute(sql`
       SELECT j.*, 1 - (je.embedding <=> ${JSON.stringify(embedding)}::vector) as similarity
       FROM ${jobs} j
@@ -80,15 +107,28 @@ router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (r
       LIMIT 5
     `);
 
-    res.json({
-      resumeId: resume.id,
-      analysis,
-      matches,
-    });
-
+    res.json({ resumeId: resume.id, status: "complete", analysis, matches });
   } catch (error: unknown) {
     logger.error({ err: error }, "Error analyzing resume");
     res.status(500).json({ error: "Failed to analyze resume: " + (error instanceof Error ? error.message : String(error)) });
+  }
+});
+
+router.get("/analyze-resume/status/:id", authMiddleware, async (req, res) => {
+  try {
+    const [resume] = await db.select().from(resumes).where(eq(resumes.id, parseInt(req.params.id))).limit(1);
+    if (!resume) return res.status(404).json({ error: "Resume not found" });
+
+    if (resume.parsedData && typeof resume.parsedData === "object" && !("error" in (resume.parsedData as object))) {
+      const [report] = await db.select().from(atsReports).where(eq(atsReports.resumeId, resume.id)).limit(1);
+      res.json({ status: "complete", analysis: { parsed: resume.parsedData, scores: report?.scores, suggestions: report?.suggestions, marketPosition: report?.marketPosition } });
+    } else if ((resume.parsedData as any)?.error) {
+      res.json({ status: "error", error: (resume.parsedData as any).error });
+    } else {
+      res.json({ status: "processing" });
+    }
+  } catch (error: unknown) {
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
   }
 });
 
@@ -97,7 +137,6 @@ router.get("/matches", async (req, res) => {
     const userId = (req as any).user?.id;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
-    // Get the latest resume and its embedding
     const [lastResume] = await db.select()
       .from(resumes)
       .where(eq(resumes.userId, userId))
@@ -127,7 +166,6 @@ router.get("/matches", async (req, res) => {
   }
 });
 
-// ─── Profile-Based Matching (no resume required) ────────────────
 router.post("/match-by-profile", async (req, res) => {
   try {
     const { skills = [], experience, location, preferences = [] } = req.body;
@@ -140,13 +178,10 @@ router.post("/match-by-profile", async (req, res) => {
 
     const scored = allJobs.map((job) => {
       const jobSkills = ((job.skills ?? []) as string[]).map((s: string) => s.toLowerCase().trim());
-
-      // 1. Skill overlap (40%)
       const alignedSkills = jobSkills.filter((js) => userSkills.includes(js));
       const overlapCount = alignedSkills.length;
       const skillScore = jobSkills.length > 0 ? (overlapCount / Math.max(jobSkills.length, userSkills.length)) * 40 : 0;
 
-      // 2. Experience fit (20%)
       let expScore = 0;
       if (experience && job.experienceLevel) {
         const exp = experience.toLowerCase();
@@ -159,12 +194,11 @@ router.post("/match-by-profile", async (req, res) => {
           if (ui >= 0 && ji >= 0) expScore = Math.max(0, 20 - Math.abs(ui - ji) * 5);
         }
       } else if (experience && !job.experienceLevel) {
-        expScore = 10; // neutral
+        expScore = 10;
       } else {
-        expScore = 20; // no filter — full marks
+        expScore = 20;
       }
 
-      // 3. Location match (10%)
       let locScore = 0;
       if (location && job.location) {
         const loc = location.toLowerCase();
@@ -182,7 +216,6 @@ router.post("/match-by-profile", async (req, res) => {
         locScore = 10;
       }
 
-      // 4. Preference match (10%)
       let prefScore = 0;
       const prefs = preferences.map((p: string) => p.toLowerCase());
       if (prefs.length > 0) {
@@ -194,7 +227,6 @@ router.post("/match-by-profile", async (req, res) => {
       }
 
       const totalScore = Math.round(skillScore + expScore + locScore + prefScore);
-
       const skillGaps = jobSkills.filter((js) => !userSkills.includes(js));
 
       return {
@@ -228,7 +260,6 @@ router.post("/match-by-profile", async (req, res) => {
     });
 
     const matches = scored.sort((a, b) => b.matchScore - a.matchScore).slice(0, 10);
-
     res.json({ matches });
   } catch (error: unknown) {
     logger.error({ err: error }, "Error in match-by-profile");
@@ -236,18 +267,15 @@ router.post("/match-by-profile", async (req, res) => {
   }
 });
 
-// ─── Career Gap Analysis ────────────────────────────────────────
 router.post("/career-gaps", async (req, res) => {
   try {
     const { skills = [], targetRole } = req.body;
     const userSkills = skills.map((s: string) => s.toLowerCase().trim());
 
-    // Find active jobs, optionally filtered by target role
     const relevantJobs = targetRole
       ? await db.select().from(jobs).where(and(eq(jobs.status, "active"), sql`LOWER(${jobs.title}) LIKE ${`%${targetRole.toLowerCase()}%`}`)).limit(100)
       : await db.select().from(jobs).where(eq(jobs.status, "active")).limit(100);
 
-    // Count skill demand
     const skillDemand = new Map<string, { count: number; avgSalary: number }>();
     for (const job of relevantJobs) {
       const jobSkills = (job.skills ?? []) as string[];
@@ -262,7 +290,6 @@ router.post("/career-gaps", async (req, res) => {
       }
     }
 
-    // Sort by demand
     const sorted = [...skillDemand.entries()]
       .map(([skill, data]) => ({ skill, demand: data.count, avgSalary: Math.round(data.avgSalary) }))
       .sort((a, b) => b.demand - a.demand);

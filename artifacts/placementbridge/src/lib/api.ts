@@ -351,22 +351,46 @@ export const api = {
   },
 
   // ─── AI Matching ──────────────────────────────────────────────
-  analyzeResume(file: File) {
+  async analyzeResume(file: File) {
     const formData = new FormData();
     formData.append("resume", file);
-    return request<{
-      resumeId: number;
-      analysis: {
-        parsed: { fullName: string; headline: string; skills: string[]; experience: any[]; education: any[] };
-        scores: { ats: number; keyword: number; readability: number; skills: number; market: number };
-        suggestions: { missingKeywords: string[]; weakAreas: string[]; optimizationTips: string[] };
-        marketPosition: { rank: string; demand: string; salaryRange: string };
-      };
-      matches: any[];
-    }>("/ai/analyze-resume", {
+    const res = await fetch(`${API_BASE}/ai/analyze-resume`, {
       method: "POST",
+      headers: { Authorization: `Bearer ${getToken()}` },
       body: formData,
     });
+    const data = await res.json();
+
+    if (res.status === 202) {
+      // Analysis is processing asynchronously — poll for results
+      return new Promise<{
+        resumeId: number;
+        analysis: any;
+        matches: any[];
+      }>((resolve, reject) => {
+        const poll = async () => {
+          try {
+            const statusRes = await fetch(`${API_BASE}/ai/analyze-resume/status/${data.resumeId}`, {
+              headers: { Authorization: `Bearer ${getToken()}` },
+            });
+            const statusData = await statusRes.json();
+            if (statusData.status === "complete") {
+              resolve({ resumeId: data.resumeId, analysis: statusData.analysis, matches: [] });
+            } else if (statusData.status === "error") {
+              reject(new Error(statusData.error || "Analysis failed"));
+            } else {
+              setTimeout(poll, 3000);
+            }
+          } catch {
+            setTimeout(poll, 3000);
+          }
+        };
+        poll();
+      });
+    }
+
+    if (!res.ok) throw new Error(data.error || `Upload failed (${res.status})`);
+    return data;
   },
   getAIMatches() {
     return request<{ matches: any[] }>("/ai/matches");
