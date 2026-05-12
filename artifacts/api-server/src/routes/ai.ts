@@ -25,7 +25,7 @@ router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (r
     
     // 1. Semantic Extraction & ATS Scoring via GPT
     const completion = await openrouter().chat.completions.create({
-      model: "nvidia/nemotron-3-super-120b-a12b:free",
+      model: "meta-llama/llama-3.1-8b-instruct:free",
       messages: [
         {
           role: "system",

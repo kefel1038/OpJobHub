@@ -1,3 +1,5 @@
+export const maxDuration = 60;
+
 import { IncomingMessage, ServerResponse } from "node:http";
 
 function json(res: ServerResponse, status: number, body: unknown) {
