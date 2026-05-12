@@ -12,6 +12,8 @@ export function openrouter(): OpenAI {
     _openrouter = new OpenAI({
       baseURL: "https://openrouter.ai/api/v1",
       apiKey,
+      maxRetries: 5,
+      timeout: 120000,
       defaultHeaders: {
         "HTTP-Referer": "https://op-job-hub.vercel.app",
         "X-Title": "OP Job Hub",
