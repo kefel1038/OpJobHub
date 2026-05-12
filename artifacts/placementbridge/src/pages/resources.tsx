@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { Link } from "wouter"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import {
@@ -537,23 +538,14 @@ export default function Resources() {
           />
           <div className="grid md:grid-cols-2 gap-6">
               {[
-                { icon: Calculator, name: "End of Service Calculator", desc: "Calculate your gratuity based on salary, years served, and GCC country", color: "from-amber-500 to-yellow-500", url: "https://www.gulftalent.com/salaries" },
-                { icon: ScrollText, name: "Contract Risk Analyzer", desc: "Upload your employment contract for AI-powered risk analysis", color: "from-red-500 to-orange-500", url: "https://www.migrant-rights.org/" },
-                { icon: Shield, name: "UAE Know Your Rights Guide", desc: "Check legal work hours, overtime rules, and leave rights by country", color: "from-green-500 to-teal-500", url: "https://mohre.gov.ae/assets/download/618ff6ec/Know%20Your%20Rights%20-%20English_638924921038367080.pdf.aspx" },
-                { icon: Heart, name: "Labor Complaint Assistant", desc: "Step-by-step guidance for filing complaints with labor ministries", color: "from-blue-500 to-cyan-500", url: "https://www.mohre.gov.ae/en/home" },
-                { icon: Globe, name: "Qatar Labour E-Services", desc: "Access Qatar Ministry of Labour online services", color: "from-cyan-500 to-blue-500", url: "https://www.mol.gov.qa/En/Services" },
-                { icon: Building2, name: "Bahrain Workers Portal", desc: "LMRA online services for workers in Bahrain", color: "from-purple-500 to-pink-500", url: "https://workers.lmra.gov.bh/" },
+                { icon: Brain, name: "AI Job Match Scoring", desc: "AI analyzes your profile against live GCC jobs and returns a match score with skill gaps", color: "from-blue-500 to-cyan-500", url: "/ai-matching" },
+                { icon: FileCheck, name: "AI Resume Analyzer", desc: "Upload your CV for AI-powered ATS scoring, skill extraction, and improvement tips", color: "from-purple-500 to-pink-500", url: "/ai-matching" },
+                { icon: BarChart3, name: "AI Skill Gap Analyzer", desc: "Identify high-demand GCC market skills you're missing — with AI career advice", color: "from-indigo-500 to-violet-500", url: "/ai-matching" },
+                { icon: Calculator, name: "AI Salary & Market Intel", desc: "AI analyzes market rates, salary ranges, and demand trends for your role", color: "from-amber-500 to-yellow-500", url: "/ai-matching" },
+                { icon: ScrollText, name: "Contract & Rights Analyzer", desc: "AI reviews GCC employment contract risks and flags unfair clauses", color: "from-red-500 to-orange-500", url: "/ai-matching" },
+                { icon: TrendingUp, name: "Career Growth AI Coach", desc: "Get personalized AI recommendations for upskilling and career advancement", color: "from-green-500 to-teal-500", url: "/ai-matching" },
               ].map((tool, i) => (
-              <motion.a
-                key={tool.name}
-                href={tool.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-              >
+              <Link key={tool.name} href={tool.url}>
                 <GlassCard className="p-6 flex items-start gap-5 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group">
                   <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center flex-shrink-0`}>
                     <tool.icon className="h-7 w-7 text-white" />
@@ -566,7 +558,7 @@ export default function Resources() {
                     </div>
                   </div>
                 </GlassCard>
-              </motion.a>
+              </Link>
             ))}
           </div>
         </div>
