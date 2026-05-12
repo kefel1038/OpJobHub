@@ -130,7 +130,7 @@ router.get("/jobs/:id/similar", async (req: Request, res: Response) => {
 });
 
 router.post("/jobs", authMiddleware, requireRole("employer", "admin"), async (req: Request, res: Response) => {
-  const { title, company, location, salary, description, employmentType, industry, isFeatured, visaSponsored, applyUrl } = req.body ?? {};
+  const { title, company, location, salary, description, responsibilities, employmentType, industry, isFeatured, visaSponsored, applyUrl } = req.body ?? {};
 
   if (!title || !company || !location || !description) {
     res.status(400).json({ error: "title, company, location, and description are required." });
@@ -148,6 +148,7 @@ router.post("/jobs", authMiddleware, requireRole("employer", "admin"), async (re
       location,
       salary: typeof salary === "string" ? salary : null,
       description,
+      responsibilities: Array.isArray(responsibilities) ? responsibilities : [],
       employmentType: employmentType ?? "Full-Time",
       industry,
       isFeatured: Boolean(isFeatured),
@@ -180,7 +181,7 @@ router.patch("/jobs/:id", authMiddleware, async (req: Request, res: Response) =>
     return;
   }
 
-  const allowedFields = ["title", "company", "location", "salary", "description", "employmentType", "industry", "isFeatured", "visaSonsored", "status", "isUrgent", "experienceLevel"];
+  const allowedFields = ["title", "company", "location", "salary", "description", "responsibilities", "employmentType", "industry", "isFeatured", "visaSonsored", "status", "isUrgent", "experienceLevel"];
   const updates: Record<string, unknown> = {};
   for (const field of allowedFields) {
     if (req.body[field] !== undefined) {

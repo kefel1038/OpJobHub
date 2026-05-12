@@ -24,6 +24,7 @@ export default function PostJob() {
   const [location, setLocation] = useState("");
   const [salary, setSalary] = useState("");
   const [description, setDescription] = useState("");
+  const [responsibilities, setResponsibilities] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -46,13 +47,13 @@ export default function PostJob() {
         const { url } = await api.createCheckoutSession();
         sessionStorage.setItem(
           "pending_job",
-          JSON.stringify({ title, company, location, salary, description, isFeatured: true }),
+          JSON.stringify({ title, company, location, salary, description, responsibilities: responsibilities.split("\n").map(s => s.trim()).filter(Boolean), isFeatured: true }),
         );
         window.location.href = url;
         return;
       }
 
-      const job = await api.createJob({ title, company, location, salary, description, isFeatured: false });
+      const job = await api.createJob({ title, company, location, salary, description, responsibilities: responsibilities.split("\n").map(s => s.trim()).filter(Boolean), isFeatured: false });
       navigate(`/jobs/${job.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to post job.");
@@ -156,6 +157,16 @@ export default function PostJob() {
                   placeholder="Describe the role, requirements, and benefits..."
                   rows={6}
                   required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="responsibilities">Key Responsibilities (one per line)</Label>
+                <Textarea
+                  id="responsibilities"
+                  value={responsibilities}
+                  onChange={(e) => setResponsibilities(e.target.value)}
+                  placeholder={"Design and implement scalable software solutions\nCollaborate with product and design teams\nWrite clean, maintainable, and tested code"}
+                  rows={5}
                 />
               </div>
 

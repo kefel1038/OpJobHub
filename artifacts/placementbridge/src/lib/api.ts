@@ -220,6 +220,7 @@ export const api = {
     location: string;
     salary?: string;
     description: string;
+    responsibilities?: string[];
     employmentType?: string;
     industry?: string;
     isFeatured?: boolean;

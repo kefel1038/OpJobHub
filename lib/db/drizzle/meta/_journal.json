@@ -8,6 +8,13 @@
       "when": 1778485632585,
       "tag": "0000_strong_colossus",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778585632000,
+      "tag": "0001_nifty_gress",
+      "breakpoints": true
     }
   ]
 }

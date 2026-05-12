@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useRoute, useLocation } from "wouter";
-import { MapPin, DollarSign, Calendar, ArrowLeft, Star, Loader2, Trash2 } from "lucide-react";
+import { MapPin, DollarSign, Calendar, ArrowLeft, Star, Loader2, Trash2, CheckCircle2 } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -104,6 +104,20 @@ export default function JobDetail() {
                   Posted {new Date(job.createdAt).toLocaleDateString()}
                 </span>
               </div>
+
+              {job.responsibilities && job.responsibilities.length > 0 && (
+                <div className="mb-6">
+                  <h2 className="text-xl font-bold mb-3">Key Responsibilities</h2>
+                  <ul className="space-y-2">
+                    {job.responsibilities.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                        <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               <div className="prose prose-sm max-w-none whitespace-pre-wrap text-foreground">
                 {job.description}

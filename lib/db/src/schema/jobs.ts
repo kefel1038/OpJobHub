@@ -16,6 +16,7 @@ export const jobs = pgTable("jobs", {
   salaryCurrency: text("salary_currency").default("QAR"),
   description: text("description").notNull(),
   descriptionCleaned: text("description_cleaned"),
+  responsibilities: jsonb("responsibilities").$type<string[]>().default([]),
   employmentType: text("employment_type").default("Full-Time"),
   experienceLevel: text("experience_level"),
   industry: text("industry"),
