@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useRoute, useLocation } from "wouter";
-import { MapPin, DollarSign, Calendar, ArrowLeft, Star, Loader2, Trash2, CheckCircle2 } from "lucide-react";
+import { MapPin, DollarSign, Calendar, ArrowLeft, Star, Loader2, Trash2, Pencil, CheckCircle2 } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ export default function JobDetail() {
     }
   };
 
-  const canDelete = !!user && !!job && (user.role === "admin" || user.id === job.createdBy);
+  const canEdit = !!user && !!job && (user.role === "admin" || user.id === job.createdBy);
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,11 +80,19 @@ export default function JobDetail() {
                   </div>
                   <p className="text-lg text-muted-foreground">{job.company}</p>
                 </div>
-                {canDelete && (
-                  <Button variant="outline" size="sm" onClick={handleDelete} className="gap-1.5 text-destructive hover:text-destructive">
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </Button>
+                {canEdit && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" asChild className="gap-1.5">
+                      <Link href={`/jobs/${job.id}/edit`}>
+                        <Pencil className="h-4 w-4" />
+                        Edit
+                      </Link>
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleDelete} className="gap-1.5 text-destructive hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                      Delete
+                    </Button>
+                  </div>
                 )}
               </div>
 

@@ -9,6 +9,7 @@ import Home from "@/pages/home";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
 import PostJob from "@/pages/post-job";
+import EditJob from "@/pages/edit-job";
 import JobDetail from "@/pages/job-detail";
 import Jobs from "@/pages/jobs";
 import Admin from "@/pages/admin";
@@ -31,6 +32,7 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/post-job" component={PostJob} />
+      <Route path="/jobs/:id/edit" component={EditJob} />
       <Route path="/jobs/:id" component={JobDetail} />
       <Route path="/jobs" component={Jobs} />
       <Route path="/admin" component={Admin} />
