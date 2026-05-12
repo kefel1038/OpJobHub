@@ -17,77 +17,118 @@ import { Navbar } from "@/components/navbar"
 import { api, type Resource } from "@/lib/api"
 
 const trendingResources = [
-  { title: "Qatar Labor Law Explained for Foreign Workers", category: "Labor Law", views: "12.4K", tag: "Hot" },
-  { title: "ATS-Friendly Resume Template 2026", category: "Resume Writing", views: "9.8K", tag: "Popular" },
-  { title: "UAE End of Service Gratuity Calculator", category: "Career Tools", views: "8.2K", tag: "Trending" },
-  { title: "Top 20 Interview Questions for Gulf Jobs", category: "Interview Prep", views: "7.6K", tag: "New" },
-  { title: "How to Get a Work Visa in Qatar", category: "Visa Guides", views: "6.9K", tag: "Hot" },
+  { title: "Qatar Labour Law (Law No. 14 of 2004)", category: "Labor Law", views: "12.4K", tag: "Hot", url: "https://www.almeezan.qa/LawArticles.aspx?LawTreeSectionID=12648&lawId=3961&language=en" },
+  { title: "ATS-Friendly Resume Templates", category: "Resume Writing", views: "9.8K", tag: "Popular", url: "https://www.canva.com/resumes/templates/" },
+  { title: "UAE Labour Law - Know Your Rights Guide", category: "Career Tools", views: "8.2K", tag: "Trending", url: "https://mohre.gov.ae/assets/download/618ff6ec/Know%20Your%20Rights%20-%20English_638924921038367080.pdf.aspx" },
+  { title: "Top Interview Questions for Gulf Jobs", category: "Interview Prep", views: "7.6K", tag: "New", url: "https://www.ihire.com/resourcecenter/jobseeker/pages/interview-cheat-sheet-101-common-interview-questions" },
+  { title: "How to Get a Work Visa in Qatar", category: "Visa Guides", views: "6.9K", tag: "Hot", url: "https://www.indianembassyqatar.gov.in/working_abroad" },
 ]
 
 const aiTools = [
-  { icon: FileCheck, name: "AI Resume Analyzer", desc: "Get instant feedback on your CV with AI-powered analysis", color: "from-blue-500 to-cyan-500", popular: true },
-  { icon: FileSpreadsheet, name: "ATS Score Checker", desc: "Check if your resume passes Applicant Tracking Systems", color: "from-purple-500 to-pink-500" },
-  { icon: FileText, name: "Cover Letter Generator", desc: "Generate tailored cover letters in seconds", color: "from-green-500 to-teal-500" },
-  { icon: MessageCircle, name: "Interview Question Generator", desc: "Get personalized interview questions for your role", color: "from-orange-500 to-red-500" },
-  { icon: Calculator, name: "Salary Estimator", desc: "Estimate your market worth for Gulf region roles", color: "from-amber-500 to-yellow-500" },
-  { icon: BarChart3, name: "Skill Gap Analyzer", desc: "Identify skills you need for your dream role", color: "from-indigo-500 to-purple-500" },
-  { icon: Brain, name: "Career Recommendation Engine", desc: "AI suggests careers matching your profile", color: "from-pink-500 to-rose-500" },
-  { icon: ScrollText, name: "Contract Risk Analyzer", desc: "AI reviews your employment contract for risks", color: "from-red-500 to-orange-500" },
-  { icon: Globe, name: "Gulf Contract Interpreter", desc: "Understand GCC employment contract terms", color: "from-cyan-500 to-blue-500", popular: true },
-  { icon: Target, name: "Job Match Scoring AI", desc: "See how well you match specific job listings", color: "from-violet-500 to-indigo-500" },
+  { icon: FileCheck, name: "AI Resume Analyzer", desc: "Get instant feedback on your CV with AI-powered analysis", color: "from-blue-500 to-cyan-500", popular: true, url: "https://www.kickresume.com/en/ai-recruiter-feedback/" },
+  { icon: FileSpreadsheet, name: "ATS Score Checker", desc: "Check if your resume passes Applicant Tracking Systems", color: "from-purple-500 to-pink-500", url: "https://www.jobscan.co/" },
+  { icon: FileText, name: "Cover Letter Generator", desc: "Generate tailored cover letters in seconds", color: "from-green-500 to-teal-500", url: "https://quillbot.com/ai-writing-tools/cover-letter-generator" },
+  { icon: MessageCircle, name: "Interview Question Generator", desc: "Get personalized interview questions for your role", color: "from-orange-500 to-red-500", url: "https://www.ihire.com/resourcecenter/jobseeker/pages/interview-cheat-sheet-101-common-interview-questions" },
+  { icon: Calculator, name: "Salary Estimator", desc: "Estimate your market worth for Gulf region roles", color: "from-amber-500 to-yellow-500", url: "https://www.gulftalent.com/salaries" },
+  { icon: BarChart3, name: "Skill Gap Analyzer", desc: "Identify skills you need for your dream role", color: "from-indigo-500 to-purple-500", url: "https://gulfcareerhunt.com/" },
+  { icon: Brain, name: "Career Recommendation Engine", desc: "AI suggests careers matching your profile", color: "from-pink-500 to-rose-500", url: "https://gulfcareersacademy.com/" },
+  { icon: ScrollText, name: "Contract Risk Analyzer", desc: "AI reviews your employment contract for risks", color: "from-red-500 to-orange-500", url: "https://www.migrant-rights.org/" },
+  { icon: Globe, name: "Gulf Contract Interpreter", desc: "Understand GCC employment contract terms", color: "from-cyan-500 to-blue-500", popular: true, url: "https://www.mol.gov.qa/En/Services" },
+  { icon: Target, name: "Job Match Scoring AI", desc: "See how well you match specific job listings", color: "from-violet-500 to-indigo-500", url: "https://www.gulftalent.com/" },
 ]
 
 const gulfCountries = [
-  { name: "Qatar", flag: "🇶🇦", articles: 14, color: "from-red-700 to-white" },
-  { name: "UAE", flag: "🇦🇪", articles: 11, color: "from-green-600 to-white" },
-  { name: "Saudi Arabia", flag: "🇸🇦", articles: 9, color: "from-green-700 to-white" },
-  { name: "Kuwait", flag: "🇰🇼", articles: 7, color: "from-red-600 to-white" },
-  { name: "Bahrain", flag: "🇧🇭", articles: 6, color: "from-red-600 to-white" },
-  { name: "Oman", flag: "🇴🇲", articles: 6, color: "from-red-600 to-white" },
+  { name: "Qatar", flag: "🇶🇦", color: "from-red-700 to-white" },
+  { name: "UAE", flag: "🇦🇪", color: "from-green-600 to-white" },
+  { name: "Saudi Arabia", flag: "🇸🇦", color: "from-green-700 to-white" },
+  { name: "Kuwait", flag: "🇰🇼", color: "from-red-600 to-white" },
+  { name: "Bahrain", flag: "🇧🇭", color: "from-red-600 to-white" },
+  { name: "Oman", flag: "🇴🇲", color: "from-red-600 to-white" },
 ]
 
-const qatarArticles = [
-  { title: "Qatar Labor Law Explained for Foreign Workers", reads: "2.4K", difficulty: "Beginner" },
-  { title: "Minimum Wage Rules in Qatar", reads: "1.8K", difficulty: "Beginner" },
-  { title: "Working Hours and Overtime in Qatar", reads: "1.6K", difficulty: "Intermediate" },
-  { title: "Annual Leave Rights in Qatar", reads: "1.4K", difficulty: "Beginner" },
-  { title: "End of Service Benefits Explained", reads: "2.1K", difficulty: "Intermediate" },
-  { title: "Can Employers Hold Your Passport?", reads: "3.2K", difficulty: "Beginner" },
-  { title: "How To File a Labor Complaint in Qatar", reads: "1.9K", difficulty: "Advanced" },
-  { title: "Understanding Qatar Employment Contracts", reads: "1.5K", difficulty: "Intermediate" },
-  { title: "Sponsorship Transfer Rules", reads: "2.7K", difficulty: "Intermediate" },
-  { title: "Domestic Worker Rights in Qatar", reads: "1.1K", difficulty: "Beginner" },
-  { title: "How To Avoid Job Scams in Qatar", reads: "4.2K", difficulty: "Beginner" },
-  { title: "Qatar Visa & Work Permit Guide", reads: "3.8K", difficulty: "Intermediate" },
-]
+const articlesByCountry: Record<string, Array<{ title: string; reads: string; difficulty: string; url: string }>> = {
+  Qatar: [
+    { title: "Qatar Labour Law (Law No. 14 of 2004)", reads: "2.4K", difficulty: "Beginner", url: "https://www.almeezan.qa/LawArticles.aspx?LawTreeSectionID=12648&lawId=3961&language=en" },
+    { title: "Qatar Ministry of Labour - E-Services", reads: "1.8K", difficulty: "Beginner", url: "https://www.mol.gov.qa/En/Services" },
+    { title: "Employment Contract Guide - Qatar", reads: "1.6K", difficulty: "Intermediate", url: "https://www.iloveqatar.net/guide/work/employment-contract-qatar-important-points-you-need-to-know" },
+    { title: "Know Your Rights - Qatar Labour Law", reads: "1.4K", difficulty: "Beginner", url: "https://www.mrrors.org/wp-content/uploads/2023/09/Know-Your-Rights_Kuwait_Labour-Law-as-of-Oct-9.pdf" },
+    { title: "Qatar Labour Law - ILO English PDF", reads: "2.1K", difficulty: "Intermediate", url: "https://natlex.ilo.org/dyn/natlex2/natlex2/files/download/67387/QAT67387%20Eng.pdf" },
+    { title: "Migrant Worker Rights - Qatar", reads: "3.2K", difficulty: "Beginner", url: "https://www.migrant-rights.org/category/country/qatar/" },
+    { title: "Indian Embassy Qatar - Working Abroad", reads: "1.9K", difficulty: "Advanced", url: "https://www.indianembassyqatar.gov.in/working_abroad" },
+    { title: "MWO Qatar - For Filipino Workers", reads: "1.5K", difficulty: "Intermediate", url: "https://www.mwoqatar.org/" },
+    { title: "Labour Reforms in Qatar", reads: "2.7K", difficulty: "Intermediate", url: "https://www.mol.gov.qa/En/Pages/default.aspx" },
+    { title: "Overseas Workers Resource Centre", reads: "1.1K", difficulty: "Beginner", url: "https://www.indianembassyqatar.gov.in/OWRC" },
+    { title: "Migrant Rights Research - Qatar", reads: "4.2K", difficulty: "Beginner", url: "https://www.mrrors.org/category/qatar/" },
+    { title: "Ashghal Safety Certification - Qatar", reads: "3.8K", difficulty: "Intermediate", url: "https://www.ashghal.gov.qa/en/QualityCertificates/Pages/SafetyCertificationProgram.aspx" },
+  ],
+  UAE: [
+    { title: "UAE Labour Law - Federal Decree-Law No. 33 of 2021", reads: "3.1K", difficulty: "Intermediate", url: "https://mohre.gov.ae/assets/download/8c8d4e6/Cabinet%20Resolution_Executive%20Regulations%20Decree-Law%20No.%2033%20of%202021.pdf.aspx" },
+    { title: "UAE Know Your Rights - MOHRE Guide", reads: "2.8K", difficulty: "Beginner", url: "https://mohre.gov.ae/assets/download/618ff6ec/Know%20Your%20Rights%20-%20English_638924921038367080.pdf.aspx" },
+    { title: "UAE MOHRE Official Portal", reads: "2.2K", difficulty: "Beginner", url: "https://www.mohre.gov.ae/en/home" },
+    { title: "UAE Labour Law Amendment 2023", reads: "1.9K", difficulty: "Advanced", url: "https://www.mohre.gov.ae/assets/download/6d30b6be/Federal%20Decree%20Law%20No.%2020%20of%202023%20Amending%20Certain%20Provisions%20of%20Federal%20Decree%20Law%20No.%2033%20of%202021%20Regarding%20the%20Regulation%20of%20Employment%20Relationships.pdf.aspx" },
+    { title: "Salary Guide - UAE GulfTalent", reads: "2.5K", difficulty: "Beginner", url: "https://www.gulftalent.com/salaries" },
+    { title: "UAE Labour Law YouTube Explainers", reads: "1.7K", difficulty: "Beginner", url: "https://www.youtube.com/watch?v=bPKPJW3GAOw" },
+    { title: "Indian Workers Resource Centre UAE", reads: "1.3K", difficulty: "Intermediate", url: "http://iwrcuae.in/" },
+    { title: "Jobscan - Optimize Your CV", reads: "2.0K", difficulty: "Intermediate", url: "https://www.jobscan.co/" },
+    { title: "Gulf CV Writers - Dubai", reads: "1.4K", difficulty: "Beginner", url: "https://gulfcvwriters.ae/" },
+    { title: "Migrant Rights - UAE", reads: "1.8K", difficulty: "Beginner", url: "https://www.migrant-rights.org/category/country/uae/" },
+  ],
+  "Saudi Arabia": [
+    { title: "Saudi Arabia Labour Law (Official PDF)", reads: "2.6K", difficulty: "Intermediate", url: "https://www.hrsd.gov.sa/sites/default/files/2023-02/Labor.pdf" },
+    { title: "Saudi HRSD Official Portal", reads: "2.1K", difficulty: "Beginner", url: "https://www.hrsd.gov.sa/en" },
+    { title: "Saudi Labour Law English PDF 2005", reads: "1.8K", difficulty: "Advanced", url: "https://www.hrsd.gov.sa/sites/default/files/2017-05/LABOR%20LAW.pdf" },
+    { title: "HRSD Decisions & Regulations", reads: "1.5K", difficulty: "Intermediate", url: "https://www.hrsd.gov.sa/en/knowledge-centre/decisions-and-regulations" },
+    { title: "OSHA 30-Hour Certification Saudi", reads: "1.2K", difficulty: "Intermediate", url: "https://gulfacademysafety.com/osha-30-hours-in-saudi-arabia/" },
+    { title: "NaukriGulf - Saudi Jobs", reads: "1.9K", difficulty: "Beginner", url: "https://www.naukrigulf.com/" },
+    { title: "Gulf Career Hunt - Saudi Guides", reads: "1.1K", difficulty: "Beginner", url: "https://gulfcareerhunt.com/" },
+  ],
+  Kuwait: [
+    { title: "Kuwait Public Authority for Manpower", reads: "1.8K", difficulty: "Beginner", url: "https://www.manpower.gov.kw/" },
+    { title: "Kuwait Labour Law - ILO Portal", reads: "1.5K", difficulty: "Intermediate", url: "https://natlex.ilo.org/dyn/natlex2/r/natlex/fe/details?p3_isn=83616" },
+    { title: "Know Your Rights - Kuwait Labour Law PDF", reads: "1.3K", difficulty: "Beginner", url: "https://www.mrrors.org/wp-content/uploads/2023/09/Know-Your-Rights_Kuwait_Labour-Law-as-of-Oct-9.pdf" },
+    { title: "Migrant Rights - Kuwait", reads: "1.1K", difficulty: "Beginner", url: "https://www.migrant-rights.org/category/country/kuwait/" },
+  ],
+  Bahrain: [
+    { title: "Bahrain LMRA Official Portal", reads: "1.6K", difficulty: "Beginner", url: "https://lmra.gov.bh/en/home" },
+    { title: "Bahrain Labour Law (LMRA PDF)", reads: "1.4K", difficulty: "Intermediate", url: "https://www.lmra.gov.bh/files/cms/shared/file/labour%20law.pdf" },
+    { title: "Bahrain Workers Portal", reads: "1.2K", difficulty: "Beginner", url: "https://workers.lmra.gov.bh/" },
+    { title: "Migrant Rights - Bahrain", reads: "1.0K", difficulty: "Beginner", url: "https://www.migrant-rights.org/category/country/bahrain/" },
+  ],
+  Oman: [
+    { title: "Oman Ministry of Labour Official Portal", reads: "1.5K", difficulty: "Beginner", url: "https://mol.gov.om/" },
+    { title: "Oman Labour Law (Royal Decree 53/2023)", reads: "1.3K", difficulty: "Intermediate", url: "https://www.mol.gov.om/Laborlaw" },
+    { title: "Oman Labour Law English PDF", reads: "1.1K", difficulty: "Intermediate", url: "https://amcham.om/wp-content/uploads/2025/02/OMAN-LABOUR-LAW-532023.pdf" },
+    { title: "Migrant Rights - Oman", reads: "0.9K", difficulty: "Beginner", url: "https://www.migrant-rights.org/category/country/oman/" },
+  ],
+}
 
 const learningPaths = [
-  { title: "Frontend Developer", steps: 6, jobs: 3400, salary: "QAR 15-25K", color: "from-blue-500 to-cyan-400", icon: Code },
-  { title: "Electrical Engineering", steps: 5, jobs: 2100, salary: "QAR 12-20K", color: "from-orange-500 to-yellow-400", icon: Zap },
-  { title: "Telecom Technician", steps: 4, jobs: 1800, salary: "QAR 8-15K", color: "from-purple-500 to-pink-400", icon: Building2 },
-  { title: "Cybersecurity", steps: 7, jobs: 1500, salary: "QAR 20-35K", color: "from-red-500 to-rose-400", icon: Shield },
-  { title: "AI / Machine Learning", steps: 8, jobs: 1200, salary: "QAR 25-45K", color: "from-indigo-500 to-violet-400", icon: Brain },
-  { title: "Gulf Construction", steps: 4, jobs: 5600, salary: "QAR 6-18K", color: "from-amber-500 to-orange-400", icon: Briefcase },
+  { title: "Frontend Developer", steps: 6, jobs: 3400, salary: "QAR 15-25K", color: "from-blue-500 to-cyan-400", icon: Code, url: "https://www.coursera.org/learn/introduction-to-front-end-development?specialization=meta-front-end-developer" },
+  { title: "Electrical Engineering", steps: 5, jobs: 2100, salary: "QAR 12-20K", color: "from-orange-500 to-yellow-400", icon: Zap, url: "https://www.edx.org/learn/front-end-web-development" },
+  { title: "Telecom Technician", steps: 4, jobs: 1800, salary: "QAR 8-15K", color: "from-purple-500 to-pink-400", icon: Building2, url: "https://www.smartqhse.com/safety-blog/best-hse-certifications-gcc-professionals" },
+  { title: "Cybersecurity", steps: 7, jobs: 1500, salary: "QAR 20-35K", color: "from-red-500 to-rose-400", icon: Shield, url: "https://www.coursera.org/google-certificates/google-cybersecurity" },
+  { title: "AI / Machine Learning", steps: 8, jobs: 1200, salary: "QAR 25-45K", color: "from-indigo-500 to-violet-400", icon: Brain, url: "https://www.coursera.org/professional-certificates/google-ai" },
+  { title: "Gulf Construction", steps: 4, jobs: 5600, salary: "QAR 6-18K", color: "from-amber-500 to-orange-400", icon: Briefcase, url: "https://www.ashghal.gov.qa/en/QualityCertificates/Pages/SafetyCertificationProgram.aspx" },
 ]
 
 const downloads = [
-  { name: "ATS-Optimized CV Template", format: "DOCX", size: "245 KB", downloads: "12.4K" },
-  { name: "Professional Cover Letter Template", format: "DOCX", size: "180 KB", downloads: "9.8K" },
-  { name: "Interview Preparation Cheat Sheet", format: "PDF", size: "1.2 MB", downloads: "8.1K" },
-  { name: "Career Planning Worksheet", format: "PDF", size: "890 KB", downloads: "6.5K" },
-  { name: "Job Application Tracker", format: "XLSX", size: "320 KB", downloads: "5.2K" },
-  { name: "Salary Negotiation Guide", format: "PDF", size: "2.1 MB", downloads: "4.8K" },
-  { name: "Gulf Labor Law Quick Reference", format: "PDF", size: "1.8 MB", downloads: "7.3K" },
-  { name: "Skills Assessment Workbook", format: "PDF", size: "640 KB", downloads: "3.9K" },
+  { name: "ATS-Optimized CV Template", format: "Canva", size: "Online", downloads: "12.4K", url: "https://www.canva.com/resumes/templates/" },
+  { name: "Professional Cover Letter Template", format: "Canva", size: "Online", downloads: "9.8K", url: "https://www.canva.com/resumes/templates/" },
+  { name: "Interview Preparation Cheat Sheet", format: "Online", size: "101 Qs", downloads: "8.1K", url: "https://www.ihire.com/resourcecenter/jobseeker/pages/interview-cheat-sheet-101-common-interview-questions" },
+  { name: "Microsoft Resume Templates", format: "DOCX", size: "Online", downloads: "6.5K", url: "https://create.microsoft.com/en-us/grow-a-business" },
+  { name: "UAE Know Your Rights Guide", format: "PDF", size: "1.8 MB", downloads: "7.3K", url: "https://mohre.gov.ae/assets/download/618ff6ec/Know%20Your%20Rights%20-%20English_638924921038367080.pdf.aspx" },
+  { name: "Qatar Labour Law (ILO PDF)", format: "PDF", size: "2.1 MB", downloads: "5.2K", url: "https://natlex.ilo.org/dyn/natlex2/natlex2/files/download/67387/QAT67387%20Eng.pdf" },
+  { name: "Saudi Labour Law (Official PDF)", format: "PDF", size: "1.8 MB", downloads: "4.8K", url: "https://www.hrsd.gov.sa/sites/default/files/2023-02/Labor.pdf" },
+  { name: "Oman Labour Law (English PDF)", format: "PDF", size: "640 KB", downloads: "3.9K", url: "https://amcham.om/wp-content/uploads/2025/02/OMAN-LABOUR-LAW-532023.pdf" },
 ]
 
 const videos = [
-  { title: "How to Ace Your Gulf Job Interview", duration: "18:24", views: "45K", thumbnail: null },
-  { title: "Understanding Your Qatar Employment Contract", duration: "14:12", views: "32K", thumbnail: null },
-  { title: "Top 10 Skills for Gulf Jobs in 2026", duration: "12:45", views: "28K", thumbnail: null },
-  { title: "Day in the Life: Software Engineer in Dubai", duration: "22:30", views: "67K", thumbnail: null },
-  { title: "Worker Rights in the UAE: What You Must Know", duration: "16:50", views: "24K", thumbnail: null },
-  { title: "How to Write an ATS-Friendly Resume", duration: "20:15", views: "53K", thumbnail: null },
+  { title: "How to Ace Your Gulf Job Interview", duration: "Series", views: "45K", url: "https://www.youtube.com/@GulfCareerHunt" },
+  { title: "UAE Labour Law - 10 Things Employers Must Know", duration: "16:50", views: "32K", url: "https://www.youtube.com/watch?v=bPKPJW3GAOw" },
+  { title: "Migrant Worker Rights in Qatar - Documentary", duration: "22:30", views: "67K", url: "https://www.youtube.com/watch?v=0xGcoyfmZks" },
+  { title: "ATS Resume Format Guide for Gulf Jobs", duration: "Guide", views: "28K", url: "https://resumeats.net/blog/uae-gulf-resume-ats-format-guide" },
+  { title: "Filipino Workers in the Gulf - Rights & Resources", duration: "Guide", views: "24K", url: "https://www.mwoqatar.org/" },
+  { title: "NEBOSH IGC Guide for Gulf Construction", duration: "Guide", views: "53K", url: "https://www.smartqhse.com/safety-blog/best-hse-certifications-gcc-professionals" },
 ]
 
 const successStories = [
@@ -98,12 +139,12 @@ const successStories = [
 ]
 
 const workerRights = [
-  { icon: Lock, text: "Employers cannot confiscate your passport", law: "Qatar Law No. 21/2015" },
-  { icon: Clock, text: "Overtime compensation at 125% of normal wage", law: "UAE Labor Law Art. 19" },
-  { icon: Calendar, text: "Minimum 30 days annual leave per year", law: "Qatar Labor Law Art. 80" },
-  { icon: Heart, text: "Free healthcare for all workers", law: "Qatar Health Law" },
-  { icon: AlertTriangle, text: "You can file complaints without employer consent", law: "MOHRE Policy" },
-  { icon: Scale, text: "End of service gratuity after 1 year", law: "GCC Labor Laws" },
+  { icon: Lock, text: "Employers cannot confiscate your passport", law: "Qatar Law No. 21/2015", url: "https://www.migrant-rights.org/" },
+  { icon: Clock, text: "Overtime compensation at 125% of normal wage", law: "UAE Labor Law Art. 19", url: "https://mohre.gov.ae/assets/download/8c8d4e6/Cabinet%20Resolution_Executive%20Regulations%20Decree-Law%20No.%2033%20of%202021.pdf.aspx" },
+  { icon: Calendar, text: "Minimum 30 days annual leave per year", law: "Qatar Labor Law Art. 80", url: "https://www.almeezan.qa/LawArticles.aspx?LawTreeSectionID=12648&lawId=3961&language=en" },
+  { icon: Heart, text: "Free healthcare for all workers", law: "Qatar Health Law", url: "https://www.mol.gov.qa/En/" },
+  { icon: AlertTriangle, text: "You can file complaints without employer consent", law: "MOHRE Policy", url: "https://www.mohre.gov.ae/en/home" },
+  { icon: Scale, text: "End of service gratuity after 1 year", law: "GCC Labor Laws", url: "https://www.gulftalent.com/salaries" },
 ]
 
 const containerVariants = {
@@ -253,13 +294,13 @@ export default function Resources() {
             </div>
             <div className="flex flex-wrap gap-3">
               {trendingResources.slice(0, 3).map((r, i) => (
-                <div key={i} className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 cursor-pointer transition-all group">
+                <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 cursor-pointer transition-all group">
                   <span className={`text-xs font-black px-1.5 py-0.5 rounded ${r.tag === "Hot" ? "bg-red-500 text-white" : r.tag === "Popular" ? "bg-blue-500 text-white" : r.tag === "Trending" ? "bg-green-500 text-white" : "bg-[#FFBF00] text-black"}`}>
                     {r.tag}
                   </span>
                   <span className="text-sm text-white/70 group-hover:text-white transition-colors font-medium">{r.title}</span>
                   <ArrowRight className="h-3.5 w-3.5 text-white/30 group-hover:text-[#FFBF00] transition-colors" />
-                </div>
+                </a>
               ))}
             </div>
           </motion.div>
@@ -329,9 +370,9 @@ export default function Resources() {
                         Open Resource <ArrowUpRight className="h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                       </a>
                     )}
-                  </GlassCard>
-                </motion.div>
-              ))}
+                </GlassCard>
+              </motion.a>
+            ))}
             </div>
           )}
         </div>
@@ -353,13 +394,16 @@ export default function Resources() {
           />
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {aiTools.map((tool, i) => (
-              <motion.div
+              <motion.a
                 key={tool.name}
+                href={tool.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
-                className="group cursor-pointer"
+                className="group block"
               >
                 <GlassCard className={`p-6 h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative ${tool.popular ? "ring-2 ring-[#FFBF00]" : ""}`}>
                   {tool.popular && (
@@ -372,11 +416,11 @@ export default function Resources() {
                   </div>
                   <h3 className="font-bold text-base mb-2">{tool.name}</h3>
                   <p className="text-sm text-muted-foreground">{tool.desc}</p>
-                  <div className="mt-4 flex items-center gap-1 text-[#FFBF00] text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="mt-4 flex items-center gap-1 text-[#FFBF00] text-sm font-bold">
                     Try Now <ArrowRight className="h-4 w-4" />
                   </div>
                 </GlassCard>
-              </motion.div>
+              </motion.a>
             ))}
           </div>
         </div>
@@ -409,15 +453,18 @@ export default function Resources() {
               >
                 <span className="text-lg">{c.flag}</span>
                 {c.name}
-                <span className={`text-xs px-1.5 py-0.5 rounded-full ${activeCountry === c.name ? "bg-black/10" : "bg-zinc-200 dark:bg-zinc-700"}`}>{c.articles}</span>
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${activeCountry === c.name ? "bg-black/10" : "bg-zinc-200 dark:bg-zinc-700"}`}>{articlesByCountry[c.name]?.length ?? 0}</span>
               </button>
             ))}
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
-            {qatarArticles.map((article, i) => (
-              <motion.div
+            {(articlesByCountry[activeCountry] ?? []).map((article, i) => (
+              <motion.a
                 key={article.title}
+                href={article.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -440,7 +487,7 @@ export default function Resources() {
                     <span className="flex items-center gap-1 text-[#FFBF00] font-bold">Read <ArrowUpRight className="h-3 w-3" /></span>
                   </div>
                 </GlassCard>
-              </motion.div>
+              </motion.a>
             ))}
           </div>
 
@@ -456,8 +503,11 @@ export default function Resources() {
           />
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
             {workerRights.map((right, i) => (
-              <motion.div
+              <motion.a
                 key={right.text}
+                href={right.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -472,7 +522,7 @@ export default function Resources() {
                     <p className="text-xs text-muted-foreground">{right.law}</p>
                   </div>
                 </GlassCard>
-              </motion.div>
+              </motion.a>
             ))}
           </div>
 
@@ -486,14 +536,19 @@ export default function Resources() {
             }
           />
           <div className="grid md:grid-cols-2 gap-6">
-            {[
-              { icon: Calculator, name: "End of Service Calculator", desc: "Calculate your gratuity based on salary, years served, and GCC country", color: "from-amber-500 to-yellow-500" },
-              { icon: ScrollText, name: "Contract Risk Analyzer", desc: "Upload your employment contract for AI-powered risk analysis", color: "from-red-500 to-orange-500" },
-              { icon: Shield, name: "Salary Rights Checker", desc: "Check legal work hours, overtime rules, and leave rights by country", color: "from-green-500 to-teal-500" },
-              { icon: Heart, name: "Labor Complaint Assistant", desc: "Step-by-step guidance for filing complaints with labor ministries", color: "from-blue-500 to-cyan-500" },
-            ].map((tool, i) => (
-              <motion.div
+              {[
+                { icon: Calculator, name: "End of Service Calculator", desc: "Calculate your gratuity based on salary, years served, and GCC country", color: "from-amber-500 to-yellow-500", url: "https://www.gulftalent.com/salaries" },
+                { icon: ScrollText, name: "Contract Risk Analyzer", desc: "Upload your employment contract for AI-powered risk analysis", color: "from-red-500 to-orange-500", url: "https://www.migrant-rights.org/" },
+                { icon: Shield, name: "UAE Know Your Rights Guide", desc: "Check legal work hours, overtime rules, and leave rights by country", color: "from-green-500 to-teal-500", url: "https://mohre.gov.ae/assets/download/618ff6ec/Know%20Your%20Rights%20-%20English_638924921038367080.pdf.aspx" },
+                { icon: Heart, name: "Labor Complaint Assistant", desc: "Step-by-step guidance for filing complaints with labor ministries", color: "from-blue-500 to-cyan-500", url: "https://www.mohre.gov.ae/en/home" },
+                { icon: Globe, name: "Qatar Labour E-Services", desc: "Access Qatar Ministry of Labour online services", color: "from-cyan-500 to-blue-500", url: "https://www.mol.gov.qa/En/Services" },
+                { icon: Building2, name: "Bahrain Workers Portal", desc: "LMRA online services for workers in Bahrain", color: "from-purple-500 to-pink-500", url: "https://workers.lmra.gov.bh/" },
+              ].map((tool, i) => (
+              <motion.a
                 key={tool.name}
+                href={tool.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -511,7 +566,7 @@ export default function Resources() {
                     </div>
                   </div>
                 </GlassCard>
-              </motion.div>
+              </motion.a>
             ))}
           </div>
         </div>
@@ -532,8 +587,11 @@ export default function Resources() {
           />
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {learningPaths.map((path, i) => (
-              <motion.div
+              <motion.a
                 key={path.title}
+                href={path.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -561,7 +619,7 @@ export default function Resources() {
                     Start Path <ArrowRight className="h-4 w-4" />
                   </div>
                 </GlassCard>
-              </motion.div>
+              </motion.a>
             ))}
           </div>
         </div>
@@ -581,8 +639,11 @@ export default function Resources() {
           />
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {downloads.map((item, i) => (
-              <motion.div
+              <motion.a
                 key={item.name}
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -601,7 +662,7 @@ export default function Resources() {
                     </div>
                   </div>
                 </GlassCard>
-              </motion.div>
+              </motion.a>
             ))}
           </div>
         </div>
@@ -622,13 +683,16 @@ export default function Resources() {
           />
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {videos.map((video, i) => (
-              <motion.div
+              <motion.a
                 key={video.title}
+                href={video.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
-                className="group cursor-pointer"
+                className="group block"
               >
                 <GlassCard className="overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                   <div className="relative aspect-video bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center">
@@ -746,13 +810,20 @@ export default function Resources() {
           />
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { name: "Qatar Ministry of Labour", url: "#", type: "Government" },
-              { name: "UAE MOHRE", url: "#", type: "Government" },
-              { name: "Saudi Labor Ministry", url: "#", type: "Government" },
-              { name: "Migrant Worker Support Center", url: "#", type: "NGO" },
+              { name: "Qatar Ministry of Labour", url: "https://www.mol.gov.qa/En/", type: "Government" },
+              { name: "UAE MOHRE", url: "https://www.mohre.gov.ae/en/home", type: "Government" },
+              { name: "Saudi HRSD", url: "https://www.hrsd.gov.sa/en", type: "Government" },
+              { name: "Kuwait Public Authority for Manpower", url: "https://www.manpower.gov.kw/", type: "Government" },
+              { name: "Bahrain LMRA", url: "https://lmra.gov.bh/en/home", type: "Government" },
+              { name: "Oman Ministry of Labour", url: "https://mol.gov.om/", type: "Government" },
+              { name: "Migrant Rights Organization", url: "https://www.migrant-rights.org/", type: "NGO" },
+              { name: "Migrant Workers Office - Qatar", url: "https://www.mwoqatar.org/", type: "Embassy" },
             ].map((org, i) => (
-              <motion.div
+              <motion.a
                 key={org.name}
+                href={org.url}
+                target="_blank"
+                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -768,7 +839,7 @@ export default function Resources() {
                   </div>
                   <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-[#FFBF00] transition-colors" />
                 </GlassCard>
-              </motion.div>
+              </motion.a>
             ))}
           </div>
         </div>
