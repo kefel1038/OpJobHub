@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Search, MapPin, Briefcase, Building2, DollarSign,
@@ -83,6 +83,27 @@ export default function AIMatching() {
   const [selectedJob, setSelectedJob] = useState<MatchResult | null>(null);
 
   const isAuthenticated = !!getToken();
+
+  // Auto-load skills from resume upload
+  useEffect(() => {
+    const stored = localStorage.getItem("resume_skills");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0 && skills.length === 0) {
+          setSkills(parsed);
+          localStorage.removeItem("resume_skills");
+        }
+      } catch { /* ignore */ }
+    }
+  }, []);
+
+  // Auto-trigger search when skills are loaded from resume
+  useEffect(() => {
+    if (skills.length > 0 && !searching && matches.length === 0 && gapAnalysis === null) {
+      handleSearch();
+    }
+  }, [skills]);
 
   const addSkill = useCallback(() => {
     const trimmed = skillsInput.trim();

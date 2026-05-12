@@ -44,7 +44,10 @@ export function ResumeUploadCTA() {
 
     try {
       setUploadState("loading");
-      await api.analyzeResume(file);
+      const result = await api.analyzeResume(file);
+      if (result?.analysis?.parsed?.skills?.length) {
+        localStorage.setItem("resume_skills", JSON.stringify(result.analysis.parsed.skills));
+      }
       setUploadState("success");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed. Please try again.";
