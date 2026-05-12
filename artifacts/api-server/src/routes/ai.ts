@@ -12,7 +12,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
 
 async function runAiAnalysis(text: string) {
   const completion = await openrouter().chat.completions.create({
-    model: "meta-llama/llama-3.1-8b-instruct:free",
+    model: "openrouter/free",
     messages: [
       {
         role: "system",
