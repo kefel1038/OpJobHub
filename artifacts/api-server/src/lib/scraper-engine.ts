@@ -254,7 +254,7 @@ export async function aiCategorizeJob(job: {
 }) {
   try {
     const completion = await openrouter().chat.completions.create({
-      model: "openrouter/free",
+      model: "google/gemma-4-26b-a4b-it:free",
       messages: [
         {
           role: "system",
@@ -275,10 +275,9 @@ export async function aiCategorizeJob(job: {
           content: `Title: ${job.title}\nCompany: ${job.company}\nDescription: ${job.description.slice(0, 2000)}`,
         },
       ],
-      response_format: { type: "json_object" },
     });
 
-    return JSON.parse(completion.choices[0].message.content || "{}");
+      return JSON.parse(completion.choices[0].message.content || "{}");
   } catch (err) {
     logger.error({ err }, "AI categorization failed");
     return null;
@@ -293,7 +292,7 @@ export async function aiDetectScam(job: {
 }): Promise<{ isScam: boolean; confidence: number; reasons: string[] }> {
   try {
     const completion = await openrouter().chat.completions.create({
-      model: "openrouter/free",
+      model: "google/gemma-4-26b-a4b-it:free",
       messages: [
         {
           role: "system",
@@ -308,7 +307,6 @@ export async function aiDetectScam(job: {
           content: `Title: ${job.title}\nCompany: ${job.company}\nSalary: ${job.salary ?? "Not specified"}\nDescription: ${job.description.slice(0, 2000)}`,
         },
       ],
-      response_format: { type: "json_object" },
     });
 
     return JSON.parse(completion.choices[0].message.content || '{"isScam":false,"confidence":0,"reasons":[]}');

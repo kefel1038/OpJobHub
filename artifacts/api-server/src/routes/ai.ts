@@ -25,7 +25,7 @@ router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (r
     
     // 1. Semantic Extraction & ATS Scoring via GPT
     const completion = await openrouter().chat.completions.create({
-      model: "openrouter/free",
+      model: "google/gemma-4-26b-a4b-it:free",
       messages: [
         {
           role: "system",
@@ -33,7 +33,7 @@ router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (r
         },
         {
           role: "user",
-          content: `Analyze this resume text:\n\n${text}\n\nReturn JSON with following structure:
+          content: `Analyze this resume text:\n\n${text.slice(0, 3000)}\n\nReturn JSON with following structure:
           {
             "parsed": { "fullName": "", "headline": "", "skills": [], "experience": [], "education": [] },
             "scores": { "ats": 0-100, "keyword": 0-100, "readability": 0-100, "skills": 0-100, "market": 0-100 },
@@ -42,7 +42,6 @@ router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (r
           }`
         }
       ],
-      response_format: { type: "json_object" }
     });
 
     const analysis = JSON.parse(completion.choices[0].message.content || "{}");
