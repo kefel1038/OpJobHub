@@ -26,16 +26,16 @@ const trendingResources = [
 ]
 
 const aiTools = [
-  { icon: FileCheck, name: "AI Resume Analyzer", desc: "Get instant feedback on your CV with AI-powered analysis", color: "from-blue-500 to-cyan-500", popular: true, url: "https://www.kickresume.com/en/ai-recruiter-feedback/" },
-  { icon: FileSpreadsheet, name: "ATS Score Checker", desc: "Check if your resume passes Applicant Tracking Systems", color: "from-purple-500 to-pink-500", url: "https://www.jobscan.co/" },
-  { icon: FileText, name: "Cover Letter Generator", desc: "Generate tailored cover letters in seconds", color: "from-green-500 to-teal-500", url: "https://quillbot.com/ai-writing-tools/cover-letter-generator" },
-  { icon: MessageCircle, name: "Interview Question Generator", desc: "Get personalized interview questions for your role", color: "from-orange-500 to-red-500", url: "https://www.ihire.com/resourcecenter/jobseeker/pages/interview-cheat-sheet-101-common-interview-questions" },
-  { icon: Calculator, name: "Salary Estimator", desc: "Estimate your market worth for Gulf region roles", color: "from-amber-500 to-yellow-500", url: "https://www.gulftalent.com/salaries" },
-  { icon: BarChart3, name: "Skill Gap Analyzer", desc: "Identify skills you need for your dream role", color: "from-indigo-500 to-purple-500", url: "https://gulfcareerhunt.com/" },
-  { icon: Brain, name: "Career Recommendation Engine", desc: "AI suggests careers matching your profile", color: "from-pink-500 to-rose-500", url: "https://gulfcareersacademy.com/" },
-  { icon: ScrollText, name: "Contract Risk Analyzer", desc: "AI reviews your employment contract for risks", color: "from-red-500 to-orange-500", url: "https://www.migrant-rights.org/" },
-  { icon: Globe, name: "Gulf Contract Interpreter", desc: "Understand GCC employment contract terms", color: "from-cyan-500 to-blue-500", popular: true, url: "https://www.mol.gov.qa/En/Services" },
-  { icon: Target, name: "Job Match Scoring AI", desc: "See how well you match specific job listings", color: "from-violet-500 to-indigo-500", url: "https://www.gulftalent.com/" },
+  { icon: FileCheck, name: "AI Resume Analyzer", desc: "Upload your CV for AI ATS scoring, skill extraction, and tailored improvement tips", color: "from-blue-500 to-cyan-500", popular: true, url: "/ai-matching" },
+  { icon: Target, name: "AI Job Match Scoring", desc: "AI matches your profile against live GCC jobs with match percentage and reasons", color: "from-violet-500 to-indigo-500", url: "/ai-matching" },
+  { icon: BarChart3, name: "Skill Gap Analyzer", desc: "AI identifies high-demand GCC skills you're missing and suggests courses", color: "from-indigo-500 to-purple-500", url: "/ai-matching" },
+  { icon: Calculator, name: "Salary & Market Intel", desc: "AI analyzes salary ranges, demand trends, and market rates for your role", color: "from-amber-500 to-yellow-500", url: "/ai-matching" },
+  { icon: Brain, name: "Career Recommendation AI", desc: "AI suggests career paths and roles matching your experience and skills", color: "from-pink-500 to-rose-500", url: "/ai-matching" },
+  { icon: ScrollText, name: "Contract Risk Analyzer", desc: "AI flags risky clauses and explains your rights under GCC labour law", color: "from-red-500 to-orange-500", url: "/ai-matching" },
+  { icon: MessageCircle, name: "Interview Coach AI", desc: "Get AI-generated interview questions and tips for Gulf region roles", color: "from-orange-500 to-red-500", url: "/ai-matching" },
+  { icon: Globe, name: "Gulf Labour Law Guide", desc: "AI explains your worker rights across all 6 GCC countries", color: "from-cyan-500 to-blue-500", popular: true, url: "/ai-matching" },
+  { icon: FileSpreadsheet, name: "ATS Resume Optimizer", desc: "AI optimizes your CV keywords to pass Gulf employer ATS filters", color: "from-purple-500 to-pink-500", url: "/ai-matching" },
+  { icon: TrendingUp, name: "Career Growth AI Coach", desc: "AI generates a personalized upskilling roadmap for Gulf career advancement", color: "from-green-500 to-teal-500", url: "/ai-matching" },
 ]
 
 const gulfCountries = [
@@ -391,37 +391,35 @@ export default function Resources() {
               </span>
             }
             subtitle="10 AI-powered tools to accelerate your Gulf career journey"
-            action={<Button className="rounded-full bg-[#FFBF00] text-black hover:bg-[#FFBF00]/90 font-bold">View All Tools <ChevronRight className="h-4 w-4 ml-1" /></Button>}
+            action={<Link href="/ai-matching"><Button className="rounded-full bg-[#FFBF00] text-black hover:bg-[#FFBF00]/90 font-bold">View All Tools <ChevronRight className="h-4 w-4 ml-1" /></Button></Link>}
           />
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {aiTools.map((tool, i) => (
-              <motion.a
+              <motion.div
                 key={tool.name}
-                href={tool.url}
-                target="_blank"
-                rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.05 }}
-                className="group block"
               >
-                <GlassCard className={`p-6 h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative ${tool.popular ? "ring-2 ring-[#FFBF00]" : ""}`}>
-                  {tool.popular && (
-                    <span className="absolute -top-2.5 -right-2.5 bg-[#FFBF00] text-black text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <Star className="h-3 w-3" /> POPULAR
-                    </span>
-                  )}
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center mb-4`}>
-                    <tool.icon className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="font-bold text-base mb-2">{tool.name}</h3>
-                  <p className="text-sm text-muted-foreground">{tool.desc}</p>
-                  <div className="mt-4 flex items-center gap-1 text-[#FFBF00] text-sm font-bold">
-                    Try Now <ArrowRight className="h-4 w-4" />
-                  </div>
-                </GlassCard>
-              </motion.a>
+                <Link href={tool.url}>
+                  <GlassCard className={`p-6 h-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer relative ${tool.popular ? "ring-2 ring-[#FFBF00]" : ""}`}>
+                    {tool.popular && (
+                      <span className="absolute -top-2.5 -right-2.5 bg-[#FFBF00] text-black text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Star className="h-3 w-3" /> POPULAR
+                      </span>
+                    )}
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center mb-4`}>
+                      <tool.icon className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="font-bold text-base mb-2">{tool.name}</h3>
+                    <p className="text-sm text-muted-foreground">{tool.desc}</p>
+                    <div className="mt-4 flex items-center gap-1 text-[#FFBF00] text-sm font-bold">
+                      Try Now <ArrowRight className="h-4 w-4" />
+                    </div>
+                  </GlassCard>
+                </Link>
+              </motion.div>
             ))}
           </div>
         </div>
