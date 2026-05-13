@@ -27,10 +27,12 @@ export function FeaturedJobs() {
               <Star className="h-3 w-3 mr-1 fill-blue-400" />
               Opportunities
             </Badge>
-            <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4 text-white">
-              Featured Career <span className="text-gradient">Paths</span>
-            </h2>
-            <p className="text-gray-400 text-lg">Hand-picked roles from top employers across the Gulf. Verified and ready for your application.</p>
+            <a href="https://roadmap.sh/ai" target="_blank" rel="noopener noreferrer" className="block group">
+              <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4 text-white group-hover:text-primary transition-colors">
+                Featured Career <span className="text-gradient">Paths</span>
+              </h2>
+              <p className="text-gray-400 text-lg group-hover:text-gray-300 transition-colors">Hand-picked roles from top employers across the Gulf. Verified and ready for your application.</p>
+            </a>
           </div>
           <Button variant="outline" asChild className="group rounded-full border border-[#2C2C2E] text-gray-300 hover:text-white hover:bg-white/5 font-semibold px-8 h-12">
             <Link href="/jobs">
