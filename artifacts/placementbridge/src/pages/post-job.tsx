@@ -25,6 +25,10 @@ export default function PostJob() {
   const [salary, setSalary] = useState("");
   const [description, setDescription] = useState("");
   const [responsibilities, setResponsibilities] = useState("");
+  const [requirements, setRequirements] = useState("");
+  const [benefits, setBenefits] = useState("");
+  const [companySize, setCompanySize] = useState("");
+  const [companyOverview, setCompanyOverview] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -47,13 +51,27 @@ export default function PostJob() {
         const { url } = await api.createCheckoutSession();
         sessionStorage.setItem(
           "pending_job",
-          JSON.stringify({ title, company, location, salary, description, responsibilities: responsibilities.split("\n").map(s => s.trim()).filter(Boolean), isFeatured: true }),
+          JSON.stringify({ 
+            title, company, location, salary, description, 
+            responsibilities: responsibilities.split("\n").map(s => s.trim()).filter(Boolean), 
+            requirements: requirements.split("\n").map(s => s.trim()).filter(Boolean),
+            benefits: benefits.split("\n").map(s => s.trim()).filter(Boolean),
+            companySize, companyOverview,
+            isFeatured: true 
+          }),
         );
         window.location.href = url;
         return;
       }
 
-      const job = await api.createJob({ title, company, location, salary, description, responsibilities: responsibilities.split("\n").map(s => s.trim()).filter(Boolean), isFeatured: false });
+      const job = await api.createJob({ 
+        title, company, location, salary, description, 
+        responsibilities: responsibilities.split("\n").map(s => s.trim()).filter(Boolean), 
+        requirements: requirements.split("\n").map(s => s.trim()).filter(Boolean),
+        benefits: benefits.split("\n").map(s => s.trim()).filter(Boolean),
+        companySize, companyOverview,
+        isFeatured: false 
+      });
       navigate(`/jobs/${job.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to post job.");
@@ -160,14 +178,55 @@ export default function PostJob() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="responsibilities">Key Responsibilities (one per line)</Label>
-                <Textarea
-                  id="responsibilities"
-                  value={responsibilities}
-                  onChange={(e) => setResponsibilities(e.target.value)}
-                  placeholder={"Design and implement scalable software solutions\nCollaborate with product and design teams\nWrite clean, maintainable, and tested code"}
-                  rows={5}
-                />
+                  <Label htmlFor="responsibilities">Key Responsibilities (one per line)</Label>
+                  <Textarea
+                    id="responsibilities"
+                    value={responsibilities}
+                    onChange={(e) => setResponsibilities(e.target.value)}
+                    placeholder={"Design and implement scalable software solutions\nCollaborate with product and design teams\nWrite clean, maintainable, and tested code"}
+                    rows={4}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="requirements">Requirements (one per line)</Label>
+                  <Textarea
+                    id="requirements"
+                    value={requirements}
+                    onChange={(e) => setRequirements(e.target.value)}
+                    placeholder={"5+ years experience\nStrong React skills\nBachelor's degree"}
+                    rows={4}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="benefits">Benefits (one per line)</Label>
+                  <Textarea
+                    id="benefits"
+                    value={benefits}
+                    onChange={(e) => setBenefits(e.target.value)}
+                    placeholder={"Health insurance\nRemote work\n401k match"}
+                    rows={4}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="companySize">Company Size (optional)</Label>
+                    <Input
+                      id="companySize"
+                      value={companySize}
+                      onChange={(e) => setCompanySize(e.target.value)}
+                      placeholder="e.g. 51-200 employees"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="companyOverview">Company Overview</Label>
+                  <Textarea
+                    id="companyOverview"
+                    value={companyOverview}
+                    onChange={(e) => setCompanyOverview(e.target.value)}
+                    placeholder="Leading technology company focused on..."
+                    rows={3}
+                  />
               </div>
 
               <label className="flex items-start gap-3 border rounded-md p-4 cursor-pointer hover:bg-muted/30 has-[:checked]:border-primary has-[:checked]:bg-primary/5">

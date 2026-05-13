@@ -20,9 +20,13 @@ export const jobs = pgTable("jobs", {
   employmentType: text("employment_type").default("Full-Time"),
   experienceLevel: text("experience_level"),
   industry: text("industry"),
+  companySize: text("company_size"),
+  companyOverview: text("company_overview"),
   category: text("category"),
   tags: jsonb("tags").$type<string[]>().default([]),
   skills: jsonb("skills").$type<string[]>().default([]),
+  requirements: jsonb("requirements").$type<string[]>().default([]),
+  benefits: jsonb("benefits").$type<string[]>().default([]),
 
   visaSponsored: boolean("visa_sponsored").default(false),
   isRemote: boolean("is_remote").default(false),

@@ -24,6 +24,10 @@ export default function EditJob() {
   const [salary, setSalary] = useState("");
   const [description, setDescription] = useState("");
   const [responsibilities, setResponsibilities] = useState("");
+  const [requirements, setRequirements] = useState("");
+  const [benefits, setBenefits] = useState("");
+  const [companySize, setCompanySize] = useState("");
+  const [companyOverview, setCompanyOverview] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +49,10 @@ export default function EditJob() {
         setSalary(job.salary ?? "");
         setDescription(job.description);
         setResponsibilities((job.responsibilities ?? []).join("\n"));
+        setRequirements((job.requirements ?? []).join("\n"));
+        setBenefits((job.benefits ?? []).join("\n"));
+        setCompanySize(job.companySize ?? "");
+        setCompanyOverview(job.companyOverview ?? "");
       })
       .catch((e) => setFetchError(e.message))
       .finally(() => setLoading(false));
@@ -63,6 +71,10 @@ export default function EditJob() {
         salary: salary || null,
         description,
         responsibilities: responsibilities.split("\n").map((s) => s.trim()).filter(Boolean),
+        requirements: requirements.split("\n").map((s) => s.trim()).filter(Boolean),
+        benefits: benefits.split("\n").map((s) => s.trim()).filter(Boolean),
+        companySize,
+        companyOverview,
       });
       navigate(`/jobs/${id}`);
     } catch (e) {
@@ -171,7 +183,44 @@ export default function EditJob() {
                     id="responsibilities"
                     value={responsibilities}
                     onChange={(e) => setResponsibilities(e.target.value)}
-                    rows={5}
+                    rows={4}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="requirements">Requirements (one per line)</Label>
+                  <Textarea
+                    id="requirements"
+                    value={requirements}
+                    onChange={(e) => setRequirements(e.target.value)}
+                    rows={4}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="benefits">Benefits (one per line)</Label>
+                  <Textarea
+                    id="benefits"
+                    value={benefits}
+                    onChange={(e) => setBenefits(e.target.value)}
+                    rows={4}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="companySize">Company Size (e.g. 51-200 employees)</Label>
+                    <Input
+                      id="companySize"
+                      value={companySize}
+                      onChange={(e) => setCompanySize(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="companyOverview">Company Overview</Label>
+                  <Textarea
+                    id="companyOverview"
+                    value={companyOverview}
+                    onChange={(e) => setCompanyOverview(e.target.value)}
+                    rows={3}
                   />
                 </div>
 

@@ -22,6 +22,11 @@ export interface Job {
   salaryCurrency?: string;
   description: string;
   descriptionCleaned?: string | null;
+  responsibilities?: string[];
+  requirements?: string[];
+  benefits?: string[];
+  companySize?: string;
+  companyOverview?: string;
   employmentType?: string;
   experienceLevel?: string | null;
   industry?: string | null;
@@ -221,6 +226,10 @@ export const api = {
     salary?: string;
     description: string;
     responsibilities?: string[];
+    requirements?: string[];
+    benefits?: string[];
+    companySize?: string;
+    companyOverview?: string;
     employmentType?: string;
     industry?: string;
     isFeatured?: boolean;

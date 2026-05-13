@@ -159,7 +159,7 @@ export function JobDetailPanel({ job, open, onClose }: JobDetailPanelProps) {
                   <section>
                     <h3 className="text-lg font-bold mb-3">Key Responsibilities</h3>
                     <ul className="space-y-2">
-                      {(job.responsibilities ?? [
+                      {((job.responsibilities && job.responsibilities.length > 0) ? job.responsibilities : [
                         "Design and implement scalable software solutions",
                         "Collaborate with product and design teams",
                         "Write clean, maintainable, and tested code",
@@ -177,7 +177,7 @@ export function JobDetailPanel({ job, open, onClose }: JobDetailPanelProps) {
                   <section>
                     <h3 className="text-lg font-bold mb-3">Requirements</h3>
                     <ul className="space-y-2">
-                      {(job.requirements ?? [
+                      {((job.requirements && job.requirements.length > 0) ? job.requirements : [
                         "5+ years of experience in software development",
                         "Strong proficiency in React, TypeScript, and Node.js",
                         "Experience with cloud services (AWS/GCP/Azure)",
@@ -195,7 +195,7 @@ export function JobDetailPanel({ job, open, onClose }: JobDetailPanelProps) {
                   <section>
                     <h3 className="text-lg font-bold mb-3">Benefits</h3>
                     <div className="grid grid-cols-2 gap-2">
-                      {(job.benefits ?? [
+                      {((job.benefits && job.benefits.length > 0) ? job.benefits : [
                         "Competitive salary & equity",
                         "Health, dental & vision insurance",
                         "Flexible work hours",
@@ -246,12 +246,12 @@ export function JobDetailPanel({ job, open, onClose }: JobDetailPanelProps) {
                       </div>
                       <div>
                         <p className="font-semibold text-sm">{job.company}</p>
-                        <p className="text-xs text-muted-foreground">{job.industry ?? "Technology"} &middot; {job.companySize ?? "51-200 employees"}</p>
+                        <p className="text-xs text-muted-foreground">{job.industry ?? "Technology"} &middot; {job.companySize || "51-200 employees"}</p>
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Leading technology company focused on building innovative solutions that transform industries. 
-                      With a team of passionate professionals, we're committed to excellence and continuous innovation.
+                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                      {job.companyOverview || `Leading technology company focused on building innovative solutions that transform industries. 
+With a team of passionate professionals, we're committed to excellence and continuous innovation.`}
                     </p>
                   </div>
                 </section>
