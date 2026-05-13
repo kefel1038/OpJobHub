@@ -33,7 +33,7 @@ export default function Home() {
       <section className="py-24 bg-surface overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="text-center mb-20">
-            <Badge className="mb-4 bg-blue-500/10 text-blue-400 font-semibold border border-blue-500/20">
+            <Badge className="mb-4 bg-primary/10 text-primary font-semibold border border-primary/20">
               <Target className="h-3 w-3 mr-1" />
               How It Works
             </Badge>
@@ -43,14 +43,14 @@ export default function Home() {
           </div>
 
           <div className="relative max-w-4xl mx-auto">
-            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-blue-500/30 via-purple-500/20 to-transparent -translate-x-1/2 hidden md:block" />
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-primary/30 via-amber-500/20 to-transparent -translate-x-1/2 hidden md:block" />
 
             <div className="space-y-24 relative">
               <TimelineStep
                 number={1}
                 title="Specify requirements"
                 description="Sign to your dashboard to specify your hiring requirements and skills needs in a very simple and easy steps."
-                image="https://images.unsplash.com/photo-1454165833767-027ffea9e78a?auto=format&fit=crop&q=80&w=400"
+                image="https://images.unsplash.com/photo-1556761175-5973dc0f32b7?auto=format&fit=crop&q=80&w=800"
               />
               <TimelineStep
                 number={2}
@@ -78,14 +78,14 @@ export default function Home() {
       {/* Final CTA Strip */}
       <section className="py-24 bg-surface">
         <div className="container mx-auto px-4">
-          <div className="bg-gradient-to-br from-blue-600/20 via-purple-600/10 to-blue-600/20 rounded-[2rem] p-12 md:p-20 text-center relative overflow-hidden group border border-[#2C2C2E]">
+          <div className="bg-gradient-to-br from-primary/20 via-amber-500/10 to-primary/20 rounded-[2rem] p-12 md:p-20 text-center relative overflow-hidden group border border-[#362823]">
             <div className="absolute inset-0 bg-grid-white opacity-20 pointer-events-none" />
             <div className="relative z-10 max-w-2xl mx-auto">
               <h2 className="text-4xl md:text-5xl font-heading font-bold mb-8 text-white">
                 Ready to find your <br /> next success story?
               </h2>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button asChild size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-full px-12 h-16 font-bold text-xl shadow-2xl shadow-blue-600/20">
+                <Button asChild size="lg" className="bg-gradient-to-r from-primary to-amber-500 hover:from-primary/90 hover:to-amber-500/90 text-white rounded-full px-12 h-16 font-bold text-xl shadow-2xl shadow-primary/20">
                   <Link href="/register">Get Started Free</Link>
                 </Button>
               </div>
@@ -108,7 +108,7 @@ function TimelineStep({ number, title, description, image, side = "right" }: { n
           className="space-y-4"
         >
           <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white flex items-center justify-center font-bold shrink-0 text-sm">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-amber-500 text-white flex items-center justify-center font-bold shrink-0 text-sm">
               {number}
             </div>
             <h3 className="text-2xl md:text-3xl font-bold text-white">{title}</h3>
