@@ -28,6 +28,7 @@ interface ExtendedJob extends Omit<Job, "description"> {
   companySize?: string;
   industry?: string;
   description?: string;
+  aiResumeOptimization?: string[];
 }
 
 interface JobDetailPanelProps {
@@ -36,9 +37,9 @@ interface JobDetailPanelProps {
   onClose: () => void;
 }
 
-const suggestions = [
+const defaultSuggestions = [
   "Add more quantified achievements to your resume",
-  "Highlight your experience with React and TypeScript",
+  "Highlight your experience with relevant technologies",
   "Include relevant certifications",
   "Optimize your summary section for ATS scanning",
 ];
@@ -221,7 +222,7 @@ export function JobDetailPanel({ job, open, onClose }: JobDetailPanelProps) {
                     <Sparkles className="h-4 w-4 text-primary" /> AI Resume Optimization
                   </h3>
                   <div className="space-y-3">
-                    {suggestions.map((suggestion, i) => (
+                    {((job.aiResumeOptimization && job.aiResumeOptimization.length > 0) ? job.aiResumeOptimization : defaultSuggestions).map((suggestion, i) => (
                       <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10">
                         <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                           <TrendingUp className="h-3.5 w-3.5 text-primary" />

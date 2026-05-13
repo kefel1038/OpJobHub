@@ -50,6 +50,7 @@ export const jobs = pgTable("jobs", {
   aiSummary: text("ai_summary"),
   aiCategory: text("ai_category"),
   aiMatchScore: doublePrecision("ai_match_score"),
+  aiResumeOptimization: jsonb("ai_resume_optimization").$type<string[]>().default([]),
 
   status: text("status").notNull().default("active"),
   viewCount: integer("view_count").default(0),

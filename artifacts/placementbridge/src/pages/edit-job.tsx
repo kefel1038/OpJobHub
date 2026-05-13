@@ -28,6 +28,7 @@ export default function EditJob() {
   const [benefits, setBenefits] = useState("");
   const [companySize, setCompanySize] = useState("");
   const [companyOverview, setCompanyOverview] = useState("");
+  const [aiResumeOptimization, setAiResumeOptimization] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +54,7 @@ export default function EditJob() {
         setBenefits((job.benefits ?? []).join("\n"));
         setCompanySize(job.companySize ?? "");
         setCompanyOverview(job.companyOverview ?? "");
+        setAiResumeOptimization((job.aiResumeOptimization ?? []).join("\n"));
       })
       .catch((e) => setFetchError(e.message))
       .finally(() => setLoading(false));
@@ -75,6 +77,7 @@ export default function EditJob() {
         benefits: benefits.split("\n").map((s) => s.trim()).filter(Boolean),
         companySize,
         companyOverview,
+        aiResumeOptimization: aiResumeOptimization.split("\n").map((s) => s.trim()).filter(Boolean),
       });
       navigate(`/jobs/${id}`);
     } catch (e) {
@@ -221,6 +224,15 @@ export default function EditJob() {
                     value={companyOverview}
                     onChange={(e) => setCompanyOverview(e.target.value)}
                     rows={3}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="aiResumeOptimization">AI Resume Optimization Tips (one per line)</Label>
+                  <Textarea
+                    id="aiResumeOptimization"
+                    value={aiResumeOptimization}
+                    onChange={(e) => setAiResumeOptimization(e.target.value)}
+                    rows={4}
                   />
                 </div>
 

@@ -46,7 +46,9 @@ export interface Job {
   expiresAt?: string;
   scrapedAt?: string;
   aiSummary?: string | null;
+  aiCategory?: string | null;
   aiMatchScore?: number | null;
+  aiResumeOptimization?: string[];
   status?: string;
   viewCount?: number;
   applyCount?: number;
@@ -230,6 +232,7 @@ export const api = {
     benefits?: string[];
     companySize?: string;
     companyOverview?: string;
+    aiResumeOptimization?: string[];
     employmentType?: string;
     industry?: string;
     isFeatured?: boolean;

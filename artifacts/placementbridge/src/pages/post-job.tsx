@@ -29,6 +29,7 @@ export default function PostJob() {
   const [benefits, setBenefits] = useState("");
   const [companySize, setCompanySize] = useState("");
   const [companyOverview, setCompanyOverview] = useState("");
+  const [aiResumeOptimization, setAiResumeOptimization] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -57,6 +58,7 @@ export default function PostJob() {
             requirements: requirements.split("\n").map(s => s.trim()).filter(Boolean),
             benefits: benefits.split("\n").map(s => s.trim()).filter(Boolean),
             companySize, companyOverview,
+            aiResumeOptimization: aiResumeOptimization.split("\n").map(s => s.trim()).filter(Boolean),
             isFeatured: true 
           }),
         );
@@ -70,6 +72,7 @@ export default function PostJob() {
         requirements: requirements.split("\n").map(s => s.trim()).filter(Boolean),
         benefits: benefits.split("\n").map(s => s.trim()).filter(Boolean),
         companySize, companyOverview,
+        aiResumeOptimization: aiResumeOptimization.split("\n").map(s => s.trim()).filter(Boolean),
         isFeatured: false 
       });
       navigate(`/jobs/${job.id}`);
@@ -227,7 +230,17 @@ export default function PostJob() {
                     placeholder="Leading technology company focused on..."
                     rows={3}
                   />
-              </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="aiResumeOptimization">AI Resume Optimization Tips (one per line)</Label>
+                  <Textarea
+                    id="aiResumeOptimization"
+                    value={aiResumeOptimization}
+                    onChange={(e) => setAiResumeOptimization(e.target.value)}
+                    placeholder={"Add more quantified achievements to your resume\nHighlight your experience with relevant technologies\nInclude relevant certifications"}
+                    rows={4}
+                  />
+                </div>
 
               <label className="flex items-start gap-3 border rounded-md p-4 cursor-pointer hover:bg-muted/30 has-[:checked]:border-primary has-[:checked]:bg-primary/5">
                 <Checkbox

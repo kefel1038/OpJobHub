@@ -153,6 +153,7 @@ router.post("/jobs", authMiddleware, requireRole("employer", "admin"), async (re
       benefits: Array.isArray(benefits) ? benefits : [],
       companySize,
       companyOverview,
+      aiResumeOptimization: Array.isArray(req.body.aiResumeOptimization) ? req.body.aiResumeOptimization : [],
       employmentType: employmentType ?? "Full-Time",
       industry,
       isFeatured: Boolean(isFeatured),
@@ -185,7 +186,7 @@ router.patch("/jobs/:id", authMiddleware, async (req: Request, res: Response) =>
     return;
   }
 
-  const allowedFields = ["title", "company", "location", "salary", "description", "responsibilities", "requirements", "benefits", "companySize", "companyOverview", "employmentType", "industry", "isFeatured", "visaSonsored", "status", "isUrgent", "experienceLevel"];
+  const allowedFields = ["title", "company", "location", "salary", "description", "responsibilities", "requirements", "benefits", "companySize", "companyOverview", "employmentType", "industry", "isFeatured", "visaSonsored", "status", "isUrgent", "experienceLevel", "aiSummary", "aiCategory", "aiMatchScore", "aiResumeOptimization"];
   const updates: Record<string, unknown> = {};
   for (const field of allowedFields) {
     if (req.body[field] !== undefined) {
