@@ -39,8 +39,13 @@ app.use("/api", router);
 // Global error handler — always returns JSON
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   const message = err instanceof Error ? err.message : String(err);
-  try { logger.error({ err }, "Unhandled error"); } catch { /* logger unavailable */ }
-  try { res.status(500).json({ error: message }); } catch { _next(err); }
+  const causeMsg =
+    err instanceof Error && "cause" in err && err.cause instanceof Error
+      ? err.cause.message
+      : undefined;
+  const fullMessage = causeMsg ? `${message} — ${causeMsg}` : message;
+  try { logger.error({ err, cause: err instanceof Error && "cause" in err ? err.cause : undefined }, "Unhandled error"); } catch { /* logger unavailable */ }
+  try { res.status(500).json({ error: fullMessage }); } catch { _next(err); }
 });
 
 export default app;
