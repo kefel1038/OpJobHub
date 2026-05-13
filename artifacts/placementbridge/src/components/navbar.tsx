@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Shield, Menu, Sparkles, Building2, Briefcase } from "lucide-react";
+import { Shield, Menu, Sparkles, Building2, Briefcase, Globe } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -60,6 +60,10 @@ export function Navbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
+          <Button variant="ghost" className="text-foreground/80 hover:text-foreground hidden lg:flex items-center gap-1.5 font-medium">
+            <Globe className="h-4 w-4" />
+            English
+          </Button>
           {user ? (
             <>
               <Badge variant="secondary" className="capitalize font-medium">
