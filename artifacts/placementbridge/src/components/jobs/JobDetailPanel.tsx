@@ -4,7 +4,7 @@ import {
   X, MapPin, DollarSign, Building2, Clock, Calendar,
   Sparkles, Send, Bookmark, BookmarkCheck, Briefcase,
   CheckCircle2, GraduationCap, TrendingUp, ChevronRight,
-  ExternalLink, Share2, Flag
+  ExternalLink, Share2, Flag, Mail, Phone, MessageCircle, ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,93 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { Job } from "@/lib/api";
+
+/** Detect applyUrl type and build the correct href */
+function buildApplyHref(applyUrl?: string | null): { href: string; type: "email" | "whatsapp" | "phone" | "url" | null } {
+  if (!applyUrl) return { href: "", type: null };
+  const u = applyUrl.trim();
+  // Email address
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u)) return { href: `mailto:${u}`, type: "email" };
+  // Already a mailto:
+  if (u.startsWith("mailto:")) return { href: u, type: "email" };
+  // Phone / WhatsApp number (+, digits, spaces, dashes)
+  if (/^[\+\d][\d\s\-]{6,}$/.test(u)) {
+    const digits = u.replace(/[^\d+]/g, "");
+    return { href: `https://wa.me/${digits}`, type: "whatsapp" };
+  }
+  // WhatsApp link
+  if (u.includes("wa.me") || u.includes("whatsapp")) return { href: u, type: "whatsapp" };
+  // tel:
+  if (u.startsWith("tel:")) return { href: u, type: "phone" };
+  return { href: u.startsWith("http") ? u : `https://${u}`, type: "url" };
+}
+
+function ApplyButton({ applyUrl, title, company, className }: { applyUrl?: string | null; title: string; company: string; className?: string }) {
+  const [open, setOpen] = useState(false);
+  const { href, type } = buildApplyHref(applyUrl);
+
+  if (!href) {
+    // No applyUrl — show a dropdown with fallback options
+    return (
+      <div className="relative">
+        <Button
+          className={cn("flex-1 h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-base gap-2", className)}
+          onClick={() => setOpen(!open)}
+        >
+          <Send className="h-4 w-4" /> Apply Now <ChevronDown className="h-4 w-4 ml-auto" />
+        </Button>
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, y: 6, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 6, scale: 0.97 }}
+              className="absolute bottom-14 left-0 right-0 z-50 bg-card border border-border/60 rounded-xl shadow-2xl overflow-hidden"
+            >
+              <a
+                href={`mailto:?subject=Application for ${encodeURIComponent(title)} at ${encodeURIComponent(company)}`}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-sm"
+              >
+                <Mail className="h-4 w-4 text-primary" /> Apply via Email
+              </a>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`Hi, I'm interested in the ${title} position at ${company}. I found this listing on KeFeL Jobs.`)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-sm border-t border-border/40"
+              >
+                <MessageCircle className="h-4 w-4 text-emerald-500" /> Apply via WhatsApp
+              </a>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  const icon = type === "email" ? <Mail className="h-4 w-4" />
+    : type === "whatsapp" ? <MessageCircle className="h-4 w-4" />
+    : type === "phone" ? <Phone className="h-4 w-4" />
+    : <Send className="h-4 w-4" />;
+
+  const label = type === "email" ? "Apply via Email"
+    : type === "whatsapp" ? "Apply via WhatsApp"
+    : type === "phone" ? "Call to Apply"
+    : "Apply Now";
+
+  return (
+    <Button
+      className={cn("flex-1 h-12 rounded-xl font-semibold text-base gap-2",
+        type === "whatsapp" ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-primary text-primary-foreground hover:bg-primary/90",
+        className
+      )}
+      asChild
+    >
+      <a href={href} target={type === "url" ? "_blank" : undefined} rel="noopener noreferrer">
+        {icon} {label}
+      </a>
+    </Button>
+  );
+}
 
 interface ExtendedJob extends Omit<Job, "description"> {
   aiMatch?: number;
@@ -261,13 +348,11 @@ With a team of passionate professionals, we're committed to excellence and conti
 
             <div className="border-t border-border/60 p-4 bg-background/80 backdrop-blur-sm">
               <div className="flex items-center gap-3">
-                <Button className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-semibold text-base gap-2">
-                  <Send className="h-4 w-4" />
-                  Apply Now
-                </Button>
-                <Button variant="outline" className="h-12 rounded-xl gap-2">
-                  <ExternalLink className="h-4 w-4" />
-                  Company Site
+                <ApplyButton applyUrl={job.applyUrl} title={job.title} company={job.company} />
+                <Button variant="outline" className="h-12 rounded-xl gap-2" asChild>
+                  <a href={job.applyUrl && (job.applyUrl.startsWith("http") || job.applyUrl.startsWith("www")) ? job.applyUrl : "#"} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4" /> Company Site
+                  </a>
                 </Button>
               </div>
             </div>

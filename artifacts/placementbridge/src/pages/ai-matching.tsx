@@ -5,7 +5,7 @@ import {
   Target, BrainCircuit, TrendingUp, CheckCircle2, AlertCircle,
   ArrowRight, ChevronRight, Bookmark, BookmarkCheck, X,
   Upload, Filter, SlidersHorizontal, RotateCcw, Loader2,
-  GraduationCap, Zap, Star, Clock, BarChart3,
+  GraduationCap, Zap, Star, Clock, BarChart3, Mail, MessageCircle,
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -508,9 +508,45 @@ export default function AIMatching() {
                                         )}
 
                                         <div className="flex gap-2 pt-1">
-                                          <Button size="sm" className="rounded-full gap-1.5 text-xs">
-                                            Apply Now <ArrowRight className="h-3 w-3" />
-                                          </Button>
+                                          {(() => {
+                                            const u = (match as any).applyUrl as string | undefined;
+                                            if (u && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u.trim())) {
+                                              return (
+                                                <Button size="sm" className="rounded-full gap-1.5 text-xs" asChild>
+                                                  <a href={`mailto:${u.trim()}`}><Mail className="h-3 w-3" /> Apply via Email <ArrowRight className="h-3 w-3" /></a>
+                                                </Button>
+                                              );
+                                            }
+                                            if (u && /^[\+\d][\d\s\-]{6,}$/.test(u.trim())) {
+                                              return (
+                                                <Button size="sm" className="rounded-full gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white" asChild>
+                                                  <a href={`https://wa.me/${u.replace(/[^\d+]/g,"")}`} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-3 w-3" /> Apply via WhatsApp</a>
+                                                </Button>
+                                              );
+                                            }
+                                            if (u && (u.includes("wa.me") || u.includes("whatsapp"))) {
+                                              return (
+                                                <Button size="sm" className="rounded-full gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white" asChild>
+                                                  <a href={u} target="_blank" rel="noopener noreferrer"><MessageCircle className="h-3 w-3" /> Apply via WhatsApp</a>
+                                                </Button>
+                                              );
+                                            }
+                                            if (u) {
+                                              return (
+                                                <Button size="sm" className="rounded-full gap-1.5 text-xs" asChild>
+                                                  <a href={u.startsWith("http") ? u : `https://${u}`} target="_blank" rel="noopener noreferrer">Apply Now <ArrowRight className="h-3 w-3" /></a>
+                                                </Button>
+                                              );
+                                            }
+                                            // fallback — WhatsApp generic
+                                            return (
+                                              <Button size="sm" className="rounded-full gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white" asChild>
+                                                <a href={`https://wa.me/?text=${encodeURIComponent(`Hi, I'm applying for the ${match.title} position at ${match.company} (KeFeL Jobs).`)}`} target="_blank" rel="noopener noreferrer">
+                                                  <MessageCircle className="h-3 w-3" /> Apply via WhatsApp
+                                                </a>
+                                              </Button>
+                                            );
+                                          })()}
                                           <Button size="sm" variant="outline" className="rounded-full text-xs" onClick={(e) => { e.stopPropagation(); toggleSaved(match.jobId); }}>
                                             {savedJobIds.has(match.jobId) ? "Saved" : "Save Job"}
                                           </Button>
