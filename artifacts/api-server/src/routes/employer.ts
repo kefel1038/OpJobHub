@@ -1,8 +1,11 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db, jobs, applications, users, savedJobs } from "@workspace/db";
-import { eq, and, desc, sql, count, gte, lt, inArray } from "drizzle-orm";
+import { eq, and, desc, sql, count, gte, lt, inArray, isNull } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../lib/auth";
 import { serializeDates } from "../lib/serialize";
+import { openrouter } from "../lib/openai";
+import { signalCollector } from "../services/agents/behavioral-signals";
+import { recruitmentMemory } from "../services/agents/memory";
 
 const router: IRouter = Router();
 
@@ -184,6 +187,46 @@ router.patch("/employer/applications/:id/status", async (req: Request, res: Resp
     return;
   }
 
+  setImmediate(async () => {
+    try {
+      const actionTypeMap: Record<string, string> = {
+        shortlisted: "shortlisted",
+        hired: "hired",
+        rejected: "rejected",
+        interviewed: "interview_completed",
+        reviewed: "viewed",
+      };
+      const actionType = actionTypeMap[status];
+      if (actionType) {
+        const profileRows = await db.execute(sql`
+          SELECT skills, location, experience FROM profiles WHERE user_id = ${updated.userId}
+        `);
+        const profile = profileRows.rows?.[0] as any;
+        await signalCollector.record({
+          employerId: req.user!.id,
+          actionType,
+          candidateId: updated.userId,
+          jobId: updated.jobId,
+          metadata: {
+            skills: profile?.skills || [],
+            location: profile?.location || null,
+            experienceLevel: profile?.experience?.[0]?.level || null,
+            applicationStatus: status,
+            applicationId: appId,
+          },
+        });
+        if (status === "hired" || status === "shortlisted") {
+          const skills: string[] = profile?.skills || [];
+          for (const skill of skills) {
+            await recruitmentMemory.reinforcePreference(req.user!.id, "preferred_skill", skill, 0.7);
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Failed to record behavioral signal:", err);
+    }
+  });
+
   res.json(updated);
 });
 
@@ -218,6 +261,155 @@ router.get("/employer/ai-matches", async (req: Request, res: Response) => {
   }));
 
   res.json({ matches });
+});
+
+// ─── AI Follow-Up Messages ─────────────────────────────────────────
+const FOLLOW_UP_PROMPT = `You are a professional recruitment assistant. Generate a short, warm, personalized follow-up message.
+Keep it concise (2-4 sentences). Match the tone to the situation. No markdown, no JSON, plain text only.`;
+
+const followUpTemplates: Record<string, (candidateName: string, jobTitle: string, companyName: string) => string> = {
+  applied: (name, title, company) =>
+    `Hi ${name},\n\nThank you for applying for the ${title} position at ${company}. We've received your application and our team will review it shortly. We'll be in touch with updates within the next few days.\n\nBest regards,\nThe ${company} Recruitment Team`,
+
+  shortlisted: (name, title, company) =>
+    `Hi ${name},\n\nGreat news! Your application for ${title} at ${company} has been shortlisted. We were impressed by your background and would like to invite you for an interview. Our team will reach out to schedule a convenient time.\n\nLooking forward to speaking with you!\nThe ${company} Recruitment Team`,
+
+  interviewed: (name, title, company) =>
+    `Hi ${name},\n\nThank you for taking the time to interview for the ${title} position at ${company}. We really enjoyed learning about your experience. We're currently reviewing all candidates and will get back to you with an update soon.\n\nBest regards,\nThe ${company} Recruitment Team`,
+
+  hired: (name, title, company) =>
+    `Hi ${name},\n\nCongratulations! We're thrilled to offer you the ${title} position at ${company}. Your skills and experience are exactly what we're looking for. Please expect an official offer letter shortly with the details.\n\nWelcome to the team!\nThe ${company} Recruitment Team`,
+
+  rejected: (name, title, company) =>
+    `Hi ${name},\n\nThank you for your interest in the ${title} position at ${company}. After careful consideration, we've decided to move forward with other candidates whose experience more closely matches our current needs. We appreciate the time you invested in the process.\n\nWe wish you all the best in your job search.\nThe ${company} Recruitment Team`,
+};
+
+router.post("/employer/applications/:id/follow-up", async (req: Request, res: Response) => {
+  try {
+    const appId = Number(req.params.id);
+    const { stage, candidateName, jobTitle, companyName, customInstructions } = req.body ?? {};
+
+    if (!stage || !candidateName || !jobTitle || !companyName) {
+      res.status(400).json({ error: "stage, candidateName, jobTitle, and companyName are required" });
+      return;
+    }
+
+    const stageKey = stage as string;
+    const template = followUpTemplates[stageKey] || followUpTemplates.applied;
+
+    let message: string;
+    if (customInstructions) {
+      const completion = await openrouter().chat.completions.create({
+        model: "openrouter/free",
+        messages: [
+          { role: "system", content: FOLLOW_UP_PROMPT },
+          {
+            role: "user",
+            content: `Generate a follow-up message for ${stageKey} stage.\nCandidate: ${candidateName}\nJob: ${jobTitle}\nCompany: ${companyName}\n\nCustom instructions: ${customInstructions}`,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 300,
+      });
+      message = completion.choices[0].message.content || template(candidateName, jobTitle, companyName);
+    } else {
+      message = template(candidateName, jobTitle, companyName);
+    }
+
+    const [updated] = await db
+      .update(applications)
+      .set({
+        metadata: sql`jsonb_set(COALESCE(metadata, '{}'::jsonb), '{followUp}', ${JSON.stringify({
+          stage: stageKey,
+          message,
+          generatedAt: new Date().toISOString(),
+        })}::jsonb)`,
+        updatedAt: new Date(),
+      })
+      .where(eq(applications.id, appId))
+      .returning();
+
+    setImmediate(async () => {
+      try {
+        await signalCollector.record({
+          employerId: req.user!.id,
+          actionType: "outreach_sent",
+          candidateId: undefined,
+          jobId: undefined,
+          metadata: { stage: stageKey, applicationId: appId, candidateName, jobTitle, companyName },
+        });
+      } catch { /* background signal */ }
+    });
+
+    res.json({
+      message,
+      stage: stageKey,
+      applicationId: appId,
+      candidateName,
+      jobTitle,
+    });
+  } catch (error: unknown) {
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
+  }
+});
+
+router.get("/employer/follow-ups/pending", async (req: Request, res: Response) => {
+  try {
+    const employerId = req.user!.id;
+
+    const employerJobIds = await db
+      .select({ id: jobs.id })
+      .from(jobs)
+      .where(eq(jobs.createdBy, employerId));
+
+    if (employerJobIds.length === 0) {
+      res.json({ followUps: [] });
+      return;
+    }
+
+    const ids = employerJobIds.map((j) => j.id);
+
+    const pending = await db
+      .select({
+        id: applications.id,
+        status: applications.status,
+        createdAt: applications.createdAt,
+        userId: applications.userId,
+        jobId: applications.jobId,
+        metadata: applications.metadata,
+        jobTitle: jobs.title,
+        companyName: jobs.company,
+      })
+      .from(applications)
+      .leftJoin(jobs, eq(applications.jobId, jobs.id))
+      .where(
+        and(
+          inArray(applications.jobId, ids),
+          sql`(applications.metadata->>'followUp' IS NULL OR applications.metadata->>'followUp' = '{}'::text)`
+        )
+      )
+      .orderBy(desc(applications.createdAt))
+      .limit(20);
+
+    const userIds = pending.map((a) => a.userId).filter(Boolean);
+    const userProfiles = userIds.length > 0
+      ? await db.select({ id: users.id, email: users.email }).from(users).where(inArray(users.id, userIds))
+      : [];
+    const profileMap = new Map(userProfiles.map((p) => [p.id, p.email]));
+
+    const followUps = pending.map((a) => ({
+      applicationId: a.id,
+      status: a.status,
+      candidateName: profileMap.get(a.userId)?.split("@")[0] || "Candidate",
+      jobTitle: a.jobTitle,
+      companyName: a.companyName,
+      appliedAt: a.createdAt,
+    }));
+
+    res.json({ followUps: followUps });
+  } catch (error: unknown) {
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
+  }
 });
 
 export default router;

@@ -3,6 +3,9 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { orchestrator } from "./services/agents/orchestrator";
+
+orchestrator.start();
 
 const app: Express = express();
 

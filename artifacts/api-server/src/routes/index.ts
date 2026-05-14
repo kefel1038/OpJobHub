@@ -10,6 +10,8 @@ import searchRouter from "./search";
 import resourcesRouter from "./resources";
 import employerRouter from "./employer";
 import freelanceRouter from "./freelance";
+import extensionRouter from "./extension";
+import agentsRouter from "./agents";
 
 const router: IRouter = Router();
 
@@ -24,5 +26,7 @@ router.use("/search", searchRouter);
 router.use("/resources", resourcesRouter);
 router.use(employerRouter);
 router.use(freelanceRouter);
+router.use(extensionRouter);
+router.use(agentsRouter);
 
 export default router;

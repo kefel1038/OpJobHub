@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MessageSquare, X, Send, Sparkles, Bot, User,
@@ -7,6 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api";
 
 type Message = {
   id: string;
@@ -44,7 +45,7 @@ export function AIChatbot() {
     }
   }, [messages]);
 
-  const handleSend = (content: string) => {
+  const handleSend = useCallback(async (content: string) => {
     if (!content.trim()) return;
 
     const userMessage: Message = {
@@ -57,17 +58,32 @@ export function AIChatbot() {
     setInput("");
     setIsTyping(true);
 
-    setTimeout(() => {
+    try {
+      const chatHistory = [...messages, userMessage].map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      const result = await api.copilot(chatHistory);
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "bot",
-        content: getBotResponse(content.trim()),
+        content: result.reply,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, botMessage]);
+    } catch {
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "bot",
+        content: "I'm having trouble connecting right now. Please try again or check your connection.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, botMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1000 + Math.random() * 1000);
-  };
+    }
+  }, [messages]);
 
   return (
     <>
@@ -192,19 +208,4 @@ export function AIChatbot() {
   );
 }
 
-function getBotResponse(input: string): string {
-  const lower = input.toLowerCase();
-  if (lower.includes("react") || lower.includes("developer") || lower.includes("frontend")) {
-    return "I found 47 React developer positions matching your profile. Top matches include Senior React Developer at Google ($150K-$220K), React Engineer at Meta ($140K-$200K), and Frontend Lead at Stripe ($160K-$240K). Would you like me to show more details?";
-  }
-  if (lower.includes("resume") || lower.includes("optimize")) {
-    return "I can help optimize your resume! Here are my top suggestions:\n\n1. Add quantifiable achievements (e.g., 'Increased revenue by 25%')\n2. Include relevant keywords from the job description\n3. Keep it to one page for <10 years experience\n4. Use action verbs like 'Led', 'Built', 'Optimized'\n5. Add a skills section tailored to each application\n\nUpload your resume for a detailed ATS analysis!";
-  }
-  if (lower.includes("salary") || lower.includes("trend")) {
-    return "Based on current market data:\n\n• Software Engineers: $90K-$200K (avg. $145K)\n• Data Scientists: $100K-$190K (avg. $135K)\n• Product Managers: $110K-$220K (avg. $155K)\n• DevOps Engineers: $100K-$180K (avg. $135K)\n\nSalaries have increased 8-12% YoY in tech. Would you like a detailed breakdown for a specific role?";
-  }
-  if (lower.includes("skill") || lower.includes("learn")) {
-    return "The most in-demand skills right now:\n\n1. AI/Machine Learning (+180% demand)\n2. Cloud Computing (AWS/GCP/Azure)\n3. Cybersecurity\n4. Full-Stack Development\n5. Data Engineering\n6. UI/UX Design\n\nWhich area interests you most? I can suggest specific courses and certifications.";
-  }
-  return "Great question! Based on your interests, I recommend exploring opportunities in high-growth tech roles. The market is particularly strong for senior engineering positions, AI/ML specialists, and cloud architects. Would you like me to help you find specific job listings, optimize your resume, or explore career paths?";
-}
+

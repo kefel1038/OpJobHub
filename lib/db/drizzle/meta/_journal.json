@@ -15,6 +15,27 @@
       "when": 1778585632000,
       "tag": "0001_nifty_gress",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778685632000,
+      "tag": "0002_dark_agents",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778785632000,
+      "tag": "0003_adaptive_intelligence",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778885632000,
+      "tag": "0004_observability_governance",
+      "breakpoints": true
     }
   ]
 }

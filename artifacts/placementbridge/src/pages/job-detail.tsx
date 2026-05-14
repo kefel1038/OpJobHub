@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useRoute, useLocation } from "wouter";
-import { MapPin, DollarSign, Calendar, ArrowLeft, Star, Loader2, Trash2, Pencil, CheckCircle2 } from "lucide-react";
+import { MapPin, DollarSign, Calendar, ArrowLeft, Star, Loader2, Trash2, Pencil, CheckCircle2, Share2 } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { api, type Job } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
+import SocialShareButtons from "@/components/jobs/SocialShareButtons";
 
 export default function JobDetail() {
   const [, params] = useRoute<{ id: string }>("/jobs/:id");
@@ -96,7 +97,7 @@ export default function JobDetail() {
                 )}
               </div>
 
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-6 pb-6 border-b">
+              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4 pb-4 border-b">
                 <span className="flex items-center gap-1.5">
                   <MapPin className="h-4 w-4" />
                   {job.location}
@@ -111,6 +112,14 @@ export default function JobDetail() {
                   <Calendar className="h-4 w-4" />
                   Posted {new Date(job.createdAt).toLocaleDateString()}
                 </span>
+              </div>
+
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <Share2 className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Share this job</span>
+                </div>
+                <SocialShareButtons job={job} />
               </div>
 
               {job.responsibilities && job.responsibilities.length > 0 && (

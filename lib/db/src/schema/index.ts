@@ -9,3 +9,4 @@ export * from "./applications";
 export * from "./scrape-logs";
 export * from "./ai";
 export * from "./resources";
+export * from "./agents";

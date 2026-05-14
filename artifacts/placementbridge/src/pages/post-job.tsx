@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useSearch } from "wouter";
-import { CreditCard, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { CreditCard, CheckCircle2, XCircle, AlertCircle, Sparkles } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { api } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
+import AIJobDescriptionGenerator from "@/components/jobs/AIJobDescriptionGenerator";
 
 export default function PostJob() {
   const [, navigate] = useLocation();
@@ -169,6 +170,15 @@ export default function PostJob() {
                   placeholder="$80,000 - $120,000"
                 />
               </div>
+              <AIJobDescriptionGenerator
+                onGenerate={(result) => {
+                  setDescription(result.description);
+                  setResponsibilities(result.responsibilities.join("\n"));
+                  setRequirements(result.requirements.join("\n"));
+                  setBenefits(result.benefits.join("\n"));
+                }}
+                initialValues={{ title, company, location }}
+              />
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
                 <Textarea

@@ -1,4 +1,5 @@
-import { pool } from "../index";
+import { getDb } from "../index";
+import { sql } from "drizzle-orm";
 
 async function init() {
   const client = await pool.connect();

@@ -3,11 +3,14 @@
 ## 1. PLATFORM OVERVIEW
 
 ### Vision
-Transform KeFeL from a simple job board into a billion-dollar AI-powered international workforce recruitment platform connecting Africa to the Gulf.
+Transform KeFeL from a passive job listing platform into **Africa's AI-Powered Employment Operating System** — an intelligent recruitment infrastructure that automates sourcing, matching, engagement, deployment, and workforce intelligence across Africa and the Middle East.
 
 ### Core Offering
 ```
-KeFeL Platform = AI Matching + Verified Candidates + End-to-End Deployment + Employer Suite
+OpJobHub = AI Recruitment Operating System
+         = Multi-Agent Sourcing + Intelligent Matching + Automated Syndication
+         + Recruiter CRM + Browser Extension + MCP AI Infrastructure
+         + Labor Market Intelligence + End-to-End Deployment
 ```
 
 ### Target Personas
@@ -21,7 +24,171 @@ KeFeL Platform = AI Matching + Verified Candidates + End-to-End Deployment + Emp
 
 ---
 
-## 2. SITE RESTRUCTURING STRATEGY
+## 2. INTEGRATED STRATEGIC ARCHITECTURE
+
+### Positioning
+Do NOT market OpJobHub as a job board, recruitment portal, or employment listing site.
+Position it as:
+
+> **"Africa's AI-Powered Employment Operating System"**
+> — The AI Recruitment Infrastructure for Africa & the Middle East.
+
+### 2.1 Recruitment Browser Extension (Highest Strategic ROI)
+
+Inspired by AiToEarn's engagement automation. A Plasmo-based browser extension that makes OpJobHub omnipresent in recruiters' daily workflow.
+
+#### Recruiter Features
+- One-click import from LinkedIn, Indeed, Bayt
+- Auto-extract: skills, experience, certifications, education
+- AI candidate scoring while browsing profiles
+- AI fit analysis (match against open roles in pipeline)
+- Save candidate directly into pipeline with one click
+
+#### Job Seeker Features
+- Apply instantly to jobs from any page
+- AI resume tailoring for specific applications
+- Salary estimation based on market data
+- Sponsorship probability scoring
+- ATS optimization feedback
+
+#### Employer Features
+- Auto-post jobs to LinkedIn, X/Twitter, Facebook, WhatsApp, Telegram
+- AI-generated hashtags, captions, localized copy, poster graphics
+- Syndication analytics (which channels drive applications)
+
+### 2.2 MCP Protocol Integration (Extremely Forward-Thinking)
+
+Expose an MCP (Model Context Protocol) server making OpJobHub **AI-native infrastructure**. Claude, Cursor, VS Code AI agents, ChatGPT tools, and autonomous agents can interact with the platform programmatically.
+
+#### Use Cases
+- **Recruiter**: *"Find top 20 telecom engineers in Qatar with 5+ years experience"*
+- **Job Seeker**: *"Find sponsorship jobs in Doha matching my CV"*
+- **Employer**: *"Summarize hiring bottlenecks this month"*
+- **Analyst**: *"What are the top 10 in-demand skills in Saudi Arabia right now?"*
+
+This transforms OpJobHub into **conversational recruitment infrastructure** — very few job platforms are thinking this way yet.
+
+### 2.3 AI Multi-Agent Recruitment System
+
+The core architecture. Specialized AI agents working in concert:
+
+| Agent | Function |
+|-------|----------|
+| **Sourcing Agent** | Finds candidates across platforms (job boards, social, forums) |
+| **Matching Agent** | Scores compatibility using semantic embeddings + weighted criteria |
+| **Outreach Agent** | Sends personalized follow-ups, nurtures passive candidates |
+| **Resume Agent** | Optimizes CVs, ATS scoring, skill gap analysis, cover letters |
+| **Job Description Agent** | Generates professional, inclusive, optimized JDs |
+| **Syndication Agent** | Cross-posts jobs to 10+ platforms with platform-specific formatting |
+| **Analytics Agent** | Generates workforce insights, salary trends, hiring heatmaps |
+| **Interview Agent** | Schedules interviews, generates role-specific questions |
+| **Compliance Agent** | Validates labor law compliance across GCC countries |
+| **Verification Agent** | Detects fake employers, fraudulent job posts, scam patterns |
+
+### 2.4 Social Recruitment Distribution Engine
+
+Critical for African markets where WhatsApp, Telegram, and Facebook groups dominate.
+
+#### Workflow
+```
+Employer posts job
+        ↓
+AI reformats per platform (LinkedIn, X, Facebook, WhatsApp, Telegram)
+        ↓
+AI generates: hashtags, captions, localized wording, poster graphics
+        ↓
+Auto-publishes to connected channels
+        ↓
+Tracks click-through, applications, engagement per channel
+```
+
+### 2.5 Recruitment Engagement Mining
+
+Inspired by AiToEarn's comment mining. Detect job-seeking intent signals from public platforms:
+
+- "looking for work in Qatar"
+- "need sponsorship"
+- "telecom engineer available"
+- "open to relocation"
+
+Sources: X/Twitter, LinkedIn, Telegram groups, Facebook groups, Reddit, public forums.
+
+Then: recommend matching jobs, invite candidates, auto-nurture leads. This becomes **recruitment lead generation** at scale.
+
+### 2.6 AI Recruitment CRM
+
+Move beyond basic job board functionality into a **hiring operations platform**:
+
+- Automated follow-up sequences
+- Candidate lifecycle tracking (awareness → interest → applied → hired → deployed)
+- Full hiring funnel visualization
+- Pipeline automation (auto-move stages based on triggers)
+- Smart reminders and tagging
+- AI-generated candidate summaries for hiring managers
+- Bulk actions for enterprise hiring
+
+### 2.7 Desktop Recruitment Assistant (Electron)
+
+An Electron desktop app for power recruiters:
+
+- Real-time hiring alerts (system tray notifications)
+- Quick candidate search (global hotkey)
+- Pipeline monitor (live updates)
+- AI assistant popup (voice/text queries)
+- Drag-and-drop CV parsing
+- Offline access to cached candidates
+
+### 2.8 Offline + QR Recruitment Ecosystem
+
+Uniquely valuable in African markets with limited internet penetration:
+
+- QR-powered recruitment drives at job fairs
+- Instant candidate profile creation via QR scan
+- Booth analytics (footfall, scan rates, conversion)
+- Attendance tracking for events
+- AI-powered event summaries and lead scoring
+- Offline-to-online synchronization (scan QR → profile created when online)
+
+Bridges **offline employment ecosystems** with **digital recruitment**.
+
+### 2.9 AI Job Intelligence Layer
+
+The long-term competitive moat. Track and monetize:
+
+- Sponsorship trends by country and industry
+- Visa demand forecasting
+- Salary intelligence (real-time comps by role, country, experience)
+- Migration demand patterns
+- Emerging skills and declining roles
+- Regional hiring heatmaps
+- Employer reputation scores
+
+Monetizable as: premium reports, data APIs, government/NGO consulting, workforce planning dashboards.
+
+### 2.10 Monetization Architecture (Expanded)
+
+#### Employers
+- AI recruiting assistant subscriptions (monthly/ annual)
+- Premium sourcing credits (beyond free tier)
+- AI candidate ranking unlocks
+- Automated outreach campaigns (pay-per-candidate)
+- Featured AI campaigns (boosted visibility)
+
+#### Job Seekers
+- Premium AI resume optimization ($9.99)
+- AI interview coaching ($14.99)
+- Sponsorship matching premium tier
+- Migration/job intelligence reports
+
+#### Governments / NGOs / Development Orgs
+- Labor market analytics subscriptions
+- Employment reports and workforce dashboards
+- Skills gap analysis for policy planning
+- Regional migration data insights
+
+---
+
+## 4. SITE RESTRUCTURING STRATEGY
 
 ### Current Site Structure (Simplified)
 ```
@@ -78,7 +245,7 @@ KeFeL Platform = AI Matching + Verified Candidates + End-to-End Deployment + Emp
 
 ---
 
-## 3. UI/UX ARCHITECTURE
+## 5. UI/UX ARCHITECTURE
 
 ### Design System
 
@@ -154,7 +321,7 @@ App
 
 ---
 
-## 4. DATABASE SCHEMA SUGGESTIONS
+## 6. DATABASE SCHEMA SUGGESTIONS
 
 ### Core Entities (PostgreSQL via Supabase)
 
@@ -419,7 +586,7 @@ CREATE INDEX idx_deployments_route ON deployments(source_country, destination_co
 
 ---
 
-## 5. AI FEATURE ARCHITECTURE
+## 7. AI FEATURE ARCHITECTURE
 
 ### AI Pipeline
 ```
@@ -488,7 +655,7 @@ CREATE INDEX idx_deployments_route ON deployments(source_country, destination_co
 
 ---
 
-## 6. EMPLOYER ONBOARDING FLOW
+## 8. EMPLOYER ONBOARDING FLOW
 
 ```
                     EMPLOYER ONBOARDING
@@ -535,7 +702,7 @@ Step 7: First Candidate Review
 
 ---
 
-## 7. MONETIZATION STRATEGY
+## 9. MONETIZATION STRATEGY
 
 ### Pricing Tiers
 
@@ -605,7 +772,7 @@ Total: $1,419,220 ARR (Year 1 conservative)
 
 ---
 
-## 8. RECRUITMENT WORKFLOW DIAGRAMS
+## 10. RECRUITMENT WORKFLOW DIAGRAMS
 
 ### Basic Hiring Flow
 ```
@@ -665,7 +832,7 @@ EMPLOYER                         PLATFORM                    CANDIDATE
 
 ---
 
-## 9. MOBILE RESPONSIVENESS PLAN
+## 11. MOBILE RESPONSIVENESS PLAN
 
 ### Breakpoints
 ```
@@ -719,7 +886,7 @@ Wide:       1441px+
 
 ---
 
-## 10. FUTURE SCALABILITY ROADMAP
+## 12. FUTURE SCALABILITY ROADMAP
 
 ### Phase 1: Foundation (Month 1-2) ✅ CURRENT
 ```
@@ -739,33 +906,43 @@ Wide:       1441px+
 □ International deployment tracking
 □ Video profile uploads
 □ WhatsApp integration
+□ AI Job Description Generator (quick win - 1 day with existing LLM infra)
+□ Social share buttons on job listings (LinkedIn, X, WhatsApp, Telegram)
 ```
 
 ### Phase 3: Scale (Month 5-6)
 ```
+□ AI Multi-Agent System (Sourcing, Matching, Resume, JD agents)
+□ Recruitment Browser Extension v1 (Plasmo - LinkedIn profile import + AI scoring)
+□ MCP Protocol Server (expose conversational recruitment API)
+□ AI Resume Intelligence (ATS scoring, tailoring, cover letter gen)
 □ Freelance/gig marketplace
 □ Payment & escrow system
 □ Agency portal with white-label
-□ Advanced analytics & reporting
 □ AI chatbot (24/7 hiring assistant)
-□ Mobile app (React Native)
 ```
 
 ### Phase 4: Expansion (Month 7-9)
 ```
+□ Recruiter Desktop App (Electron - system tray, pipeline monitor, AI popup)
+□ Social Recruitment Syndication Engine (auto-post to 8+ platforms)
+□ Recruitment Engagement Mining (intent detection from social platforms)
+□ AI Recruitment CRM (automated follow-up, lifecycle tracking, pipeline automation)
 □ Multi-language support (Swahili, Amharic, Somali)
 □ Blockchain credential verification
 □ Predictive hiring analytics
-□ Automated compliance & contracts
-□ E-signature integration
-□ Payroll integration
+□ Browser Extension v2 (job seeker features: instant apply, sponsorship scoring)
 ```
 
 ### Phase 5: Enterprise (Month 10-12)
 ```
+□ Offline + QR Recruitment Ecosystem (job fairs, booth analytics)
+□ Labor Market Intelligence Dashboard (salary trends, hiring heatmaps, migration data)
 □ API marketplace for third-party integrations
 □ Custom enterprise dashboards
-□ Advanced fraud detection (AI)
+□ Automated compliance & contracts (GCC labor law)
+□ Advanced fraud detection (AI scam detection for job posts)
+□ MCP Protocol v2 (autonomous agent support, webhook triggers)
 □ Virtual recruitment events platform
 □ Skills assessment center
 □ Partnership network with training centers
@@ -773,7 +950,7 @@ Wide:       1441px+
 
 ---
 
-## 11. KEY METRICS & KPIs
+## 13. KEY METRICS & KPIs
 
 ### Employer-Side Metrics
 ```
@@ -799,7 +976,7 @@ NPS Score:                          Target > 60
 
 ---
 
-## 12. SECURITY & COMPLIANCE
+## 14. SECURITY & COMPLIANCE
 
 ### Data Protection
 - End-to-end encryption for messages
@@ -822,7 +999,7 @@ NPS Score:                          Target > 60
 
 ---
 
-## 13. TECHNOLOGY STACK (CURRENT + RECOMMENDED)
+## 15. TECHNOLOGY STACK (CURRENT + EVOLVED VISION)
 
 ### Current Stack
 ```
@@ -833,22 +1010,333 @@ Routing:         wouter
 State:           TanStack React Query
 Charts:          Recharts
 Auth:            Custom JWT-based
-API:             Custom Express (in api-server)
-Database:        SQLite (via api-server)
+API:             Express 5 (in api-server)
+Database:        PostgreSQL (via Supabase) + Drizzle ORM
+AI/LLM:          OpenAI SDK via OpenRouter
+File Parsing:    pdf-parse + mammoth (PDF/DOCX)
+Scraping:        Cheerio + Axios (6 job board scrapers)
 ```
 
-### Recommended Additions
+### Target Stack (Evolved Vision)
+
+| Layer | Recommendation |
+|-------|---------------|
+| Frontend | Next.js 15 (migration path from Vite/React) |
+| UI | Tailwind 4 + shadcn/ui (keep existing) |
+| Backend | NestJS monorepo (Nx) — modular microservices architecture |
+| AI Orchestration | LangGraph or CrewAI (multi-agent system) |
+| Vector Search | pgvector (PostgreSQL extension) |
+| Database | PostgreSQL (Supabase) |
+| Queue System | BullMQ (background job processing) |
+| Realtime | Supabase Realtime + WebSocket |
+| AI APIs | OpenAI + Gemini + OpenRouter (multi-provider) |
+| Browser Extension | Plasmo framework |
+| Desktop App | Electron (recruiter assistant) |
+| Auth | Clerk or custom JWT |
+| File Storage | Supabase Storage / Cloudflare R2 |
+| Search | Hybrid semantic + keyword (pgvector + Meilisearch) |
+| AI Memory | Redis (caching + session state) |
+| MCP | FastMCP / Model Context Protocol SDK |
+| Payments | Stripe Connect |
+| Email | Resend or SendGrid |
+| SMS | Twilio or Africa's Talking |
+| WhatsApp | Twilio WhatsApp API / WATI |
+| CI/CD | GitHub Actions |
+| Monitoring | Sentry + PostHog |
+| Event/Scraping | GitHub Actions cron + BullMQ workers |
+
+---
+
+## 16. MASTER PROMPT — OpJobHub: AI Recruitment Operating System
+
+Use this prompt for planning, AI coding assistants, architecture generation, or investor/developer documentation:
+
+> Build an advanced AI-powered recruitment ecosystem called OpJobHub that evolves beyond a traditional job board into a full **Employment Operating System for Africa and the Middle East**.
+>
+> The platform should combine:
+> - AI recruitment automation
+> - intelligent candidate sourcing
+> - multi-platform job syndication
+> - AI resume intelligence
+> - conversational AI assistants
+> - labor market analytics
+> - browser extension recruitment tooling
+> - MCP AI assistant integrations
+> - recruiter CRM workflows
+> - semantic matching systems
+> - real-time engagement automation
+>
+> Core vision: Transform hiring from a manual process into an autonomous AI-assisted workflow.
+>
+> Key modules to build:
+>
+> 1. **AI Multi-Agent Recruitment Architecture** — Specialized AI agents: Sourcing Agent, Resume Analysis Agent, Job Description Generator Agent, Candidate Match Scoring Agent, Outreach & Follow-up Agent, Recruitment Marketing Agent, Analytics & Reporting Agent, Interview Scheduling Agent, Verification & Compliance Agent
+>
+> 2. **Browser Extension (Plasmo)** — One-click import of LinkedIn/Indeed/Bayt candidates, AI-powered profile scoring while browsing, auto-save candidates into recruitment pipelines, auto-post jobs to LinkedIn/X/Facebook/Telegram/WhatsApp, instant resume/job analysis
+>
+> 3. **MCP Protocol Integration** — Expose MCP-compatible recruitment API allowing Claude/Cursor/AI assistants to search jobs, conversational resume feedback, recruiter analytics querying, AI-assisted hiring workflows, candidate search via natural language
+>
+> 4. **AI Resume Intelligence System** — ATS scoring, semantic skill extraction, sponsorship eligibility prediction, salary intelligence, missing skills detection, AI-generated resume improvements, cover letter generation, career path recommendations
+>
+> 5. **Semantic AI Matching Engine** — Use embeddings + vector search (pgvector) to match candidates to jobs semantically, score cultural and technical fit, recommend relocation/sponsorship opportunities, detect hidden candidate-job compatibility
+>
+> 6. **Multi-Platform Recruitment Syndication** — Automatically distribute jobs to LinkedIn, X/Twitter, Facebook, Instagram, WhatsApp Channels, Telegram groups, partner job boards. Generate captions, hashtags, recruitment posters, short-form hiring content, localized platform-specific messaging
+>
+> 7. **AI Recruitment CRM** — Pipeline management, automated follow-ups, candidate reminders, AI-generated summaries, interview scheduling, hiring funnel analytics
+>
+> 8. **Engagement Mining System** — Detect job-seeking intent signals from social platforms ("looking for work", "need sponsorship", "open to relocation"), recommend matching jobs, trigger AI outreach, nurture passive candidates
+>
+> 9. **Desktop Recruitment Assistant (Electron)** — Real-time recruiter notifications, quick candidate search, pipeline monitoring, AI hiring assistant, drag-and-drop resume parsing
+>
+> 10. **Offline Recruitment Ecosystem** — QR-powered recruitment drives, job fairs, candidate booth registration, event analytics, offline-to-online recruitment synchronization
+>
+> 11. **Labor Market Intelligence Dashboard** — Salary trends, sponsorship trends, hiring heatmaps, in-demand skills, migration/employment analytics, workforce intelligence reports
+>
+> Technical stack: Next.js 15, Tailwind CSS, shadcn/ui, NestJS, PostgreSQL + pgvector, Supabase, BullMQ, Redis, LangGraph or CrewAI, OpenAI + Gemini + OpenRouter, Plasmo browser extension, Electron desktop app, MCP server integration.
+>
+> The final platform should feel like: **"An AI-native employment infrastructure platform that automates recruitment, workforce intelligence, candidate engagement, and career growth across Africa and the Middle East."**
+
+---
+
+## 12. POST-PHASE 5 STRATEGIC DIRECTION
+
+### The Shift: From Feature-Building to Systems Engineering
+
+The platform has crossed the threshold from "AI-powered recruitment software" to **"self-improving recruitment infrastructure."** This changes the build strategy:
+
+| Before | After |
+|--------|-------|
+| AI feature layering | Intelligence optimization |
+| Recruiter utilities | Adaptive learning systems |
+| Job marketplace features | Enterprise infrastructure |
+| Prompt-driven agents | Behaviorally adaptive agents |
+| Static scoring | Confidence-weighted evolution |
+
+### Correct Strategic Sequence
+
+| Order | Priority | Rationale |
+|-------|----------|-----------|
+| **Phase 5A** | Adaptive Intelligence Engine | Learning recruitment system — compounds all other features |
+| **Phase 5B** | Observability + Human Override | Trust infrastructure for adaptive AI |
+| **Phase 6** | Autonomous Sourcing | Continuous talent discovery (quality depends on preference intelligence first) |
+| **Phase 7** | Knowledge Graph (Neo4j) | Workforce intelligence graph (richer with behavioral data first) |
+| **Phase 8** | Hiring Simulation Engine | Predictive intelligence (needs historical outcome data) |
+| **Phase 9** | Labor Market Intelligence | B2B/government revenue layer |
+| **Phase 10** | Enterprise Governance | Audit, compliance, SLA, permissions |
+
+### Phase 5A Architecture: Adaptive Intelligence Engine
+
+#### Layers Built
+
 ```
-AI Services:     OpenAI GPT-4 / Gemini API for matching
-Vector DB:       pgvector (PostgreSQL extension)
-Payments:        Stripe Connect
-Real-time:       WebSocket / Supabase Realtime
-Search:          Meilisearch or Typesense
-Storage:         Supabase Storage or Cloudflare R2
-Email:           Resend or SendGrid
-SMS:             Twilio or Africa's Talking
-WhatsApp:        Twilio WhatsApp API / WATI
-CI/CD:           GitHub Actions
-Monitoring:      Sentry + PostHog
-PWA:             vite-plugin-pwa
+┌─────────────────────────────────────────────┐
+│         Preference Embedding Layer           │
+│  (pgvector embeddings for contextual ranking)│
+├─────────────────────────────────────────────┤
+│      Confidence-Weighted Memory System       │
+│  (decay · reinforcement · contradiction)     │
+├─────────────────────────────────────────────┤
+│        Preference Inference Engine           │
+│  (skill · location · experience · cert)     │
+├─────────────────────────────────────────────┤
+│       Behavioral Signal Collection Layer     │
+│  (hired +1.0 · shortlisted +0.6 · rejected  │
+│   -0.5 · ghosted -0.6 · rapid_rejected -0.8)│
+├─────────────────────────────────────────────┤
+│     Recruiter Actions → Signals Wiring      │
+│  (status updates · follow-ups · pipeline)   │
+└─────────────────────────────────────────────┘
 ```
+
+#### New Database Tables
+- `behavioral_signals` — raw recruiter action events with signal strength (-1.0 to 1.0)
+- `inferred_preferences` — auto-detected preferences with confidence, supporting signals, decay tracking
+- `preference_embeddings` — vector embeddings for contextual semantic matching
+
+#### Signal Strength Mapping
+| Recruiter Action | Signal Strength | Category |
+|-----------------|----------------|----------|
+| hired | +1.0 | strong_positive |
+| interview_completed | +0.8 | positive |
+| outreach_replied | +0.7 | positive |
+| shortlisted | +0.6 | positive |
+| outreach_sent | +0.5 | positive |
+| sourced | +0.3 | neutral |
+| viewed | +0.1 | neutral |
+| ignored | -0.2 | negative |
+| rejected | -0.5 | negative |
+| ghosted | -0.6 | strong_negative |
+| rapid_rejected | -0.8 | strong_negative |
+
+#### Confidence-Weighted Evolution
+- **Reinforcement**: Matching behaviors increase confidence (diminishing returns toward 0.98)
+- **Decay**: Unreinforced preferences lose 0.1 confidence per 30 days
+- **Contradiction**: Opposite behaviors reduce conflicting preference confidence by 15%
+- **Deactivation**: Preferences below 0.1 confidence for 7+ days auto-deactivate
+- **Inference trigger**: Every 10th signal triggers background pattern inference
+
+#### Frontend: Agents Tab (Enhanced)
+- 4 status cards: Orchestrator · Events · Inferred Preferences · Learning Progress
+- Pipeline Runner (unchanged)
+- Adaptive Intelligence Controls: Infer, Decay, Embed, Load Profile
+- Inferred Preferences panel: confidence badges, source, signal count, decay indicator
+- Behavioral Signals log: color-coded by strength, with timestamps
+- Consolidated Recruiter Profile: manual + inferred + avoided skills + stats
+- Learning documentation explaining the three-stage pipeline
+
+#### API Endpoints Added
+| Method | Route | Description |
+|--------|-------|-------------|
+| POST | `/agents/signals/record` | Record a behavioral signal |
+| GET | `/agents/signals` | Get signals for employer |
+| POST | `/agents/preferences/infer` | Trigger preference inference |
+| GET | `/agents/preferences/inferred` | Get inferred preferences |
+| POST | `/agents/preferences/decay` | Decay stale preferences |
+| GET | `/agents/preferences/summary` | Get learning summary |
+| GET | `/agents/preferences/consolidated` | Get full recruiter profile |
+| POST | `/agents/embeddings/generate` | Generate preference embeddings |
+
+### Key Strategic Insight
+
+The system now learns from recruiter behavior automatically:
+
+**Before Phase 5A:**
+```
+Recruiter sets preferences manually
+```
+
+**After Phase 5A:**
+```
+System infers recruiter behavior automatically
+```
+
+This creates a **compounding intelligence loop**: more recruiter actions → better preference inference → better sourcing/ranking → better hiring outcomes → more recruiter engagement → more signals → even better inference.
+
+---
+
+## Phase 5B Architecture: Observability + Human Override
+
+### Strategic Importance
+
+The platform now learns autonomously, adapts recruiter preferences, and changes ranking behavior over time. This makes AI decisions directly influence hiring outcomes. Phase 5B builds the **governance infrastructure for autonomous AI systems** — transforming powerful AI into trusted AI infrastructure.
+
+### Why This Must Come Before Scale
+
+Without observability and human override:
+- Recruiters lose trust in AI decisions
+- Enterprises hesitate to adopt
+- Bias risks increase
+- Automation becomes dangerous
+
+### New Database Tables (6)
+
+| Table | Purpose |
+|-------|---------|
+| `agent_reasoning_logs` | Structured AI reasoning artifacts for every decision |
+| `approval_workflows` | Human approval states with confidence-based execution |
+| `override_events` | Recruiter override tracking for reinforcement learning |
+| `safety_flags` | Risk events: bias, drift, hallucinations, threshold breaches |
+| `drift_metrics` | Intelligence drift tracking over time windows |
+| `agent_metrics` | Performance telemetry (latency, success rate, executions) |
+
+### Core Services Built
+
+#### 1. Reasoning Engine (`reasoning-engine.ts`)
+- Generates structured decision artifacts with factor-level reasoning
+- Each factor includes: name, weight (0-1), source (inferred_preference, semantic_match, behavioral_learning, skill_match, etc.)
+- Supports explainable ranking, outreach, sourcing decisions
+- `explainRanking(candidateId, jobId)` — retrieve why a specific candidate was ranked a certain way
+
+#### 2. Approval Manager (`approval-manager.ts`)
+- Confidence-based automation thresholds (default: 0.95)
+- Actions above threshold → `auto_executed`; below → `pending_approval`
+- Approval states: `suggested` → `pending_approval` → `approved` | `rejected` | `auto_executed`
+- Recruiters can approve, reject with reason, and view history/stats
+- Threshold stored in `recruiter_memory` for per-employer customization
+
+#### 3. Safety Engine (`safety-engine.ts`)
+- **Confidence Gates**: Actions below minimum confidence are blocked with flag raised
+- **Bias Detection**: Monitors location bias (>90% from preferred locations) and skill homogeneity (>85% from preferred set)
+- **Drift Detection**: Tracks metric changes over time, raises flags on >30% drift
+- **Severity Levels**: `info` → `warning` → `critical` (critical triggers SYSTEM_ALERT event)
+
+#### 4. Observability Service (`observability-service.ts`)
+- Agents can push arbitrary metrics (`recordMetric`)
+- Dashboard aggregator returns: agent health, decision analytics, approval stats, safety summary, signal metrics, preference metrics
+- Decision analytics: total decisions, average confidence, approval rate, override rate, recruiter trust score, top factors
+
+#### 5. Override Learner (`override-learner.ts`)
+- Records every recruiter override with full context (AI suggestion, human choice, reason, confidence snapshot)
+- Generates override patterns: most overridden actions, common reasons, confidence at override
+- Detects AI blind spots: systematic gaps where AI confidently suggests actions recruiters reject
+- Feeds override events back as behavioral signals for adaptive learning
+
+### Approval States System
+
+| State | Meaning |
+|-------|---------|
+| `suggested` | AI recommends an action |
+| `pending_approval` | Waiting for recruiter decision |
+| `approved` | Human accepted the AI suggestion |
+| `rejected` | Human denied with reason |
+| `auto_executed` | Confidence above threshold, auto-trusted |
+
+### Confidence Threshold Configuration
+
+The automation threshold is stored per-employer in `recruiter_memory` (key: `auto_execution_threshold`).
+- **95-99% (Conservative)**: Most actions require approval
+- **85-94% (Balanced)**: High-confidence actions auto-execute
+- **50-84% (Aggressive)**: Most actions auto-execute
+- Configurable via the Observability dashboard slider
+
+### API Endpoints Added (Phase 5B)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| POST | `/agents/reasoning/record` | Record structured decision artifact |
+| GET | `/agents/reasoning` | List reasoning logs |
+| GET | `/agents/reasoning/target` | Get decisions for a target entity |
+| GET | `/agents/reasoning/explain` | Explain a specific ranking decision |
+| POST | `/agents/approvals/submit` | Submit action for approval |
+| POST | `/agents/approvals/:id/approve` | Approve a pending action |
+| POST | `/agents/approvals/:id/reject` | Reject with reason |
+| GET | `/agents/approvals/pending` | List pending approvals + stats |
+| GET | `/agents/approvals/history` | Full approval history |
+| GET | `/agents/approvals/stats` | Approval statistics |
+| GET | `/agents/approvals/threshold` | Get confidence threshold |
+| POST | `/agents/approvals/threshold` | Set confidence threshold |
+| GET | `/agents/overrides` | Override history + patterns |
+| GET | `/agents/overrides/blind-spots` | Detected AI blind spots |
+| GET | `/agents/safety/flags` | Safety flags + summary |
+| POST | `/agents/safety/flags/:id/resolve` | Resolve a safety flag |
+| GET | `/agents/observability/dashboard` | Full observability dashboard |
+| GET | `/agents/observability/health` | Agent health metrics |
+| GET | `/agents/observability/decisions` | Decision analytics |
+| GET | `/agents/observability/metrics` | Raw agent metrics |
+
+### Frontend: Observability Tab
+
+New tab in employer dashboard with 5 sections:
+1. **Agent Health Cards** — Active agents, AI decisions count, recruiter trust score, active safety flags
+2. **Pending Approvals** — List of actions awaiting recruiter decision with approve/reject buttons and confidence badges
+3. **Override Insights** — Most overridden actions, common rejection reasons, confidence at override stats, AI blind spot detection
+4. **Safety Flags** — Active flags with severity indicators (critical/warning/info), type labels, and resolve actions
+5. **Automation Threshold** — Slider to configure confidence-based auto-execution threshold (50-99%), with mode labels (Conservative/Balanced/Aggressive)
+6. **Top Decision Factors** — Weighted list of factors influencing AI decisions, with frequency counts
+
+### Key Strategic Insight
+
+Phase 5B transforms the system from:
+```
+Powerful AI → Trusted AI Infrastructure
+```
+
+The difference is governance: explainability, auditability, intervention controls, and safety monitoring. This is what enterprise adoption depends on.
+
+### What This Unlocks
+
+- Recruiters can **trust** AI decisions because they're explainable
+- Enterprises can **adopt** because they have override controls
+- The system can **safely increase autonomy** as trust grows
+- Override patterns become **reinforcement learning signals** for the adaptive intelligence layer
+- Bias and drift are **detected early** before they impact hiring outcomes

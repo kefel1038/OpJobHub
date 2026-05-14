@@ -3,6 +3,8 @@ import { db, jobs, companies, savedJobs } from "@workspace/db";
 import { eq, desc, and, sql, count, gte, lt, inArray, or } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../lib/auth";
 import { serializeDates } from "../lib/serialize";
+import { logger } from "../lib/logger";
+import { eventBus, RecruitmentEventTypes } from "../services/agents/event-bus";
 
 const router: IRouter = Router();
 
@@ -164,6 +166,13 @@ router.post("/jobs", authMiddleware, requireRole("employer", "admin"), async (re
       status: "active",
     })
     .returning();
+
+  eventBus.emitEvent({
+    type: RecruitmentEventTypes.JOB_POSTED,
+    source: "jobs-route",
+    payload: { jobId: created.id, employerId: created.createdBy, title: created.title },
+    timestamp: new Date(),
+  }).catch((err) => logger.error({ err }, "Failed to emit JOB_POSTED event"));
 
   res.status(201).json(serializeDates(created));
 });

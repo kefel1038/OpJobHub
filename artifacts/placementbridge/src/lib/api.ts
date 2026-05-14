@@ -450,6 +450,67 @@ export const api = {
       body: JSON.stringify(payload),
     });
   },
+  semanticMatch(payload: {
+    skills?: string[];
+    title?: string;
+    experience?: string;
+    location?: string;
+    industry?: string;
+    topN?: number;
+  }) {
+    return request<{
+      matches: Array<{
+        jobId: number; title: string; company: string; location: string;
+        salary: string; salaryMin: number | null; salaryMax: number | null;
+        employmentType: string; experienceLevel: string; industry: string;
+        visaSponsored: boolean; isRemote: boolean; postedAt: string;
+        matchScore: number; vectorScore: number; skillMatchScore: number;
+        exactMatchSkills: string[]; transferableMatchSkills: string[];
+        hiddenTalent: boolean; sponsorshipScore: number;
+        skillGaps: string[]; reasons: string[];
+      }>;
+      hiddenGems: Array<any>;
+      sponsorshipEligible: Array<any>;
+      inferredSkills: string[];
+      transferableRoles: string[];
+      totalScored: number;
+    }>("/ai/semantic-match", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+  copilot(messages: Array<{ role: string; content: string }>) {
+    return request<{ reply: string; context: { hasMarketData: boolean; hasJobData: boolean; mentionedSkills: string[] } }>(
+      "/ai/copilot",
+      { method: "POST", body: JSON.stringify({ messages }) }
+    );
+  },
+  generateJobDescription(payload: {
+    title: string;
+    industry?: string;
+    location?: string;
+    experienceLevel?: string;
+    employmentType?: string;
+    skills?: string[];
+    salaryRange?: string;
+    companyName?: string;
+    companyOverview?: string;
+    aboutRole?: string;
+  }) {
+    return request<{
+      description: string;
+      responsibilities: string[];
+      requirements: string[];
+      benefits: string[];
+      socialLinkedIn: string;
+      socialWhatsApp: string;
+      seoKeywords: string[];
+      interviewQuestions: string[];
+    }>("/ai/generate-job-description", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
 
   // ─── Freelance/Gig Marketplace APIs ───────────────────────────────
   getFreelanceGigs(params?: { category?: string; limit?: number }) {
@@ -499,5 +560,282 @@ export const api = {
   },
   getEmployerAIMatches() {
     return request<{ matches: AIMatch[] }>("/employer/ai-matches");
+  },
+  generateFollowUp(appId: number, payload: { stage: string; candidateName: string; jobTitle: string; companyName: string; customInstructions?: string }) {
+    return request<{ message: string; stage: string; applicationId: number; candidateName: string; jobTitle: string }>(
+      `/employer/applications/${appId}/follow-up`,
+      { method: "POST", body: JSON.stringify(payload) }
+    );
+  },
+  // ─── Agent System APIs ──────────────────────────────────────────
+  startAgents() {
+    return request<{ status: string; message: string }>("/agents/start", { method: "POST" });
+  },
+  stopAgents() {
+    return request<{ status: string; message: string }>("/agents/stop", { method: "POST" });
+  },
+  getAgentStatus() {
+    return request<{ active: boolean; recentEvents: number; registeredHandlers: string[] }>("/agents/status");
+  },
+  runSourcingAgent(jobId: number) {
+    return request<{ sourcedCount: number; candidates: Array<{ name: string; email: string; matchReason: string; score: number }> }>(
+      "/agents/sourcing/run", { method: "POST", body: JSON.stringify({ jobId }) }
+    );
+  },
+  runRankingAgent(jobId: number) {
+    return request<{ rankedCount: number; rankings: Array<{ candidateId: number; name: string; score: number; reasoning: string; recommendation: string }> }>(
+      "/agents/ranking/run", { method: "POST", body: JSON.stringify({ jobId }) }
+    );
+  },
+  runFullPipeline(jobId: number) {
+    return request<{ sourcing: { sourcedCount: number }; ranking: { rankedCount: number } }>(
+      "/agents/pipeline/run", { method: "POST", body: JSON.stringify({ jobId }) }
+    );
+  },
+  generateOutreach(candidateId: number, jobId: number, stage: string, customNotes?: string) {
+    return request<{ message: string; subject: string }>(
+      "/agents/outreach/generate", { method: "POST", body: JSON.stringify({ candidateId, jobId, stage, customNotes }) }
+    );
+  },
+  getAgentMemory() {
+    return request<{ preferences: Array<{ key: string; value: string; confidence: number }>; patterns: any }>("/agents/memory");
+  },
+  storeAgentPreference(key: string, value: string, confidence?: number) {
+    return request<{ status: string }>("/agents/memory/preference", { method: "POST", body: JSON.stringify({ key, value, confidence }) });
+  },
+  getAgentEvents(type?: string, limit?: number) {
+    const qs = new URLSearchParams();
+    if (type) qs.set("type", type);
+    if (limit) qs.set("limit", String(limit));
+    return request<{ events: Array<{ type: string; source: string; payload: any; timestamp: string }> }>(`/agents/events?${qs.toString()}`);
+  },
+  getPendingFollowUps() {
+    return request<{ followUps: Array<{ applicationId: number; status: string; candidateName: string; jobTitle: string; companyName: string; appliedAt: string }> }>(
+      "/employer/follow-ups/pending"
+    );
+  },
+
+  // ─── Adaptive Intelligence ─────────────────────────────────────
+  recordSignal(actionType: string, candidateId?: number, jobId?: number, metadata?: any) {
+    return request<{ status: string; contradiction: string | null }>("/agents/signals/record", {
+      method: "POST",
+      body: JSON.stringify({ actionType, candidateId, jobId, metadata }),
+    });
+  },
+  getSignals(limit?: number, offset?: number) {
+    const qs = new URLSearchParams();
+    if (limit) qs.set("limit", String(limit));
+    if (offset) qs.set("offset", String(offset));
+    return request<{ signals: any[]; total: number }>(`/agents/signals?${qs.toString()}`);
+  },
+  inferPreferences() {
+    return request<{ inferred: number; suggestions: any[] }>("/agents/preferences/infer", { method: "POST" });
+  },
+  getInferredPreferences(activeOnly?: boolean) {
+    const qs = activeOnly !== undefined ? `?active_only=${activeOnly}` : "";
+    return request<{ preferences: any[] }>(`/agents/preferences/inferred${qs}`);
+  },
+  decayPreferences() {
+    return request<{ status: string; count: number }>("/agents/preferences/decay", { method: "POST" });
+  },
+  getPreferenceSummary() {
+    return request<{
+      preferredSkills: string[];
+      avoidedSkills: string[];
+      preferredLocations: string[];
+      preferredExperienceLevels: string[];
+      preferredCertifications: string[];
+      learningProgress: number;
+      totalSignals: number;
+      totalPreferences: number;
+    }>("/agents/preferences/summary");
+  },
+  getConsolidatedProfile() {
+    return request<{
+      manualPreferences: any[];
+      inferredPreferences: any[];
+      hiringPatterns: any;
+      behavioralSummary: any;
+    }>("/agents/preferences/consolidated");
+  },
+  generateEmbeddings(key?: string, value?: string) {
+    return request<{ status: string; count?: number }>("/agents/embeddings/generate", {
+      method: "POST",
+      body: JSON.stringify({ key, value }),
+    });
+  },
+
+  // ─── Phase 5B: Observability & Governance ──────────────────────
+  recordReasoning(artifact: {
+    decisionType: string; agentType: string; targetId?: number; targetType?: string;
+    score?: number; confidence: number; reasoning: any[]; inputContext?: any; metadata?: any;
+  }) {
+    return request<{ id: number; status: string }>("/agents/reasoning/record", {
+      method: "POST", body: JSON.stringify(artifact),
+    });
+  },
+  getReasoningLogs(limit?: number, offset?: number) {
+    const qs = new URLSearchParams();
+    if (limit) qs.set("limit", String(limit));
+    if (offset) qs.set("offset", String(offset));
+    return request<{ logs: any[]; total: number }>(`/agents/reasoning?${qs.toString()}`);
+  },
+  getReasoningForTarget(targetId: number, targetType: string) {
+    return request<{ logs: any[] }>(`/agents/reasoning/target?targetId=${targetId}&targetType=${targetType}`);
+  },
+  explainRanking(candidateId: number, jobId: number) {
+    return request<{ explanation: any }>(`/agents/reasoning/explain?candidateId=${candidateId}&jobId=${jobId}`);
+  },
+  submitApproval(actionType: string, confidence: number, aiSuggestion?: any, reasoning?: any[], targetId?: number, targetType?: string) {
+    return request<{ id: number; status: string; autoExecuted: boolean }>("/agents/approvals/submit", {
+      method: "POST", body: JSON.stringify({ actionType, confidence, aiSuggestion, reasoning, targetId, targetType }),
+    });
+  },
+  approveApproval(id: number) {
+    return request<{ status: string }>(`/agents/approvals/${id}/approve`, { method: "POST" });
+  },
+  rejectApproval(id: number, reason: string) {
+    return request<{ status: string }>(`/agents/approvals/${id}/reject`, { method: "POST", body: JSON.stringify({ reason }) });
+  },
+  getPendingApprovals(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ approvals: any[]; stats: any }>(`/agents/approvals/pending${qs}`);
+  },
+  getApprovalHistory(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ history: any[] }>(`/agents/approvals/history${qs}`);
+  },
+  getApprovalStats() {
+    return request<any>("/agents/approvals/stats");
+  },
+  getConfidenceThreshold() {
+    return request<{ threshold: number }>("/agents/approvals/threshold");
+  },
+  setConfidenceThreshold(threshold: number) {
+    return request<{ status: string; threshold: number }>("/agents/approvals/threshold", {
+      method: "POST", body: JSON.stringify({ threshold }),
+    });
+  },
+  getOverrides(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ overrides: any[]; patterns: any }>(`/agents/overrides${qs}`);
+  },
+  getBlindSpots() {
+    return request<{ blindSpots: any[] }>("/agents/overrides/blind-spots");
+  },
+  getSafetyFlags(activeOnly?: boolean, severity?: string) {
+    const qs = new URLSearchParams();
+    if (activeOnly !== undefined) qs.set("active_only", String(activeOnly));
+    if (severity) qs.set("severity", severity);
+    return request<{ flags: any[]; summary: any }>(`/agents/safety/flags?${qs.toString()}`);
+  },
+  resolveSafetyFlag(id: number) {
+    return request<{ status: string }>(`/agents/safety/flags/${id}/resolve`, { method: "POST" });
+  },
+  getObservabilityDashboard() {
+    return request<any>("/agents/observability/dashboard");
+  },
+  getAgentHealth() {
+    return request<any>("/agents/observability/health");
+  },
+  getDecisionAnalytics() {
+    return request<any>("/agents/observability/decisions");
+  },
+  getAgentMetrics(agentType?: string, metricName?: string, limit?: number) {
+    const qs = new URLSearchParams();
+    if (agentType) qs.set("agentType", agentType);
+    if (metricName) qs.set("metricName", metricName);
+    if (limit) qs.set("limit", String(limit));
+    return request<{ metrics: any[] }>(`/agents/observability/metrics?${qs.toString()}`);
+  },
+
+  // ─── Phase 6A: Autonomous Sourcing ──────────────────────────────
+  getCandidateSources() {
+    return request<{ sources: any[] }>("/agents/sources");
+  },
+  registerSource(name: string, displayName: string, type: string, baseUrl?: string, rateLimitPerHour?: number, config?: any) {
+    return request<{ id: number; status: string }>("/agents/sources/register", {
+      method: "POST", body: JSON.stringify({ name, displayName, type, baseUrl, rateLimitPerHour, config }),
+    });
+  },
+  toggleSource(id: number, active: boolean) {
+    return request<{ status: string }>(`/agents/sources/${id}/toggle`, {
+      method: "POST", body: JSON.stringify({ active }),
+    });
+  },
+  initializeSources() {
+    return request<{ status: string }>("/agents/sources/initialize", { method: "POST" });
+  },
+  runDiscovery(sources?: string[], skills?: string[], roles?: string[], locations?: string[]) {
+    return request<{ discovered: number; candidates: Array<{ id: number; name: string | null; source: string; score: number }> }>(
+      "/agents/discovery/run", { method: "POST", body: JSON.stringify({ sources, skills, roles, locations }) }
+    );
+  },
+  runAiDiscovery(jobId: number, sourceFilter?: string[]) {
+    return request<{ discovered: number; candidates: any[] }>("/agents/discovery/ai-generate", {
+      method: "POST", body: JSON.stringify({ jobId, sourceFilter }),
+    });
+  },
+  getDiscoveredCandidates(limit?: number, offset?: number, status?: string) {
+    const qs = new URLSearchParams();
+    if (limit) qs.set("limit", String(limit));
+    if (offset) qs.set("offset", String(offset));
+    if (status) qs.set("status", status);
+    return request<{ candidates: any[]; total: number }>(`/agents/discovery/candidates?${qs.toString()}`);
+  },
+  enrichCandidate(candidateId: number) {
+    return request<any>("/agents/enrichment/run", { method: "POST", body: JSON.stringify({ candidateId }) });
+  },
+  batchEnrich(candidateIds: number[]) {
+    return request<{ enriched: number }>("/agents/enrichment/batch", { method: "POST", body: JSON.stringify({ candidateIds }) });
+  },
+  getEnrichments(candidateId: number) {
+    return request<{ enrichments: any[] }>(`/agents/enrichment/${candidateId}`);
+  },
+  verifyCandidate(candidateId: number) {
+    return request<any>("/agents/verification/run", { method: "POST", body: JSON.stringify({ candidateId }) });
+  },
+  matchCandidateToJob(candidateId: number, jobId: number) {
+    return request<any>("/agents/relevance/match", { method: "POST", body: JSON.stringify({ candidateId, jobId }) });
+  },
+  findBestMatches(jobId: number, limit?: number) {
+    return request<{ matches: any[] }>("/agents/relevance/best-for-job", {
+      method: "POST", body: JSON.stringify({ jobId, limit }),
+    });
+  },
+  analyzeIntent(candidateId: number) {
+    return request<any>("/agents/intent/analyze", { method: "POST", body: JSON.stringify({ candidateId }) });
+  },
+  getIntentSummary() {
+    return request<{ totalSignals: number; byType: Record<string, number>; relocationSeekers: number; immediateAvailable: number; sponsorshipSeeking: number; emergingTrends: any[] }>("/agents/intent/summary");
+  },
+  buildGraph(candidateId: number) {
+    return request<{ edges: number }>("/agents/graph/build", { method: "POST", body: JSON.stringify({ candidateId }) });
+  },
+  queryGraph(relationType?: string, relationValue?: string, candidateId?: number, limit?: number) {
+    const qs = new URLSearchParams();
+    if (relationType) qs.set("relationType", relationType);
+    if (relationValue) qs.set("relationValue", relationValue);
+    if (candidateId) qs.set("candidateId", String(candidateId));
+    if (limit) qs.set("limit", String(limit));
+    return request<{ results: any[] }>(`/agents/graph/query?${qs.toString()}`);
+  },
+  findSimilarCandidates(candidateId: number, limit?: number) {
+    const qs = new URLSearchParams();
+    qs.set("candidateId", String(candidateId));
+    if (limit) qs.set("limit", String(limit));
+    return request<{ similar: any[] }>(`/agents/graph/similar?${qs.toString()}`);
+  },
+  getGraphSummary() {
+    return request<{ totalNodes: number; totalEdges: number; topSkills: any[]; topLocations: any[]; topIndustries: any[] }>("/agents/graph/summary");
+  },
+  runFullSourcingPipeline(jobId: number, sources?: string[], skills?: string[], roles?: string[], locations?: string[], autoReachOut?: boolean) {
+    return request<{ discovery: { discovered: number }; enrichment: { enriched: number }; verification: { verified: number }; matching: { matched: number }; outreach: { contacted: number } }>(
+      "/agents/pipeline/full-run", { method: "POST", body: JSON.stringify({ jobId, sources, skills, roles, locations, autoReachOut }) }
+    );
+  },
+  getPipelineHistory(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ history: any[] }>(`/agents/pipeline/history${qs}`);
   },
 };
