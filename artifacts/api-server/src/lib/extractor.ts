@@ -5,7 +5,7 @@ let _pdfParse: ((buffer: Buffer) => Promise<{ text: string }>) | null = null;
 async function getPdfParser(): Promise<(buffer: Buffer) => Promise<{ text: string }>> {
   if (_pdfParse) return _pdfParse;
   const mod = await import("pdf-parse");
-  _pdfParse = mod.default || mod;
+  _pdfParse = (mod.default || mod) as (buffer: Buffer) => Promise<{ text: string }>;
   return _pdfParse;
 }
 

@@ -492,7 +492,7 @@ router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (r
 
 router.get("/analyze-resume/status/:id", authMiddleware, async (req, res) => {
   try {
-    const [resume] = await db.select().from(resumes).where(eq(resumes.id, parseInt(req.params.id))).limit(1);
+    const [resume] = await db.select().from(resumes).where(eq(resumes.id, parseInt(String(req.params.id)))).limit(1);
     if (!resume) return res.status(404).json({ error: "Resume not found" });
 
     if (resume.parsedData && typeof resume.parsedData === "object" && !("error" in (resume.parsedData as object))) {

@@ -6,6 +6,7 @@ import { rankingAgent } from "./ranking-agent";
 import { outreachAgent } from "./outreach-agent";
 import { sourceManager } from "./source-manager";
 import { continuousPipeline } from "./continuous-pipeline";
+import { startPipelineWorkers } from "../queue/pipeline-worker";
 
 export class AgentOrchestrator {
   private active = false;
@@ -22,6 +23,13 @@ export class AgentOrchestrator {
 
     sourceManager.initializeDefaultSources().catch(err => logger.error({ err }, "Failed to init default sources"));
     continuousPipeline.startScheduledRuns(60);
+
+    if (process.env.REDIS_URL) {
+      startPipelineWorkers();
+      logger.info("BullMQ pipeline workers started");
+    } else {
+      logger.warn("No REDIS_URL set — pipeline workers disabled (direct execution fallback active)");
+    }
 
     logger.info("Agent orchestrator started — listening for recruitment events — autonomous sourcing active");
   }

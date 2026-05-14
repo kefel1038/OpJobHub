@@ -10,7 +10,8 @@ import {
   BrainCircuit, Building2, LogOut, Moon, Sun,
   Loader2, AlertCircle, GripVertical, ArrowRight,
   Bot, Play, Square, Cpu, History, Activity, RotateCcw,
-  Radio, GitBranch, Network, Shield, Map, Target
+  Radio, GitBranch, Network, Shield, MapIcon, Target, MapPin,
+  Share2, GitFork, Route, Compass, Database
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +25,7 @@ import {
   PieChart, Pie, Cell, AreaChart, Area, BarChart, Bar
 } from 'recharts';
 
-type TabId = "overview" | "jobs" | "candidates" | "messages" | "analytics" | "team" | "agents" | "observability" | "sourcing";
+type TabId = "overview" | "jobs" | "candidates" | "messages" | "analytics" | "team" | "agents" | "observability" | "sourcing" | "knowledge-graph" | "predictive" | "labor" | "migration";
 
 const navItems: { id: TabId; label: string; icon: React.ElementType; count?: string }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -36,6 +37,10 @@ const navItems: { id: TabId; label: string; icon: React.ElementType; count?: str
   { id: "agents", label: "AI Agents", icon: Bot },
   { id: "observability", label: "Observability", icon: ShieldCheck },
   { id: "sourcing", label: "Sourcing", icon: Radio },
+  { id: "knowledge-graph", label: "Knowledge Graph", icon: GitBranch },
+  { id: "predictive", label: "Predictive AI", icon: BrainCircuit },
+  { id: "labor", label: "Labor Intel", icon: Globe },
+  { id: "migration", label: "Migration", icon: Network },
 ];
 
 export default function EmployerDashboard() {
@@ -207,7 +212,7 @@ export default function EmployerDashboard() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
             >
-              {activeTab === "overview" && <OverviewTab />}
+              {activeTab === "overview" && <OverviewTab onTabChange={setActiveTab} />}
               {activeTab === "jobs" && <JobsTab />}
               {activeTab === "candidates" && <CandidatesTab />}
               {activeTab === "messages" && <MessagesTab />}
@@ -216,6 +221,10 @@ export default function EmployerDashboard() {
               {activeTab === "agents" && <AgentsTab />}
               {activeTab === "observability" && <ObservabilityTab />}
               {activeTab === "sourcing" && <SourcingTab />}
+              {activeTab === "knowledge-graph" && <KnowledgeGraphTab />}
+              {activeTab === "predictive" && <PredictiveIntelligenceTab />}
+              {activeTab === "labor" && <LaborIntelligenceTab />}
+              {activeTab === "migration" && <MigrationIntelligenceTab />}
             </motion.div>
           </AnimatePresence>
         </main>
@@ -225,7 +234,7 @@ export default function EmployerDashboard() {
 }
 
 // ─── Overview Tab ─────────────────────────────────────────────────
-function OverviewTab() {
+function OverviewTab({ onTabChange }: { onTabChange: (tab: TabId) => void }) {
   const [stats, setStats] = useState<EmployerStats | null>(null);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -363,7 +372,7 @@ function OverviewTab() {
                 <Users className="h-5 w-5 text-blue-500" />
                 Recent Applicants
               </h2>
-              <Button variant="link" className="text-blue-500 font-bold p-0" onClick={() => setActiveTab("candidates")}>
+              <Button variant="link" className="text-blue-500 font-bold p-0" onClick={() => onTabChange("candidates")}>
                 View Pipeline <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
@@ -431,7 +440,7 @@ function OverviewTab() {
                   Post New Job
                 </Link>
               </Button>
-              <Button variant="outline" className="w-full justify-start h-12 bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl font-bold gap-3" onClick={() => setActiveTab("candidates")}>
+              <Button variant="outline" className="w-full justify-start h-12 bg-white/5 hover:bg-white/10 border-white/10 text-white rounded-xl font-bold gap-3" onClick={() => onTabChange("candidates")}>
                 <Search className="h-5 w-5 text-blue-400" />
                 Search Candidates
               </Button>
@@ -656,7 +665,7 @@ function CandidatesTab() {
   const [error, setError] = useState<string | null>(null);
   const [draggingId, setDraggingId] = useState<number | null>(null);
   const [dragOverStage, setDragOverStage] = useState<string | null>(null);
-  const dropTargets = useRef<Map<string, HTMLDivElement>>(new Map());
+  const dropTargets = useRef<globalThis.Map<string, HTMLDivElement>>(new globalThis.Map());
 
   const fetchApplicants = useCallback(async (limit = 50) => {
     try {
@@ -1805,7 +1814,7 @@ function SourcingTab() {
         <Card className="bg-[#0f1115] border-white/5 rounded-3xl shadow-xl">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <Map className="h-6 w-6 text-amber-500" />
+              <MapIcon className="h-6 w-6 text-amber-500" />
             </div>
             <div className="text-3xl font-black text-white">{intentSummary?.relocationSeekers || 0}</div>
             <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">Relocation Seekers</div>
@@ -1964,7 +1973,7 @@ function SourcingTab() {
         <div className="space-y-8">
           <Card className="bg-[#0f1115] border-white/5 rounded-3xl shadow-xl">
             <div className="p-6 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
-              <Map className="h-5 w-5 text-amber-500" />
+              <MapIcon className="h-5 w-5 text-amber-500" />
               <h3 className="font-black text-sm uppercase tracking-widest text-white/60">Intent Signals</h3>
             </div>
             <CardContent className="p-4">
@@ -2107,6 +2116,479 @@ function SourcingTab() {
               <div className="text-2xl font-black text-blue-500 mb-2">4</div>
               <h4 className="font-bold text-white mb-2">Intent + Graph</h4>
               <p className="text-xs text-white/40 leading-relaxed">Detects employment/relocation intent signals. Builds a lightweight opportunity graph connecting candidates to skills, locations, and industries.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Knowledge Graph Tab ────────────────────────────────────────────
+function KnowledgeGraphTab() {
+  const [graphStatus, setGraphStatus] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [cypherQuery, setCypherQuery] = useState("");
+  const [queryResult, setQueryResult] = useState<any>(null);
+  const [queryRunning, setQueryRunning] = useState(false);
+  const [syncRunning, setSyncRunning] = useState(false);
+  const [ragQuestion, setRagQuestion] = useState("");
+  const [ragResult, setRagResult] = useState<any>(null);
+  const [ragLoading, setRagLoading] = useState(false);
+  const [activeSection, setActiveSection] = useState<"overview" | "query" | "rag" | "migration">("overview");
+  const [hiddenGemSkills, setHiddenGemSkills] = useState("");
+  const [hiddenGemResult, setHiddenGemResult] = useState<any>(null);
+  const [skillAdjResult, setSkillAdjResult] = useState<any>(null);
+  const [skillAdjSkill, setSkillAdjSkill] = useState("");
+
+  const loadStatus = useCallback(async () => {
+    try {
+      const status = await api.getGraphStatus();
+      setGraphStatus(status);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadStatus(); }, [loadStatus]);
+
+  const handleSync = async () => {
+    setSyncRunning(true);
+    try {
+      const result = await api.syncGraph();
+      setGraphStatus((prev: any) => ({ ...prev, ...result }));
+      loadStatus();
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setSyncRunning(false);
+    }
+  };
+
+  const handleRunCypher = async () => {
+    if (!cypherQuery.trim()) return;
+    setQueryRunning(true);
+    setQueryResult(null);
+    try {
+      const result = await api.runRawCypher(cypherQuery);
+      setQueryResult(result);
+    } catch (e: any) {
+      setQueryResult({ error: e.message });
+    } finally {
+      setQueryRunning(false);
+    }
+  };
+
+  const handleRagQuery = async () => {
+    if (!ragQuestion.trim()) return;
+    setRagLoading(true);
+    try {
+      const result = await api.graphRagReason(ragQuestion);
+      setRagResult(result);
+    } catch (e: any) {
+      setRagResult({ error: e.message });
+    } finally {
+      setRagLoading(false);
+    }
+  };
+
+  const handleHiddenGems = async () => {
+    if (!hiddenGemSkills.trim()) return;
+    try {
+      const skills = hiddenGemSkills.split(",").map(s => s.trim());
+      const result = await api.findHiddenGems(skills);
+      setHiddenGemResult(result);
+    } catch (e: any) {
+      setHiddenGemResult({ error: e.message });
+    }
+  };
+
+  const handleSkillAdj = async () => {
+    if (!skillAdjSkill.trim()) return;
+    try {
+      const result = await api.getSkillAdjacency(skillAdjSkill.trim());
+      setSkillAdjResult(result);
+    } catch (e: any) {
+      setSkillAdjResult({ error: e.message });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="h-12 w-64 rounded-2xl bg-white/5" />
+        <div className="grid lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-32 rounded-3xl bg-white/5" />)}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-black text-white flex items-center gap-3">
+            <GitBranch className="h-7 w-7 text-purple-400" />
+            Workforce Knowledge Graph
+          </h2>
+          <p className="text-white/40 text-sm mt-1 font-medium">
+            Neo4j-powered labor intelligence infrastructure
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Badge className={`rounded-xl px-3 py-1 text-[10px] font-black border-none ${graphStatus?.connected ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"}`}>
+            {graphStatus?.connected ? "Connected" : "Disconnected"}
+          </Badge>
+          <Button onClick={handleSync} disabled={syncRunning}
+            className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl h-10 px-5 text-xs font-bold">
+            {syncRunning ? <><Loader2 className="h-3 w-3 mr-2 animate-spin" /> Syncing...</> : "Sync Graph"}
+          </Button>
+        </div>
+      </div>
+
+      {/* Section Nav */}
+      <div className="flex gap-2 border-b border-white/5 pb-4">
+        {[
+          { id: "overview", label: "Overview", icon: Database },
+          { id: "query", label: "Query", icon: Route },
+          { id: "rag", label: "GraphRAG", icon: Compass },
+          { id: "migration", label: "Migration", icon: Share2 },
+        ].map(section => {
+          const Icon = section.icon;
+          return (
+            <button key={section.id} onClick={() => setActiveSection(section.id as any)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                activeSection === section.id
+                  ? "bg-purple-600/20 text-purple-400 border border-purple-500/30"
+                  : "text-white/40 hover:text-white/60 hover:bg-white/5 border border-transparent"
+              }`}>
+              <Icon className="h-4 w-4" />
+              {section.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Overview Section */}
+      {activeSection === "overview" && (
+        <div className="space-y-8">
+          {/* Node Count Cards */}
+          <div className="grid lg:grid-cols-5 gap-4">
+            {[
+              { label: "Candidates", key: "Candidate", color: "text-blue-400" },
+              { label: "Employers", key: "Employer", color: "text-emerald-400" },
+              { label: "Skills", key: "Skill", color: "text-amber-400" },
+              { label: "Locations", key: "Location", color: "text-purple-400" },
+              { label: "Relationships", key: "_relationships", color: "text-pink-400" },
+            ].map(item => (
+              <Card key={item.key} className="bg-[#0f1115] border-white/5 rounded-2xl shadow-xl">
+                <CardContent className="p-5 text-center">
+                  <div className={`text-3xl font-black ${item.color}`}>
+                    {graphStatus?.nodeCounts?.[item.key] ?? 0}
+                  </div>
+                  <div className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">{item.label}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Hidden Gems + Skill Adjacency */}
+          <div className="grid lg:grid-cols-2 gap-8">
+            <Card className="bg-[#0f1115] border-white/5 rounded-3xl shadow-xl">
+              <div className="p-6 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+                <Target className="h-5 w-5 text-amber-500" />
+                <h3 className="font-black text-sm uppercase tracking-widest text-white/60">Hidden Gem Discovery</h3>
+              </div>
+              <CardContent className="p-5">
+                <p className="text-[10px] text-white/40 mb-3">Find candidates who DON'T have these skills but have adjacent ones:</p>
+                <div className="flex gap-2 mb-3">
+                  <input value={hiddenGemSkills} onChange={e => setHiddenGemSkills(e.target.value)}
+                    placeholder="react, node, python..."
+                    className="flex-1 h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-white text-xs placeholder:text-white/20 focus:outline-none focus:ring-4 focus:ring-purple-500/10" />
+                  <Button onClick={handleHiddenGems} size="sm" className="bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-[10px] font-bold h-10">
+                    Find Gems
+                  </Button>
+                </div>
+                {hiddenGemResult?.gems?.length > 0 && (
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {hiddenGemResult.gems.slice(0, 5).map((g: any, i: number) => (
+                      <div key={i} className="p-3 rounded-xl bg-white/5 border border-white/5">
+                        <div className="text-xs font-bold text-white">{g.candidate?.fullName || "Unknown"}</div>
+                        <div className="text-[9px] text-white/40">{g.candidate?.headline}</div>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {(g.candidateSkills as string[])?.slice(0, 4).map((s: string, j: number) => (
+                            <span key={j} className="text-[8px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">{s}</span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-[#0f1115] border-white/5 rounded-3xl shadow-xl">
+              <div className="p-6 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+                <Share2 className="h-5 w-5 text-blue-500" />
+                <h3 className="font-black text-sm uppercase tracking-widest text-white/60">Skill Adjacency</h3>
+              </div>
+              <CardContent className="p-5">
+                <p className="text-[10px] text-white/40 mb-3">Discover skills that commonly co-occur with:</p>
+                <div className="flex gap-2 mb-3">
+                  <input value={skillAdjSkill} onChange={e => setSkillAdjSkill(e.target.value)}
+                    placeholder="e.g. react"
+                    className="flex-1 h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-white text-xs placeholder:text-white/20 focus:outline-none focus:ring-4" />
+                  <Button onClick={handleSkillAdj} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[10px] font-bold h-10">
+                    Analyze
+                  </Button>
+                </div>
+                {skillAdjResult?.adjacency?.length > 0 && (
+                  <div className="space-y-2">
+                    {skillAdjResult.adjacency.slice(0, 8).map((a: any, i: number) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className="flex-1">
+                          <div className="flex justify-between text-[10px]">
+                            <span className="font-bold text-white">{a.skill}</span>
+                            <span className="text-white/40">{a.frequency}x</span>
+                          </div>
+                          <div className="h-1.5 rounded-full bg-white/5 overflow-hidden mt-1">
+                            <div className="h-full rounded-full bg-blue-500" style={{ width: `${Math.min(100, (a.frequency / Math.max(...skillAdjResult.adjacency.map((x: any) => x.frequency))) * 100)}%` }} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sync Status */}
+          {!graphStatus?.connected && (
+            <Card className="bg-amber-500/5 border-amber-500/20 rounded-3xl">
+              <CardContent className="p-6 flex items-center gap-4">
+                <AlertCircle className="h-6 w-6 text-amber-400" />
+                <div>
+                  <h4 className="font-bold text-white text-sm">Neo4j Not Connected</h4>
+                  <p className="text-[10px] text-white/40">Set NEO4J_URI, NEO4J_USER, and NEO4J_PASSWORD environment variables, then sync the graph.</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* Query Section */}
+      {activeSection === "query" && (
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl shadow-xl">
+          <div className="p-6 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+            <Route className="h-5 w-5 text-blue-500" />
+            <h3 className="font-black text-sm uppercase tracking-widest text-white/60">Cypher Query Console</h3>
+          </div>
+          <CardContent className="p-5">
+            <textarea value={cypherQuery} onChange={e => setCypherQuery(e.target.value)}
+              placeholder="MATCH (c:Candidate)-[:HAS_SKILL]->(s:Skill {name: 'react'}) RETURN c.fullName, c.headline LIMIT 10"
+              className="w-full h-32 p-4 rounded-2xl bg-white/5 border border-white/10 text-white text-xs font-mono placeholder:text-white/20 focus:outline-none focus:ring-4 resize-none" />
+            <div className="flex items-center gap-3 mt-3">
+              <Button onClick={handleRunCypher} disabled={queryRunning || !cypherQuery.trim()}
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl h-10 px-6 text-xs font-bold">
+                {queryRunning ? <><Loader2 className="h-3 w-3 mr-2 animate-spin" /> Running...</> : "Run Query"}
+              </Button>
+              <span className="text-[9px] text-white/30">Use Cypher syntax for Neo4j traversal</span>
+            </div>
+            {queryResult && (
+              <div className="mt-4">
+                {queryResult.error ? (
+                  <div className="p-4 rounded-2xl bg-red-500/5 border border-red-500/10 text-red-400 text-[10px] font-mono">{queryResult.error}</div>
+                ) : (
+                  <div>
+                    <div className="text-[10px] text-white/40 mb-2">{queryResult.records?.length || 0} records returned</div>
+                    <pre className="p-4 rounded-2xl bg-white/5 border border-white/5 text-[9px] text-white/60 font-mono max-h-80 overflow-y-auto">
+                      {JSON.stringify(queryResult.records?.slice(0, 20), null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* GraphRAG Section */}
+      {activeSection === "rag" && (
+        <div className="space-y-8">
+          <Card className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 border-white/5 rounded-3xl shadow-xl">
+            <div className="p-6 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+              <Compass className="h-5 w-5 text-purple-400" />
+              <h3 className="font-black text-sm uppercase tracking-widest text-white/60">GraphRAG — Graph-Enhanced AI Reasoning</h3>
+            </div>
+            <CardContent className="p-5">
+              <p className="text-[10px] text-white/40 mb-3">Ask complex questions about your workforce. The AI generates Cypher queries, runs them against the graph, and answers with data-driven insights.</p>
+              <textarea value={ragQuestion} onChange={e => setRagQuestion(e.target.value)}
+                placeholder='e.g. "Find telecom engineers in East Africa with GCC-adjacent experience and migration intent toward Qatar"'
+                className="w-full h-24 p-4 rounded-2xl bg-white/5 border border-white/10 text-white text-xs placeholder:text-white/20 focus:outline-none focus:ring-4 resize-none" />
+              <Button onClick={handleRagQuery} disabled={ragLoading || !ragQuestion.trim()}
+                className="mt-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl h-10 px-6 text-xs font-bold">
+                {ragLoading ? <><Loader2 className="h-3 w-3 mr-2 animate-spin" /> Reasoning...</> : "Reason with Graph"}
+              </Button>
+              {ragResult && (
+                <div className="mt-4 space-y-3">
+                  {ragResult.error ? (
+                    <div className="p-4 rounded-2xl bg-red-500/5 border border-red-500/10 text-red-400 text-[10px]">{ragResult.error}</div>
+                  ) : (
+                    <>
+                      <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge className={`border-none text-[8px] font-black ${ragResult.confidence > 0.7 ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400"}`}>
+                            {Math.round(ragResult.confidence * 100)}% confidence
+                          </Badge>
+                          <span className="text-[9px] text-white/30">{ragResult.path?.length || 0} queries generated</span>
+                        </div>
+                        <p className="text-sm text-white leading-relaxed">{ragResult.answer}</p>
+                      </div>
+                      {ragResult.path?.length > 0 && (
+                        <details className="text-[10px] text-white/30">
+                          <summary className="cursor-pointer hover:text-white/50 font-bold">Generated Cypher Queries</summary>
+                          <pre className="mt-2 p-3 rounded-xl bg-white/5 text-[8px] font-mono overflow-x-auto">
+                            {ragResult.path.map((q: string, i: number) => `// Query ${i + 1}\n${q}`).join("\n\n")}
+                          </pre>
+                        </details>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Discovery Cards */}
+          <div className="grid lg:grid-cols-3 gap-6">
+            <Card className="bg-[#0f1115] border-white/5 rounded-3xl shadow-xl">
+              <CardContent className="p-6 text-center">
+                <Target className="h-8 w-8 mx-auto mb-3 text-blue-400" />
+                <h4 className="font-bold text-sm text-white mb-1">Multi-Hop Discovery</h4>
+                <p className="text-[10px] text-white/40">Traverse the graph across multiple relationship hops to find candidates that simple skill matching misses.</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-[#0f1115] border-white/5 rounded-3xl shadow-xl">
+              <CardContent className="p-6 text-center">
+                <Share2 className="h-8 w-8 mx-auto mb-3 text-emerald-400" />
+                <h4 className="font-bold text-sm text-white mb-1">Skill Adjacency</h4>
+                <p className="text-[10px] text-white/40">Discover skill co-occurrence patterns — identify which skills frequently appear together in the workforce.</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-[#0f1115] border-white/5 rounded-3xl shadow-xl">
+              <CardContent className="p-6 text-center">
+                <Route className="h-8 w-8 mx-auto mb-3 text-amber-400" />
+                <h4 className="font-bold text-sm text-white mb-1">Career Transitions</h4>
+                <p className="text-[10px] text-white/40">Model career mobility — see which roles candidates transition between based on actual graph relationships.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Migration Section */}
+      {activeSection === "migration" && (
+        <div className="space-y-8">
+          <Card className="bg-gradient-to-br from-blue-900/20 to-indigo-900/20 border-white/5 rounded-3xl shadow-xl">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Share2 className="h-5 w-5 text-blue-400" />
+                <h3 className="font-black text-sm uppercase tracking-widest text-white/60">GCC Migration Intelligence</h3>
+              </div>
+              <div className="grid lg:grid-cols-4 gap-4">
+                {[
+                  { label: "Relocation Intents", key: "totalInterested", color: "text-blue-400" },
+                  { label: "Sponsorship Rate", key: "sponsorshipRate", color: "text-amber-400", fmt: (v: number) => `${Math.round(v * 100)}%` },
+                  { label: "Urgency Score", key: "avgUrgency", color: "text-emerald-400", fmt: (v: number) => `${Math.round(v * 100)}%` },
+                  { label: "Source Countries", key: "topSourceCountries", color: "text-purple-400", fmt: (v: string[]) => `${v?.length || 0} countries` },
+                ].map(item => (
+                  <div key={item.label} className="p-4 rounded-2xl bg-white/5 border border-white/5 text-center">
+                    <div className={`text-2xl font-black ${item.color}`}>
+                      {item.fmt ? null : (graphStatus?.connected ? "—" : "N/A")}
+                    </div>
+                    <div className="text-[9px] text-white/40 font-bold uppercase mt-1">{item.label}</div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-white/40 mt-4 text-center">
+                Connect Neo4j and sync the graph to enable GCC migration intelligence analytics
+              </p>
+            </CardContent>
+          </Card>
+
+          <div className="grid lg:grid-cols-2 gap-8">
+            <Card className="bg-[#0f1115] border-white/5 rounded-3xl shadow-xl">
+              <div className="p-6 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+                <Globe className="h-5 w-5 text-blue-500" />
+                <h3 className="font-black text-sm uppercase tracking-widest text-white/60">Labor Hotspots</h3>
+              </div>
+              <CardContent className="p-4 max-h-80 overflow-y-auto">
+                <p className="text-[10px] text-white/30 mb-3 text-center">Connect to Neo4j to see labor concentration by location</p>
+                <div className="text-center py-12 text-white/20">
+                  <Globe className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                  <p className="text-xs font-bold">Neo4j Connection Required</p>
+                  <p className="text-[9px] mt-1">Sync the graph to populate migration analytics</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-[#0f1115] border-white/5 rounded-3xl shadow-xl">
+              <div className="p-6 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+                <Share2 className="h-5 w-5 text-emerald-500" />
+                <h3 className="font-black text-sm uppercase tracking-widest text-white/60">Skill Gap by Location</h3>
+              </div>
+              <CardContent className="p-4">
+                <p className="text-[10px] text-white/30 mb-3 text-center">Analyze skill supply/demand imbalances by region</p>
+                <div className="text-center py-12 text-white/20">
+                  <Share2 className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                  <p className="text-xs font-bold">Sync to Enable</p>
+                  <p className="text-[9px] mt-1">Connecting Neo4j unlocks workforce gap analysis</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Documentation */}
+      <Card className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-white/5 rounded-3xl overflow-hidden">
+        <CardContent className="p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <GitBranch className="h-6 w-6 text-purple-400" />
+            <h3 className="font-black text-lg text-white">Workforce Knowledge Graph Infrastructure</h3>
+          </div>
+          <div className="grid md:grid-cols-5 gap-6">
+            <div>
+              <div className="text-2xl font-black text-emerald-500 mb-2">N</div>
+              <h4 className="font-bold text-white mb-2">Nodes</h4>
+              <p className="text-xs text-white/40 leading-relaxed">Candidate, Employer, Skill, Certification, Industry, Location, University, Intent Signal, Job Role, Migration Path</p>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-amber-500 mb-2">E</div>
+              <h4 className="font-bold text-white mb-2">Edges</h4>
+              <p className="text-xs text-white/40 leading-relaxed">HAS_SKILL, WORKED_AT, INTERESTED_IN, MATCHES, HIRED_BY, CERTIFIED_IN, LOCATED_IN, MIGRATES_TO, BELONGS_TO</p>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-purple-500 mb-2">Q</div>
+              <h4 className="font-bold text-white mb-2">Queries</h4>
+              <p className="text-xs text-white/40 leading-relaxed">Multi-hop traversal, talent clustering, shortest path, skill adjacency, career transitions, hidden gem discovery</p>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-blue-500 mb-2">R</div>
+              <h4 className="font-bold text-white mb-2">Recommendation</h4>
+              <p className="text-xs text-white/40 leading-relaxed">Relationship-aware matching, similar hires, recruiter preference clusters, multi-hop talent query</p>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-pink-500 mb-2">M</div>
+              <h4 className="font-bold text-white mb-2">Migration</h4>
+              <p className="text-xs text-white/40 leading-relaxed">Labor flows, talent export clusters, GCC migration analysis, skill gap by location, hotspot mapping</p>
             </div>
           </div>
         </CardContent>
@@ -2526,6 +3008,1093 @@ function ObservabilityTab() {
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+// ─── Predictive Intelligence Tab ─────────────────────────────────────
+function PredictiveIntelligenceTab() {
+  const [loading, setLoading] = useState(true);
+  const [simHistory, setSimHistory] = useState<any[]>([]);
+  const [scenarioHistory, setScenarioHistory] = useState<any[]>([]);
+  const [accuracyMap, setAccuracyMap] = useState<Record<string, any>>({});
+  const [scenarioStats, setScenarioStats] = useState<any>(null);
+  const [selectedCandidate, setSelectedCandidate] = useState("");
+  const [simResult, setSimResult] = useState<any>(null);
+  const [running, setRunning] = useState(false);
+
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [hist, scenarios, acc, sStats] = await Promise.allSettled([
+        api.getSimulationHistory(20),
+        api.getScenarioHistory(10),
+        api.getPredictionAccuracy(),
+        api.getScenarioStats(),
+      ]);
+      if (hist.status === "fulfilled") setSimHistory(hist.value.simulations);
+      if (scenarios.status === "fulfilled") setScenarioHistory(scenarios.value.scenarios);
+      if (acc.status === "fulfilled") setAccuracyMap(acc.value);
+      if (sStats.status === "fulfilled") setScenarioStats(sStats.value);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  const handleRunSimulation = async () => {
+    if (!selectedCandidate) return;
+    setRunning(true);
+    try {
+      const cid = parseInt(selectedCandidate);
+      const result = await api.simulateAll({ candidateId: cid, employerId: undefined });
+      setSimResult(result);
+      await fetchAll();
+    } catch (err: any) {
+      console.error("Simulation failed:", err);
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  const allAccuracyEntries = Object.entries(accuracyMap);
+
+  if (loading) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="h-10 w-80 bg-white/5 rounded-xl" />
+        <div className="grid lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-white/5 rounded-3xl" />)}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-3xl lg:text-4xl font-black tracking-tight">Predictive Intelligence</h1>
+          <p className="text-white/40 mt-2 font-medium flex items-center gap-2">
+            <BrainCircuit className="h-4 w-4 text-purple-500" />
+            Probabilistic hiring simulations, risk analysis, and what-if scenario modeling
+          </p>
+        </div>
+        <Button onClick={fetchAll} variant="outline" className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold gap-2 px-6">
+          <RotateCcw className="h-4 w-4" /> Refresh
+        </Button>
+      </div>
+
+      {/* Overview Cards */}
+      <div className="grid lg:grid-cols-4 gap-6">
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-2xl bg-purple-500/20 flex items-center justify-center">
+                <BrainCircuit className="h-5 w-5 text-purple-500" />
+              </div>
+              <div>
+                <div className="text-sm font-black text-white">{simHistory.length}</div>
+                <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Simulations Run</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-2xl bg-blue-500/20 flex items-center justify-center">
+                <BarChart3 className="h-5 w-5 text-blue-500" />
+              </div>
+              <div>
+                <div className="text-sm font-black text-white">{allAccuracyEntries.length}</div>
+                <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Model Types</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
+                <Compass className="h-5 w-5 text-emerald-500" />
+              </div>
+              <div>
+                <div className="text-sm font-black text-white">{scenarioHistory.length}</div>
+                <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Scenarios Modeled</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-2xl bg-amber-500/20 flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-amber-500" />
+              </div>
+              <div>
+                <div className="text-sm font-black text-white">
+                  {scenarioStats ? `${(scenarioStats.averageImprovement * 100).toFixed(1)}%` : "—"}
+                </div>
+                <div className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Avg Scenario Impact</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Run Simulation */}
+      <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden shadow-xl">
+        <div className="p-6 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+          <BrainCircuit className="h-5 w-5 text-purple-500" />
+          <h3 className="font-black text-sm uppercase tracking-widest text-white/60">Quick Simulation</h3>
+        </div>
+        <CardContent className="p-6">
+          <div className="flex items-end gap-4">
+            <div className="flex-1">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/40 block mb-2">Candidate ID</label>
+              <input
+                type="number" placeholder="Enter candidate ID..." value={selectedCandidate}
+                onChange={(e) => setSelectedCandidate(e.target.value)}
+                className="w-full h-12 px-4 rounded-2xl bg-white/5 border border-white/10 text-white text-sm font-bold
+                  placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-purple-500/40"
+              />
+            </div>
+            <Button onClick={handleRunSimulation} disabled={running || !selectedCandidate}
+              className="h-12 px-6 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold gap-2">
+              {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <BrainCircuit className="h-4 w-4" />}
+              {running ? "Running..." : "Run Full Simulation"}
+            </Button>
+          </div>
+
+          {simResult && (
+            <div className="mt-6 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.entries(simResult).map(([key, val]: [string, any]) => (
+                <div key={key} className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                  <div className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">{key.replace(/_/g, " ")}</div>
+                  <div className="text-2xl font-black text-white mb-1">
+                    {Math.round(val.probability * 100)}%
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] text-white/40">
+                    <span>CI: {Math.round(val.confidenceIntervalLower * 100)}–{Math.round(val.confidenceIntervalUpper * 100)}%</span>
+                    <span className="text-white/20">|</span>
+                    <span>Conf: {Math.round(val.confidence * 100)}%</span>
+                  </div>
+                  {val.riskFactors?.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {val.riskFactors.map((r: string, i: number) => (
+                        <Badge key={i} className="bg-red-500/10 text-red-400 border-none text-[8px] font-bold">{r}</Badge>
+                      ))}
+                    </div>
+                  )}
+                  {val.positiveFactors?.length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {val.positiveFactors.map((p: string, i: number) => (
+                        <Badge key={i} className="bg-emerald-500/10 text-emerald-400 border-none text-[8px] font-bold">{p}</Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Accuracy Dashboard */}
+      {allAccuracyEntries.length > 0 && (
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden shadow-xl">
+          <div className="p-6 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+            <BarChart3 className="h-5 w-5 text-blue-500" />
+            <h3 className="font-black text-sm uppercase tracking-widest text-white/60">Prediction Accuracy</h3>
+          </div>
+          <CardContent className="p-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {allAccuracyEntries.map(([type, stats]: [string, any]) => (
+                <div key={type} className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                  <div className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">{type.replace(/_/g, " ")}</div>
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <span className="text-2xl font-black text-white">{Math.round(stats.accuracyRate * 100)}%</span>
+                    <span className="text-[10px] text-white/40">({stats.accuratePredictions}/{stats.totalPredictions})</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-white/5 mb-3 overflow-hidden">
+                    <div className="h-full rounded-full bg-blue-500" style={{ width: `${stats.accuracyRate * 100}%` }} />
+                  </div>
+                  <div className="grid grid-cols-3 gap-1 text-[9px]">
+                    <div><span className="font-bold text-white/60">MAE:</span> <span className="text-white/40">{stats.mae.toFixed(3)}</span></div>
+                    <div><span className="font-bold text-white/60">RMSE:</span> <span className="text-white/40">{stats.rmse.toFixed(3)}</span></div>
+                    <div><span className="font-bold text-white/60">Bias:</span> <span className="text-white/40">{stats.bias?.toFixed(3) || "—"}</span></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Scenario History */}
+      {scenarioHistory.length > 0 && (
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden shadow-xl">
+          <div className="p-6 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+            <Compass className="h-5 w-5 text-emerald-500" />
+            <h3 className="font-black text-sm uppercase tracking-widest text-white/60">Recent Scenarios</h3>
+          </div>
+          <CardContent className="p-4 max-h-[400px] overflow-y-auto">
+            <div className="space-y-3">
+              {scenarioHistory.map((s: any) => (
+                <div key={s.id} className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-white">{s.name}</span>
+                    <Badge className="bg-white/5 text-white/40 border-none text-[8px] font-black uppercase">{s.scenario_type?.replace(/_/g, " ")}</Badge>
+                  </div>
+                  {s.description && <div className="text-[10px] text-white/40 mb-2">{s.description}</div>}
+                  {s.parameter_changes && (
+                    <div className="text-[9px] text-white/30">
+                      Params: {JSON.stringify(s.parameter_changes).slice(0, 120)}
+                    </div>
+                  )}
+                  <div className="text-[9px] text-white/20 mt-1">{new Date(s.executed_at || s.created_at).toLocaleDateString()}</div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Recent Simulations */}
+      {simHistory.length > 0 && (
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden shadow-xl">
+          <div className="p-6 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+            <Activity className="h-5 w-5 text-purple-500" />
+            <h3 className="font-black text-sm uppercase tracking-widest text-white/60">Recent Simulations</h3>
+          </div>
+          <CardContent className="p-4 max-h-[400px] overflow-y-auto">
+            <div className="space-y-2">
+              {simHistory.map((s: any) => (
+                <div key={s.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                  <div className="flex items-center gap-3">
+                    <div className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${
+                      Number(s.probability) >= 0.7 ? "bg-emerald-500" :
+                      Number(s.probability) >= 0.4 ? "bg-amber-500" : "bg-red-500"
+                    }`} />
+                    <div>
+                      <div className="text-[11px] font-bold text-white">{s.simulation_type?.replace(/_/g, " ")}</div>
+                      <div className="text-[9px] text-white/30">Candidate #{s.candidate_id || "—"} &middot; {new Date(s.created_at).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-black text-white">{Math.round(Number(s.probability) * 100)}%</div>
+                    <div className="text-[9px] text-white/30">CI: {Math.round(Number(s.confidence_interval_lower) * 100)}–{Math.round(Number(s.confidence_interval_upper) * 100)}%</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Documentation */}
+      <Card className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-white/5 rounded-3xl overflow-hidden">
+        <CardContent className="p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <BrainCircuit className="h-6 w-6 text-purple-400" />
+            <h3 className="font-black text-lg text-white">Probabilistic Hiring Simulation Engine</h3>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div>
+              <div className="text-2xl font-black text-purple-500 mb-2">1</div>
+              <h4 className="font-bold text-white mb-2">Monte Carlo Inference</h4>
+              <p className="text-xs text-white/40 leading-relaxed">1,000-iteration Monte Carlo simulation with Gaussian noise produces probability distributions with 95% confidence intervals — not point scores.</p>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-emerald-500 mb-2">2</div>
+              <h4 className="font-bold text-white mb-2">Graph-Powered Factors</h4>
+              <p className="text-xs text-white/40 leading-relaxed">Each simulation consumes weighted factors from the Neo4j knowledge graph: skill adjacency, migration stability, recruiter preferences, industry demand, and intent signals.</p>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-amber-500 mb-2">3</div>
+              <h4 className="font-bold text-white mb-2">Self-Calibrating</h4>
+              <p className="text-xs text-white/40 leading-relaxed">Outcome learner tracks actual vs predicted, computes MAE/RMSE/bias, and surfaces calibration drift over time for continuous improvement.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Labor Intelligence Tab ─────────────────────────────────────
+function LaborIntelligenceTab() {
+  const [loading, setLoading] = useState(true);
+  const [summary, setSummary] = useState<any>(null);
+  const [skillSummary, setSkillSummary] = useState<any>(null);
+  const [ecosystem, setEcosystem] = useState<any>(null);
+  const [selectedRegion, setSelectedRegion] = useState("");
+
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [s, sk, ec] = await Promise.allSettled([
+        api.getLaborSummary(90),
+        api.getSkillEconomySummary(),
+        api.getEcosystemHealth(),
+      ]);
+      if (s.status === "fulfilled") setSummary(s.value);
+      if (sk.status === "fulfilled") setSkillSummary(sk.value);
+      if (ec.status === "fulfilled") setEcosystem(ec.value);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    try {
+      const s = await api.refreshLaborIntelligence(90);
+      setSummary(s);
+      const ec = await api.getEcosystemHealth();
+      setEcosystem(ec);
+      const sk = await api.getSkillEconomySummary();
+      setSkillSummary(sk);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegionProfile = async () => {
+    if (!selectedRegion) return;
+    try {
+      const profile = await api.getRegionalProfile(selectedRegion);
+      alert(JSON.stringify(profile, null, 2));
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="h-10 w-80 bg-white/5 rounded-xl" />
+        <div className="grid lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-white/5 rounded-3xl" />)}
+        </div>
+      </div>
+    );
+  }
+
+  const health = ecosystem;
+  const demandCount = summary?.demandIntelligence?.length || 0;
+  const supplyCount = summary?.supplyIntelligence?.length || 0;
+  const skillCount = summary?.skillEconomy?.length || 0;
+  const regionCount = summary?.regionalProfiles?.length || 0;
+
+  const migrationFlows = summary?.workforceFlows?.migration || [];
+  const industryFlows = summary?.workforceFlows?.industry_transitions || [];
+  const skillFlows = summary?.workforceFlows?.skill_transitions || [];
+
+  return (
+    <div className="space-y-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-3xl lg:text-4xl font-black tracking-tight">Labor Intelligence</h1>
+          <p className="text-white/40 mt-2 font-medium flex items-center gap-2">
+            <Globe className="h-4 w-4 text-emerald-500" />
+            Macro workforce analytics — demand, supply, migration, and ecosystem health
+          </p>
+        </div>
+        <Button onClick={handleRefresh} variant="outline" className="rounded-xl h-12 bg-white/5 border-white/10 text-white font-bold gap-2 px-6">
+          <RotateCcw className="h-4 w-4" /> Refresh Intelligence
+        </Button>
+      </div>
+
+      {/* Ecosystem Health Cards */}
+      <div className="grid lg:grid-cols-5 gap-4">
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`h-8 w-8 rounded-xl flex items-center justify-center ${
+                (health?.overallHealth || 0) >= 0.6 ? "bg-emerald-500/20" :
+                (health?.overallHealth || 0) >= 0.3 ? "bg-amber-500/20" : "bg-red-500/20"
+              }`}>
+                <Globe className={`h-4 w-4 ${(health?.overallHealth || 0) >= 0.6 ? "text-emerald-500" : (health?.overallHealth || 0) >= 0.3 ? "text-amber-500" : "text-red-500"}`} />
+              </div>
+              <div>
+                <div className="text-lg font-black text-white">{Math.round((health?.overallHealth || 0) * 100)}%</div>
+                <div className="text-[8px] text-white/40 font-bold uppercase tracking-wider">Ecosystem Health</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-8 w-8 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                <BarChart3 className="h-4 w-4 text-blue-500" />
+              </div>
+              <div>
+                <div className="text-lg font-black text-white">{Math.round((health?.marketEfficiency || 0) * 100)}%</div>
+                <div className="text-[8px] text-white/40 font-bold uppercase tracking-wider">Market Efficiency</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-8 w-8 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-purple-500" />
+              </div>
+              <div>
+                <div className="text-lg font-black text-white">{Math.round((health?.laborMobility || 0) * 100)}%</div>
+                <div className="text-[8px] text-white/40 font-bold uppercase tracking-wider">Labor Mobility</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-8 w-8 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                <Compass className="h-4 w-4 text-emerald-500" />
+              </div>
+              <div>
+                <div className="text-lg font-black text-white">{Math.round((health?.skillAdaptability || 0) * 100)}%</div>
+                <div className="text-[8px] text-white/40 font-bold uppercase tracking-wider">Skill Adaptability</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-8 w-8 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                <Activity className="h-4 w-4 text-amber-500" />
+              </div>
+              <div>
+                <div className="text-lg font-black text-white">{Math.round((health?.migrationActivity || 0) * 100)}%</div>
+                <div className="text-[8px] text-white/40 font-bold uppercase tracking-wider">Migration Activity</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Demand + Supply Overview */}
+      <div className="grid lg:grid-cols-2 gap-8">
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden shadow-xl">
+          <div className="p-5 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+            <BarChart3 className="h-4 w-4 text-blue-500" />
+            <h3 className="font-black text-xs uppercase tracking-widest text-white/60">Demand Intelligence</h3>
+            <Badge className="ml-auto bg-blue-500/10 text-blue-400 border-none text-[9px]">{demandCount} roles</Badge>
+          </div>
+          <CardContent className="p-4 max-h-[350px] overflow-y-auto">
+            {summary?.demandIntelligence?.slice(0, 10).map((d: any, i: number) => (
+              <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 mb-2">
+                <div className="flex-1 min-w-0">
+                  <div className="text-[11px] font-bold text-white truncate">{d.role}</div>
+                  <div className="text-[8px] text-white/30">{d.region} &middot; {d.industry}</div>
+                </div>
+                <div className="text-right ml-3">
+                  <div className="text-sm font-black text-white">{d.demandCount}</div>
+                  <div className={`text-[8px] font-bold ${d.growthRate > 0 ? "text-emerald-400" : d.growthRate < 0 ? "text-red-400" : "text-white/30"}`}>
+                    {d.growthRate > 0 ? "+" : ""}{d.growthRate}%
+                  </div>
+                </div>
+              </div>
+            ))}
+            {demandCount === 0 && <div className="text-center py-8 text-white/20 text-sm font-bold">No demand data yet</div>}
+          </CardContent>
+        </Card>
+
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden shadow-xl">
+          <div className="p-5 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+            <Users className="h-4 w-4 text-purple-500" />
+            <h3 className="font-black text-xs uppercase tracking-widest text-white/60">Supply Intelligence</h3>
+            <Badge className="ml-auto bg-purple-500/10 text-purple-400 border-none text-[9px]">{supplyCount} entries</Badge>
+          </div>
+          <CardContent className="p-4 max-h-[350px] overflow-y-auto">
+            {summary?.supplyIntelligence?.slice(0, 10).map((s: any, i: number) => (
+              <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 mb-2">
+                <div className="flex-1 min-w-0">
+                  <div className="text-[11px] font-bold text-white truncate">{s.skill}</div>
+                  <div className="text-[8px] text-white/30">{s.region}</div>
+                </div>
+                <div className="text-right ml-3">
+                  <div className="text-sm font-black text-white">{s.candidateCount}</div>
+                  <div className="text-[8px] text-white/30">{Math.round(s.relocationReadiness * 100)}% ready</div>
+                </div>
+              </div>
+            ))}
+            {supplyCount === 0 && <div className="text-center py-8 text-white/20 text-sm font-bold">No supply data yet</div>}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Workforce Flows */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden shadow-xl">
+          <div className="p-5 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+            <Globe className="h-4 w-4 text-amber-500" />
+            <h3 className="font-black text-xs uppercase tracking-widest text-white/60">Migration Flows</h3>
+            <Badge className="ml-auto bg-amber-500/10 text-amber-400 border-none text-[9px]">{migrationFlows.length}</Badge>
+          </div>
+          <CardContent className="p-4 max-h-[280px] overflow-y-auto">
+            {migrationFlows.slice(0, 8).map((f: any, i: number) => (
+              <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-white/5 mb-1.5">
+                <div className="text-[9px] font-bold text-white/80 truncate">{f.sourceRegion} → {f.destinationRegion}</div>
+                <Badge className="bg-white/5 text-white/40 border-none text-[8px]">{f.flowVolume}</Badge>
+              </div>
+            ))}
+            {migrationFlows.length === 0 && <div className="text-center py-6 text-white/20 text-[11px] font-bold">No migration flows</div>}
+          </CardContent>
+        </Card>
+
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden shadow-xl">
+          <div className="p-5 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+            <Network className="h-4 w-4 text-blue-500" />
+            <h3 className="font-black text-xs uppercase tracking-widest text-white/60">Industry Transitions</h3>
+            <Badge className="ml-auto bg-blue-500/10 text-blue-400 border-none text-[9px]">{industryFlows.length}</Badge>
+          </div>
+          <CardContent className="p-4 max-h-[280px] overflow-y-auto">
+            {industryFlows.slice(0, 8).map((f: any, i: number) => (
+              <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-white/5 mb-1.5">
+                <div className="text-[9px] font-bold text-white/80 truncate">{f.sourceIndustry} → {f.destinationIndustry}</div>
+                <Badge className="bg-white/5 text-white/40 border-none text-[8px]">{f.flowVolume}</Badge>
+              </div>
+            ))}
+            {industryFlows.length === 0 && <div className="text-center py-6 text-white/20 text-[11px] font-bold">No industry transitions</div>}
+          </CardContent>
+        </Card>
+
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden shadow-xl">
+          <div className="p-5 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+            <GitBranch className="h-4 w-4 text-emerald-500" />
+            <h3 className="font-black text-xs uppercase tracking-widest text-white/60">Skill Transitions</h3>
+            <Badge className="ml-auto bg-emerald-500/10 text-emerald-400 border-none text-[9px]">{skillFlows.length}</Badge>
+          </div>
+          <CardContent className="p-4 max-h-[280px] overflow-y-auto">
+            {skillFlows.slice(0, 8).map((f: any, i: number) => (
+              <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-white/5 mb-1.5">
+                <div className="text-[9px] font-bold text-white/80 truncate">{f.sourceSkill} → {f.destinationSkill}</div>
+                <Badge className="bg-white/5 text-white/40 border-none text-[8px]">{f.flowVolume}</Badge>
+              </div>
+            ))}
+            {skillFlows.length === 0 && <div className="text-center py-6 text-white/20 text-[11px] font-bold">No skill transitions</div>}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Skill Economy + Regional Explorer */}
+      <div className="grid lg:grid-cols-2 gap-8">
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden shadow-xl">
+          <div className="p-5 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+            <TrendingUp className="h-4 w-4 text-emerald-500" />
+            <h3 className="font-black text-xs uppercase tracking-widest text-white/60">Skill Economy</h3>
+            <Badge className="ml-auto bg-emerald-500/10 text-emerald-400 border-none text-[9px]">{skillCount} skills</Badge>
+          </div>
+          <CardContent className="p-4">
+            {skillSummary && (
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
+                  <div className="text-xl font-black text-emerald-500">{skillSummary.rising}</div>
+                  <div className="text-[8px] text-white/40 font-bold uppercase tracking-wider">Rising</div>
+                </div>
+                <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
+                  <div className="text-xl font-black text-red-500">{skillSummary.declining}</div>
+                  <div className="text-[8px] text-white/40 font-bold uppercase tracking-wider">Declining</div>
+                </div>
+                <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
+                  <div className="text-xl font-black text-purple-500">{skillSummary.emerging}</div>
+                  <div className="text-[8px] text-white/40 font-bold uppercase tracking-wider">Emerging</div>
+                </div>
+                <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
+                  <div className="text-xl font-black text-white">{skillSummary.total}</div>
+                  <div className="text-[8px] text-white/40 font-bold uppercase tracking-wider">Total Tracked</div>
+                </div>
+              </div>
+            )}
+            {skillSummary?.topRising?.length > 0 && (
+              <div>
+                <div className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">Top Rising Skills</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {skillSummary.topRising.map((s: string, i: number) => (
+                    <Badge key={i} className="bg-emerald-500/10 text-emerald-400 border-none text-[8px] font-bold">{s}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            {skillSummary?.topDeclining?.length > 0 && (
+              <div className="mt-3">
+                <div className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">Declining Skills</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {skillSummary.topDeclining.map((s: string, i: number) => (
+                    <Badge key={i} className="bg-red-500/10 text-red-400 border-none text-[8px] font-bold">{s}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="bg-[#0f1115] border-white/5 rounded-3xl overflow-hidden shadow-xl">
+          <div className="p-5 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+            <Database className="h-4 w-4 text-blue-500" />
+            <h3 className="font-black text-xs uppercase tracking-widest text-white/60">Regional Explorer</h3>
+          </div>
+          <CardContent className="p-5">
+            <div className="flex items-end gap-3 mb-4">
+              <div className="flex-1">
+                <label className="text-[9px] font-bold uppercase tracking-widest text-white/40 block mb-2">Region Name</label>
+                <input
+                  type="text" placeholder="e.g. Doha, Dubai, Nairobi..." value={selectedRegion}
+                  onChange={(e) => setSelectedRegion(e.target.value)}
+                  className="w-full h-10 px-3 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-bold
+                    placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                />
+              </div>
+              <Button onClick={handleRegionProfile} disabled={!selectedRegion}
+                className="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] gap-1.5">
+                <Search className="h-3 w-3" /> Profile
+              </Button>
+            </div>
+            {summary?.regionalProfiles && summary.regionalProfiles.length > 0 && (
+              <div>
+                <div className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">Recent Snapshots</div>
+                <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+                  {summary.regionalProfiles.map((r: any, i: number) => (
+                    <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5">
+                      <div>
+                        <div className="text-[10px] font-bold text-white">{r.region}</div>
+                        <div className="text-[8px] text-white/30">Demand: {Math.round(r.demandIndex * 100)}% &middot; Supply: {Math.round(r.supplyIndex * 100)}%</div>
+                      </div>
+                      <div className={`text-[10px] font-black ${r.talentScarcityScore > 0.6 ? "text-red-400" : "text-emerald-400"}`}>
+                        {Math.round(r.talentScarcityScore * 100)}%
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Documentation */}
+      <Card className="bg-gradient-to-br from-emerald-900/30 to-blue-900/30 border-white/5 rounded-3xl overflow-hidden">
+        <CardContent className="p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <Globe className="h-6 w-6 text-emerald-400" />
+            <h3 className="font-black text-lg text-white">Labor Market Intelligence Platform</h3>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div>
+              <div className="text-2xl font-black text-emerald-500 mb-2">1</div>
+              <h4 className="font-bold text-white mb-2">Demand + Supply Analytics</h4>
+              <p className="text-xs text-white/40 leading-relaxed">Real-time hiring demand by role, region, and industry with growth rates, sponsorship demand, and urgency scoring.</p>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-blue-500 mb-2">2</div>
+              <h4 className="font-bold text-white mb-2">Workforce Flow Intelligence</h4>
+              <p className="text-xs text-white/40 leading-relaxed">Migration corridors, industry transitions, and skill adjacency pathways graph-derived from Neo4j workforce relationships.</p>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-purple-500 mb-2">3</div>
+              <h4 className="font-bold text-white mb-2">Ecosystem Health Monitoring</h4>
+              <p className="text-xs text-white/40 leading-relaxed">Six-dimension ecosystem health metric tracks market efficiency, labor mobility, skill adaptability, employer confidence, and migration activity.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Phase 9B: Migration Intelligence Tab ──────────────────────
+
+function MigrationIntelligenceTab() {
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any>(null);
+  const [topCorridors, setTopCorridors] = useState<any[]>([]);
+  const [corridorHealths, setCorridorHealths] = useState<any[]>([]);
+  const [activeRisks, setActiveRisks] = useState<any[]>([]);
+  const [selectedSource, setSelectedSource] = useState("");
+  const [selectedDest, setSelectedDest] = useState("");
+  const [corridorResult, setCorridorResult] = useState<any>(null);
+  const [healthResult, setHealthResult] = useState<any>(null);
+  const [riskResult, setRiskResult] = useState<any>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [statsData, corridorsData, healthsData, risksData] = await Promise.allSettled([
+        api.getMigrationStats(),
+        api.getTopCorridors(10),
+        api.getAllCorridorHealths(),
+        api.getActiveMigrationRisks(10),
+      ]);
+      if (statsData.status === "fulfilled") setStats(statsData.value);
+      if (corridorsData.status === "fulfilled") setTopCorridors(corridorsData.value.corridors);
+      if (healthsData.status === "fulfilled") setCorridorHealths(healthsData.value.corridors);
+      if (risksData.status === "fulfilled") setActiveRisks(risksData.value.risks);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  const handleAnalyzeCorridor = async () => {
+    if (!selectedSource || !selectedDest) return;
+    setAnalyzing(true);
+    try {
+      const [intel, health] = await Promise.all([
+        api.analyzeCorridor(selectedSource, selectedDest),
+        api.assessCorridorHealth(selectedSource, selectedDest),
+      ]);
+      setCorridorResult(intel);
+      setHealthResult(health);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const handleAssessRisk = async (type: string) => {
+    if (!selectedSource || !selectedDest) return;
+    setAnalyzing(true);
+    try {
+      let result;
+      if (type === "instability") {
+        result = await api.assessCorridorInstability(selectedSource, selectedDest);
+      } else if (type === "churn") {
+        result = await api.assessHighChurnCorridor(selectedSource, selectedDest);
+      }
+      setRiskResult(result);
+      fetchAll();
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+        <span className="ml-3 text-white/60">Loading migration intelligence...</span>
+      </div>
+    );
+  }
+
+  const scoreColor = (s: number) =>
+    s >= 0.7 ? "text-emerald-400" : s >= 0.5 ? "text-amber-400" : "text-red-400";
+
+  const riskBadge = (level: string) => {
+    const colors: Record<string, string> = {
+      low: "bg-emerald-500/20 text-emerald-400",
+      medium: "bg-amber-500/20 text-amber-400",
+      high: "bg-red-500/20 text-red-400",
+      critical: "bg-rose-500/20 text-rose-400",
+    };
+    return colors[level] || "bg-gray-500/20 text-gray-400";
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Migration Intelligence</h2>
+          <p className="text-sm text-white/40 mt-1">
+            Corridor intelligence, sponsorship analytics, stability assessment, and risk detection
+          </p>
+        </div>
+        <Button onClick={fetchAll} variant="outline" size="sm" className="border-white/10 text-white/60">
+          <RotateCcw className="w-4 h-4 mr-1" /> Refresh
+        </Button>
+      </div>
+
+      {/* Stats Cards */}
+      {stats && (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <Card className="bg-white/5 border-white/10">
+            <CardContent className="p-4">
+              <div className="text-xs text-white/40 mb-1">Total Events</div>
+              <div className="text-2xl font-bold text-white">{stats.totalEvents}</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/5 border-white/10">
+            <CardContent className="p-4">
+              <div className="text-xs text-white/40 mb-1">Active Corridors</div>
+              <div className="text-2xl font-bold text-white">{stats.totalCorridors}</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/5 border-white/10">
+            <CardContent className="p-4">
+              <div className="text-xs text-white/40 mb-1">Avg Health Score</div>
+              <div className={`text-2xl font-bold ${scoreColor(stats.averageHealthScore)}`}>
+                {Math.round(stats.averageHealthScore * 100)}%
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/5 border-white/10">
+            <CardContent className="p-4">
+              <div className="text-xs text-white/40 mb-1">Top Source</div>
+              <div className="text-lg font-bold text-white truncate">{stats.topSource}</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/5 border-white/10">
+            <CardContent className="p-4">
+              <div className="text-xs text-white/40 mb-1">Top Destination</div>
+              <div className="text-lg font-bold text-white truncate">{stats.topDestination}</div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Corridor Analyzer */}
+      <Card className="bg-white/5 border-white/10">
+        <CardContent className="p-5">
+          <h3 className="text-lg font-bold text-white mb-4">Corridor Analyzer</h3>
+          <div className="flex gap-3 mb-4">
+            <input
+              type="text"
+              placeholder="Source country (e.g. uganda)"
+              value={selectedSource}
+              onChange={e => setSelectedSource(e.target.value)}
+              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm placeholder:text-white/20"
+            />
+            <input
+              type="text"
+              placeholder="Destination country (e.g. qatar)"
+              value={selectedDest}
+              onChange={e => setSelectedDest(e.target.value)}
+              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm placeholder:text-white/20"
+            />
+            <Button onClick={handleAnalyzeCorridor} disabled={analyzing || !selectedSource || !selectedDest} size="sm">
+              {analyzing ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Compass className="w-4 h-4 mr-1" />}
+              Analyze
+            </Button>
+          </div>
+
+          {corridorResult && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+              {[
+                { label: "Demand", value: corridorResult.demandScore },
+                { label: "Supply", value: corridorResult.supplyScore },
+                { label: "Sponsorship", value: corridorResult.sponsorshipEase },
+                { label: "Stability", value: corridorResult.migrationStability },
+                { label: "Retention", value: corridorResult.retentionQuality },
+                { label: "Salary Uplift", value: corridorResult.salaryUplift },
+                { label: "Employer Conf.", value: corridorResult.employerConfidence },
+                { label: "Health", value: corridorResult.healthScore },
+              ].map(m => (
+                <div key={m.label} className="bg-white/5 rounded-lg p-3">
+                  <div className="text-xs text-white/40">{m.label}</div>
+                  <div className={`text-lg font-bold ${scoreColor(m.value)}`}>
+                    {typeof m.value === "number" ? `${Math.round(m.value * 100)}%` : m.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {corridorResult && (
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <div className="text-white/40 mb-1">Migrated: <span className="text-white">{corridorResult.totalMigrated}</span></div>
+                <div className="text-white/40 mb-1">Pipeline: <span className="text-white">{corridorResult.activeInPipeline}</span></div>
+              </div>
+              <div>
+                {corridorResult.topSkillsExported?.length > 0 && (
+                  <div className="mb-2">
+                    <span className="text-white/40">Top Skills: </span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {corridorResult.topSkillsExported.slice(0, 5).map((s: string) => (
+                        <Badge key={s} variant="outline" className="text-xs border-white/10 text-white/60">{s}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {corridorResult.topRolesDemanded?.length > 0 && (
+                  <div>
+                    <span className="text-white/40">Top Roles: </span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {corridorResult.topRolesDemanded.slice(0, 5).map((r: string) => (
+                        <Badge key={r} variant="outline" className="text-xs border-white/10 text-white/60">{r}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Risk Assessment Buttons */}
+          {corridorResult && (
+            <div className="flex gap-2 mt-4 pt-4 border-t border-white/10">
+              <Button size="sm" variant="outline" className="border-white/10 text-white/60"
+                onClick={() => handleAssessRisk("instability")} disabled={analyzing}>
+                <Shield className="w-4 h-4 mr-1" /> Assess Instability
+              </Button>
+              <Button size="sm" variant="outline" className="border-white/10 text-white/60"
+                onClick={() => handleAssessRisk("churn")} disabled={analyzing}>
+                <Activity className="w-4 h-4 mr-1" /> Assess Churn
+              </Button>
+            </div>
+          )}
+
+          {riskResult && (
+            <div className="mt-4 bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="w-4 h-4 text-red-400" />
+                <span className="text-sm font-bold text-white">{riskResult.riskType}</span>
+                <Badge className={riskBadge(riskResult.riskLevel)}>{riskResult.riskLevel}</Badge>
+                <span className="text-sm text-white/60">Score: {Math.round(riskResult.riskScore * 100)}%</span>
+              </div>
+              {riskResult.contributingFactors?.length > 0 && (
+                <ul className="text-xs text-white/40 list-disc pl-4 mb-2">
+                  {riskResult.contributingFactors.map((f: string) => <li key={f}>{f}</li>)}
+                </ul>
+              )}
+              {riskResult.mitigationSuggestions?.length > 0 && (
+                <div className="text-xs text-emerald-400/80">
+                  Suggestions: {riskResult.mitigationSuggestions.join("; ")}
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Corridor Health Detail */}
+      {healthResult && (
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="p-5">
+            <h3 className="text-lg font-bold text-white mb-3">
+              Corridor Health — {healthResult.sourceCountry} → {healthResult.destinationCountry}
+              <Badge className={`ml-2 ${riskBadge(healthResult.riskLevel)}`}>{healthResult.riskLevel}</Badge>
+              <span className="ml-2 text-sm text-white/40 font-normal">{healthResult.summary}</span>
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {Object.entries(healthResult.dimensions).map(([key, val]: any) => (
+                <div key={key} className="bg-white/5 rounded-lg p-3">
+                  <div className="text-xs text-white/40 capitalize">{key.replace(/([A-Z])/g, " $1")}</div>
+                  <div className="text-lg font-bold text-white">{Math.round(val.score * 100)}%</div>
+                  <div className="text-xs text-white/30">{val.trend}</div>
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-3 mt-3 text-sm">
+              <div><span className="text-white/40">Approval Rate:</span> <span className="text-white">{Math.round(healthResult.approvalRate * 100)}%</span></div>
+              <div><span className="text-white/40">Migrated:</span> <span className="text-white">{healthResult.totalMigrated}</span></div>
+              <div><span className="text-white/40">Pipeline:</span> <span className="text-white">{healthResult.activePipeline}</span></div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Top Corridors */}
+      <Card className="bg-white/5 border-white/10">
+        <CardContent className="p-5">
+          <h3 className="text-lg font-bold text-white mb-3">Top Corridors</h3>
+          <div className="space-y-2">
+            {topCorridors.map((c, i) => (
+              <div key={`${c.sourceCountry}-${c.destinationCountry}`}
+                className="flex items-center justify-between bg-white/5 rounded-lg p-3 cursor-pointer hover:bg-white/10 transition"
+                onClick={() => { setSelectedSource(c.sourceCountry); setSelectedDest(c.destinationCountry); }}>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-white/20 w-5">{i + 1}.</span>
+                  <div>
+                    <span className="text-sm font-bold text-white">{c.sourceCountry}</span>
+                    <ArrowRight className="w-3 h-3 inline mx-2 text-white/20" />
+                    <span className="text-sm font-bold text-white">{c.destinationCountry}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-sm">
+                  <span className={`font-bold ${scoreColor(c.healthScore)}`}>{Math.round(c.healthScore * 100)}%</span>
+                  <span className="text-white/40 text-xs">{c.totalMigrated} migrated</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Active Risks */}
+      {activeRisks.length > 0 && (
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="p-5">
+            <h3 className="text-lg font-bold text-white mb-3">Active Risks</h3>
+            <div className="space-y-2">
+              {activeRisks.map((r: any) => (
+                <div key={r.id} className="bg-red-500/5 border border-red-500/10 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-red-400" />
+                      <span className="text-sm font-bold text-white">{r.riskType.replace(/_/g, " ")}</span>
+                      <Badge className={riskBadge(r.riskLevel)}>{r.riskLevel}</Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-white/40">Score: {Math.round(r.riskScore * 100)}%</span>
+                      <Button size="sm" variant="ghost" className="h-6 text-xs text-white/40"
+                        onClick={async () => { await api.resolveMigrationRisk(r.id); fetchAll(); }}>
+                        Resolve
+                      </Button>
+                    </div>
+                  </div>
+                  {r.contributingFactors?.length > 0 && (
+                    <div className="text-xs text-white/40 ml-6">
+                      Factors: {r.contributingFactors.slice(0, 2).join("; ")}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Corridor Health List */}
+      {corridorHealths.length > 0 && (
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="p-5">
+            <h3 className="text-lg font-bold text-white mb-3">All Corridor Health Scores</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-white/40 text-xs border-b border-white/10">
+                    <th className="text-left py-2 pr-4">Corridor</th>
+                    <th className="text-left py-2 pr-4">Health</th>
+                    <th className="text-left py-2 pr-4">Risk</th>
+                    <th className="text-left py-2 pr-4">Migrated</th>
+                    <th className="text-left py-2 pr-4">Pipeline</th>
+                    <th className="text-left py-2 pr-4">Approval</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {corridorHealths.map((h: any) => (
+                    <tr key={`${h.sourceCountry}-${h.destinationCountry}`}
+                      className="border-b border-white/5 hover:bg-white/5 cursor-pointer"
+                      onClick={() => { setSelectedSource(h.sourceCountry); setSelectedDest(h.destinationCountry); }}>
+                      <td className="py-2 pr-4 text-white">
+                        {h.sourceCountry} <ArrowRight className="w-3 h-3 inline mx-1 text-white/20" /> {h.destinationCountry}
+                      </td>
+                      <td className={`py-2 pr-4 font-bold ${scoreColor(h.healthScore)}`}>{Math.round(h.healthScore * 100)}%</td>
+                      <td className="py-2 pr-4"><Badge className={riskBadge(h.riskLevel)}>{h.riskLevel}</Badge></td>
+                      <td className="py-2 pr-4 text-white/60">{h.totalMigrated}</td>
+                      <td className="py-2 pr-4 text-white/60">{h.activePipeline}</td>
+                      <td className="py-2 pr-4 text-white/60">{Math.round(h.approvalRate * 100)}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

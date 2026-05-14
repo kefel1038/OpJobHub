@@ -838,4 +838,464 @@ export const api = {
     const qs = limit ? `?limit=${limit}` : "";
     return request<{ history: any[] }>(`/agents/pipeline/history${qs}`);
   },
+
+  // ─── Phase 7: Workforce Knowledge Graph ─────────────────────────
+  getGraphStatus() {
+    return request<{ connected: boolean; isSyncing: boolean; nodeCounts: Record<string, number> }>("/graph/status");
+  },
+  syncGraph() {
+    return request<{ status: string; counts: any }>("/graph/sync", { method: "POST" });
+  },
+  syncCandidateGraph(id: number, skills: string[]) {
+    return request<{ synced: number }>(`/graph/sync/candidate/${id}`, { method: "POST", body: JSON.stringify({ skills }) });
+  },
+  runGraphQuery(params: { matchLabels?: string[]; whereConditions?: string[]; returnFields?: string[]; orderBy?: string; limit?: number; params?: any }) {
+    return request<{ records: any[] }>("/graph/query", { method: "POST", body: JSON.stringify(params) });
+  },
+  runRawCypher(query: string, params?: any) {
+    return request<{ records: any[]; summary: any }>("/graph/query/cypher", { method: "POST", body: JSON.stringify({ query, params }) });
+  },
+  findHiddenGems(skills: string[], location?: string, limit?: number) {
+    return request<{ gems: any[] }>("/graph/hidden-gems", { method: "POST", body: JSON.stringify({ skills, location, limit }) });
+  },
+  getSkillAdjacency(skill: string) {
+    return request<{ adjacency: any[] }>(`/graph/skill-adjacency?skill=${encodeURIComponent(skill)}`);
+  },
+  getCareerTransitions(role: string) {
+    return request<{ transitions: any[] }>(`/graph/career-transitions?role=${encodeURIComponent(role)}`);
+  },
+  recommendFromGraph(jobTitle: string, skills: string[], location?: string, limit?: number) {
+    return request<{ recommendations: any[] }>("/graph/recommend/job", { method: "POST", body: JSON.stringify({ jobTitle, skills, location, limit }) });
+  },
+  findHiddenTalent(requiredSkills: string[], adjacentSkills: string[], limit?: number) {
+    return request<{ talent: any[] }>("/graph/hidden-talent", { method: "POST", body: JSON.stringify({ requiredSkills, adjacentSkills, limit }) });
+  },
+  getSimilarHires(candidateId: number | string, limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ similar: any[] }>(`/graph/similar-hires/${candidateId}${qs}`);
+  },
+  multiHopQuery(params: { skills?: string[]; location?: string; industry?: string; certification?: string; currentEmployer?: string; intentType?: string; minSkills?: number; limit?: number }) {
+    return request<{ result: any[] }>("/graph/multi-hop-query", { method: "POST", body: JSON.stringify(params) });
+  },
+  getMigrationFlows() {
+    return request<{ flows: any[] }>("/graph/migration-flows");
+  },
+  getLaborHotspots() {
+    return request<{ hotspots: any[] }>("/graph/labor-hotspots");
+  },
+  getTalentExportClusters() {
+    return request<{ clusters: any[] }>("/graph/talent-export-clusters");
+  },
+  getGccMigrationAnalysis() {
+    return request<{ totalInterested: number; topSourceCountries: string[]; topSkillsDemanded: string[]; sponsorshipRate: number; avgUrgency: number }>("/graph/gcc-migration-analysis");
+  },
+  getSkillGapByLocation(location: string, industry?: string) {
+    const qs = `?location=${encodeURIComponent(location)}${industry ? `&industry=${encodeURIComponent(industry)}` : ""}`;
+    return request<any>(`/graph/skill-gap${qs}`);
+  },
+  getMigrationPathways(from: string, to: string) {
+    return request<any>(`/graph/migration-pathways?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+  },
+  graphRagChat(message: string, skills?: string[], location?: string, industry?: string, depth?: number) {
+    return request<{ reply: string; graphContext: string }>("/graph/rag/chat", { method: "POST", body: JSON.stringify({ message, skills, location, industry, depth }) });
+  },
+  graphRagReason(question: string) {
+    return request<{ answer: string; path: string[]; confidence: number }>("/graph/rag/reason", { method: "POST", body: JSON.stringify({ question }) });
+  },
+  createGraphNode(labels: string[], properties: any) {
+    return request<{ status: string }>("/graph/node", { method: "POST", body: JSON.stringify({ labels, properties }) });
+  },
+  createGraphRelation(type: string, fromLabels: string[], fromMatch: any, toLabels: string[], toMatch: any, properties?: any) {
+    return request<{ status: string }>("/graph/relation", { method: "POST", body: JSON.stringify({ type, fromLabels, fromMatch, toLabels, toMatch, properties }) });
+  },
+  getTalentCluster(skills: string[], limit?: number) {
+    return request<{ clusters: any[] }>("/graph/talent-cluster", { method: "POST", body: JSON.stringify({ skills, limit }) });
+  },
+
+  // ─── Graph Evolution ──────────────────────────────────────────────
+  takeGraphSnapshot() {
+    return request<{ status: string; snapshot: any }>("/graph/evolution/snapshot", { method: "POST" });
+  },
+  getGraphEvolutionHistory(days?: number) {
+    const qs = days ? `?days=${days}` : "";
+    return request<{ history: any[] }>(`/graph/evolution/history${qs}`);
+  },
+  getGraphGrowthTrends() {
+    return request<{ candidateGrowth: any[]; skillGrowth: any[]; relationshipGrowth: any[] }>("/graph/evolution/trends");
+  },
+  getGraphHotspotEvolution(days?: number) {
+    const qs = days ? `?days=${days}` : "";
+    return request<{ hotspots: any[] }>(`/graph/evolution/hotspots${qs}`);
+  },
+  getLatestGraphSnapshot() {
+    return request<{ snapshot: any }>("/graph/evolution/latest");
+  },
+
+  // ─── Phase 8: Hiring Simulation Engine ─────────────────────────
+  simulateHiringSuccess(params: {
+    employerId?: number; candidateId?: number; jobId?: number;
+    candidateSkills?: string[]; jobSkills?: string[]; location?: string;
+    industry?: string; experienceLevel?: string;
+  }) {
+    return request<{
+      probability: number; confidence: number;
+      confidenceIntervalLower: number; confidenceIntervalUpper: number;
+      riskFactors: string[]; positiveFactors: string[];
+    }>("/simulation/hiring-success", { method: "POST", body: JSON.stringify(params) });
+  },
+  simulateRetention(params: {
+    employerId?: number; candidateId: number; location?: string;
+    industry?: string; experienceLevel?: string;
+  }) {
+    return request<any>("/simulation/retention", { method: "POST", body: JSON.stringify(params) });
+  },
+  simulateInterviewSuccess(params: { employerId?: number; candidateId: number; jobId?: number }) {
+    return request<any>("/simulation/interview-success", { method: "POST", body: JSON.stringify(params) });
+  },
+  simulateOfferAcceptance(params: {
+    employerId?: number; candidateId: number; salary?: number; location?: string;
+  }) {
+    return request<any>("/simulation/offer-acceptance", { method: "POST", body: JSON.stringify(params) });
+  },
+  simulateSponsorshipSuccess(params: {
+    employerId?: number; candidateId: number; nationality?: string; currentLocation?: string;
+  }) {
+    return request<any>("/simulation/sponsorship-success", { method: "POST", body: JSON.stringify(params) });
+  },
+  simulateSkillGapRisk(params: { jobSkills: string[]; candidateSkills: string[]; industry?: string }) {
+    return request<any>("/simulation/skill-gap-risk", { method: "POST", body: JSON.stringify(params) });
+  },
+  simulateAll(params: {
+    employerId?: number; candidateId?: number; jobId?: number;
+    candidateSkills?: string[]; jobSkills?: string[]; location?: string;
+    industry?: string; experienceLevel?: string; salary?: number;
+    nationality?: string; currentLocation?: string;
+  }) {
+    return request<Record<string, any>>("/simulation/all", { method: "POST", body: JSON.stringify(params) });
+  },
+
+  // Outcome Learning
+  recordSimulationOutcome(simulationId: number, actualOutcome: string, outcomeValue?: number, metadata?: any) {
+    return request<{ id: number }>("/simulation/outcomes/record", {
+      method: "POST", body: JSON.stringify({ simulationId, actualOutcome, outcomeValue, metadata }),
+    });
+  },
+  getPredictionAccuracy(simulationType?: string, windowDays?: number) {
+    const qs = new URLSearchParams();
+    if (windowDays) qs.set("windowDays", String(windowDays));
+    const path = simulationType ? `/simulation/accuracy/${simulationType}` : "/simulation/accuracy";
+    return request<any>(`${path}?${qs.toString()}`);
+  },
+  getAccuracyHistory(simulationType?: string, limit?: number) {
+    const qs = new URLSearchParams();
+    if (simulationType) qs.set("simulationType", simulationType);
+    if (limit) qs.set("limit", String(limit));
+    return request<{ history: any[] }>(`/simulation/accuracy-history?${qs.toString()}`);
+  },
+  getCalibrationBias(simulationType: string) {
+    return request<{ bias: number }>(`/simulation/calibration-bias/${simulationType}`);
+  },
+
+  // Simulation Memory
+  getSimulationHistory(limit?: number, type?: string) {
+    const qs = new URLSearchParams();
+    if (limit) qs.set("limit", String(limit));
+    if (type) qs.set("type", type);
+    return request<{ simulations: any[] }>(`/simulation/history?${qs.toString()}`);
+  },
+  getAccuracyDrift(simulationType: string, windowDays?: number) {
+    const qs = windowDays ? `?windowDays=${windowDays}` : "";
+    return request<{
+      currentAccuracy: number; previousAccuracy: number; driftAmount: number;
+      driftDirection: string; totalPredictions: number; meanCalibrationError: number;
+    }>(`/simulation/drift/${simulationType}${qs}`);
+  },
+  compareAccuracyPeriods(simulationType: string, period1Days?: number, period2Days?: number) {
+    const qs = new URLSearchParams();
+    qs.set("simulationType", simulationType);
+    if (period1Days) qs.set("period1Days", String(period1Days));
+    if (period2Days) qs.set("period2Days", String(period2Days));
+    return request<any>(`/simulation/compare?${qs.toString()}`);
+  },
+  getCandidateSimulations(candidateId: number, limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ simulations: any[] }>(`/simulation/candidate/${candidateId}${qs}`);
+  },
+  getSimulationById(id: number) {
+    return request<any>(`/simulation/${id}`);
+  },
+
+  // Risk Assessment
+  assessChurnRisk(candidateId: number, jobId?: number) {
+    return request<{
+      riskScore: number; riskLevel: string; contributingFactors: string[];
+      mitigationSuggestions: string[];
+    }>("/simulation/risk/churn", { method: "POST", body: JSON.stringify({ candidateId, jobId }) });
+  },
+  assessMismatchRisk(candidateId: number, jobSkills?: string[], candidateSkills?: string[], jobId?: number) {
+    return request<any>("/simulation/risk/mismatch", {
+      method: "POST", body: JSON.stringify({ candidateId, jobSkills, candidateSkills, jobId }),
+    });
+  },
+  assessSponsorshipFailureRisk(candidateId: number, jobId?: number) {
+    return request<any>("/simulation/risk/sponsorship", {
+      method: "POST", body: JSON.stringify({ candidateId, jobId }),
+    });
+  },
+  assessFraudRisk(candidateId: number, jobId?: number) {
+    return request<any>("/simulation/risk/fraud", {
+      method: "POST", body: JSON.stringify({ candidateId, jobId }),
+    });
+  },
+  assessSkillObsolescenceRisk(candidateId: number, industry?: string, jobId?: number) {
+    return request<any>("/simulation/risk/skill-obsolescence", {
+      method: "POST", body: JSON.stringify({ candidateId, industry, jobId }),
+    });
+  },
+  assessMigrationInstabilityRisk(candidateId: number, jobId?: number) {
+    return request<any>("/simulation/risk/migration-instability", {
+      method: "POST", body: JSON.stringify({ candidateId, jobId }),
+    });
+  },
+  assessAllRisks(candidateId: number, jobId?: number, jobSkills?: string[], candidateSkills?: string[]) {
+    return request<Record<string, any>>("/simulation/risk/all", {
+      method: "POST", body: JSON.stringify({ candidateId, jobId, jobSkills, candidateSkills }),
+    });
+  },
+
+  // Scenario Analysis
+  runSalaryScenario(candidateId: number, currentSalary: number, proposedSalary: number, location?: string) {
+    return request<any>("/simulation/scenario/salary", {
+      method: "POST", body: JSON.stringify({ candidateId, currentSalary, proposedSalary, location }),
+    });
+  },
+  runLocationScenario(candidateId: number, currentLocation: string, proposedLocation: string) {
+    return request<any>("/simulation/scenario/location", {
+      method: "POST", body: JSON.stringify({ candidateId, currentLocation, proposedLocation }),
+    });
+  },
+  runSkillsScenario(candidateId: number, currentSkills: string[], additionalSkills: string[], jobSkills: string[], industry?: string) {
+    return request<any>("/simulation/scenario/skills", {
+      method: "POST", body: JSON.stringify({ candidateId, currentSkills, additionalSkills, jobSkills, industry }),
+    });
+  },
+  runCustomScenario(params: {
+    name: string; description?: string; simulationParams: any; modifiedParams: any; simulationType: string;
+  }) {
+    return request<any>("/simulation/scenario/custom", {
+      method: "POST", body: JSON.stringify(params),
+    });
+  },
+  getScenarioHistory(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ scenarios: any[] }>(`/simulation/scenarios${qs}`);
+  },
+  getScenarioById(id: number) {
+    return request<any>(`/simulation/scenario/${id}`);
+  },
+  getScenarioStats() {
+    return request<{ totalScenarios: number; byType: Record<string, number>; averageImprovement: number }>("/simulation/scenario-stats");
+  },
+
+  // ─── Phase 9A: Labor Market Intelligence ───────────────────────
+  refreshLaborIntelligence(windowDays?: number) {
+    const qs = windowDays ? `?windowDays=${windowDays}` : "";
+    return request<{
+      demandIntelligence: any[]; supplyIntelligence: any[]; workforceFlows: Record<string, any>;
+      skillEconomy: any[]; topEmployers: any[]; regionalProfiles: any[];
+      ecosystemHealth: any; snapshotTimestamp: string;
+    }>(`/labor/refresh${qs}`, { method: "POST" });
+  },
+  getLaborSummary(windowDays?: number) {
+    const qs = windowDays ? `?windowDays=${windowDays}` : "";
+    return request<any>(`/labor/summary${qs}`);
+  },
+  getLaborDemand(windowDays?: number) {
+    const qs = windowDays ? `?windowDays=${windowDays}` : "";
+    return request<{ demand: any[] }>(`/labor/demand${qs}`);
+  },
+  getLaborSupply(windowDays?: number) {
+    const qs = windowDays ? `?windowDays=${windowDays}` : "";
+    return request<{ supply: any[] }>(`/labor/supply${qs}`);
+  },
+  getWorkforceFlows(flowType?: string, limit?: number) {
+    const qs = new URLSearchParams();
+    if (flowType) qs.set("flowType", flowType);
+    if (limit) qs.set("limit", String(limit));
+    return request<any>(`/labor/flows?${qs.toString()}`);
+  },
+  refreshWorkforceFlows(windowDays?: number) {
+    const qs = windowDays ? `?windowDays=${windowDays}` : "";
+    return request<any>(`/labor/flows/refresh${qs}`, { method: "POST" });
+  },
+  getSkillTrends(trendType?: string, limit?: number, region?: string, industry?: string) {
+    const qs = new URLSearchParams();
+    if (trendType) qs.set("trendType", trendType);
+    if (limit) qs.set("limit", String(limit));
+    if (region) qs.set("region", region);
+    if (industry) qs.set("industry", industry);
+    return request<{ skills: any[] }>(`/labor/skills?${qs.toString()}`);
+  },
+  getSkillEconomySummary() {
+    return request<{ rising: number; declining: number; emerging: number; total: number; topRising: string[]; topDeclining: string[] }>("/labor/skills/summary");
+  },
+  getSkillDetail(skillName: string) {
+    return request<any>(`/labor/skills/${encodeURIComponent(skillName)}`);
+  },
+  refreshSkillEconomy(windowDays?: number) {
+    const qs = windowDays ? `?windowDays=${windowDays}` : "";
+    return request<{ skills: any[]; count: number }>(`/labor/skills/refresh${qs}`, { method: "POST" });
+  },
+  getTopEmployers(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ employers: any[] }>(`/labor/employers${qs}`);
+  },
+  getEmployerIntelligence(employerId: number, windowDays?: number) {
+    const qs = windowDays ? `?windowDays=${windowDays}` : "";
+    return request<any>(`/labor/employers/${employerId}${qs}`);
+  },
+  getEmployerMetrics(employerId: number, limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ metrics: any[] }>(`/labor/employers/${employerId}/metrics${qs}`);
+  },
+  getRegionalSnapshots(region?: string, limit?: number) {
+    const qs = new URLSearchParams();
+    if (region) qs.set("region", region);
+    if (limit) qs.set("limit", String(limit));
+    return request<{ regions: any[] }>(`/labor/regions?${qs.toString()}`);
+  },
+  getRegionalProfile(region: string) {
+    return request<any>(`/labor/regions/${encodeURIComponent(region)}`);
+  },
+  getEcosystemHealth() {
+    return request<{
+      overallHealth: number; marketEfficiency: number; laborMobility: number;
+      skillAdaptability: number; employerConfidence: number; migrationActivity: number;
+    }>("/labor/ecosystem/health");
+  },
+  getLaborMetrics(metricType?: string, region?: string, limit?: number) {
+    const qs = new URLSearchParams();
+    if (metricType) qs.set("metricType", metricType);
+    if (region) qs.set("region", region);
+    if (limit) qs.set("limit", String(limit));
+    return request<{ metrics: any[] }>(`/labor/metrics?${qs.toString()}`);
+  },
+
+  // ─── Migration Intelligence (Phase 9B) ────────────────────────
+
+  analyzeCorridor(source: string, destination: string) {
+    return request<any>("/migration/corridor/analyze", {
+      method: "POST",
+      body: JSON.stringify({ source, destination }),
+    });
+  },
+  analyzeAllCorridors() {
+    return request<{ corridors: any[]; count: number }>("/migration/corridors/analyze-all", { method: "POST" });
+  },
+  getTopCorridors(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ corridors: any[] }>(`/migration/corridors/top${qs}`);
+  },
+  getCorridorHistory(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ history: any[] }>(`/migration/corridors/history${qs}`);
+  },
+  getCorridorByRoute(source: string, destination: string) {
+    return request<any>(`/migration/corridor?source=${encodeURIComponent(source)}&destination=${encodeURIComponent(destination)}`);
+  },
+  recordMigrationEvent(event: { candidateId: number; eventType: string; sourceCountry?: string; destinationCountry?: string; employerId?: number; jobId?: number; outcome?: string; metadata?: Record<string, unknown> }) {
+    return request<{ id: number }>("/migration/events", {
+      method: "POST",
+      body: JSON.stringify(event),
+    });
+  },
+  getMigrationEvents(candidateId?: number, employerId?: number, limit?: number) {
+    const qs = new URLSearchParams();
+    if (candidateId) qs.set("candidateId", String(candidateId));
+    if (employerId) qs.set("employerId", String(employerId));
+    if (limit) qs.set("limit", String(limit));
+    return request<{ events: any[] }>(`/migration/events?${qs.toString()}`);
+  },
+  getMigrationStats() {
+    return request<{ totalEvents: number; totalCorridors: number; averageHealthScore: number; topDestination: string; topSource: string }>("/migration/stats");
+  },
+
+  analyzeEmployerSponsorship(employerId?: number) {
+    return request<any>("/migration/sponsorship/analyze", {
+      method: "POST",
+      body: JSON.stringify({ employerId }),
+    });
+  },
+  getSponsorshipSummary() {
+    return request<any>("/migration/sponsorship/summary");
+  },
+  recordSponsorshipOutcome(params: { candidateId: number; jobId?: number; nationality?: string; destinationCountry?: string; visaType?: string; status: string; processingDays?: number; sponsorCost?: number; retentionDays?: number; salaryAtSponsorship?: number; currentSalary?: number; metadata?: Record<string, unknown> }) {
+    return request<{ id: number }>("/migration/sponsorship/record", {
+      method: "POST",
+      body: JSON.stringify(params),
+    });
+  },
+  getEmployerSponsorshipHistory(employerId: number, limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ history: any[] }>(`/migration/sponsorship/history/${employerId}${qs}`);
+  },
+  getRoleSponsorshipLikelihood(role: string) {
+    return request<{ role: string; sponsorshipLikelihood: number }>(`/migration/sponsorship/role/${encodeURIComponent(role)}`);
+  },
+  getNationalitySponsorshipRate(nationality: string) {
+    return request<{ nationality: string; approvalRate: number }>(`/migration/sponsorship/nationality/${encodeURIComponent(nationality)}`);
+  },
+
+  assessCandidateStability(candidateId: number, destinationCountry?: string) {
+    return request<any>(`/migration/stability/assess/${candidateId}`, {
+      method: "POST",
+      body: JSON.stringify({ destinationCountry }),
+    });
+  },
+  getRelocationProfile(candidateId: number) {
+    return request<any>(`/migration/stability/profile/${candidateId}`);
+  },
+  getStabilityAssessments(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ assessments: any[] }>(`/migration/stability/assessments${qs}`);
+  },
+
+  assessCorridorHealth(source: string, destination: string) {
+    return request<any>(`/migration/health/${encodeURIComponent(source)}/${encodeURIComponent(destination)}`);
+  },
+  getAllCorridorHealths() {
+    return request<{ corridors: any[]; count: number }>("/migration/health/all");
+  },
+
+  assessCorridorInstability(source: string, destination: string) {
+    return request<any>("/migration/risk/corridor-instability", {
+      method: "POST",
+      body: JSON.stringify({ source, destination }),
+    });
+  },
+  assessSponsorshipFraud(employerId?: number) {
+    return request<any>("/migration/risk/sponsorship-fraud", {
+      method: "POST",
+      body: JSON.stringify({ employerId }),
+    });
+  },
+  assessHighChurnCorridor(source: string, destination: string) {
+    return request<any>("/migration/risk/high-churn", {
+      method: "POST",
+      body: JSON.stringify({ source, destination }),
+    });
+  },
+  assessVisaRejectionRisk(nationality: string, destinationCountry: string) {
+    return request<any>("/migration/risk/visa-rejection", {
+      method: "POST",
+      body: JSON.stringify({ nationality, destinationCountry }),
+    });
+  },
+  getActiveMigrationRisks(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ risks: any[] }>(`/migration/risk/active${qs}`);
+  },
+  resolveMigrationRisk(id: number) {
+    return request<{ success: boolean }>(`/migration/risk/resolve/${id}`, { method: "POST" });
+  },
 };

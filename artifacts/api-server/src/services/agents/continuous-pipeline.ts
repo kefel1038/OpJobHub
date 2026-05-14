@@ -11,6 +11,7 @@ import { sourceManager } from "./source-manager";
 import { safetyEngine } from "./safety-engine";
 import { approvalManager } from "./approval-manager";
 import { reasoningEngine } from "./reasoning-engine";
+import { runPipelineViaQueue, dispatchEnrichment, dispatchVerification, dispatchGraphSync } from "../queue/pipeline-worker";
 
 export interface PipelineConfig {
   employerId: number;

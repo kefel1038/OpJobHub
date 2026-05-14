@@ -12,6 +12,10 @@ import employerRouter from "./employer";
 import freelanceRouter from "./freelance";
 import extensionRouter from "./extension";
 import agentsRouter from "./agents";
+import knowledgeGraphRouter from "./knowledge-graph";
+import simulationRouter from "./simulation";
+import laborIntelligenceRouter from "./labor-intelligence";
+import migrationIntelligenceRouter from "./migration-intelligence";
 
 const router: IRouter = Router();
 
@@ -28,5 +32,9 @@ router.use(employerRouter);
 router.use(freelanceRouter);
 router.use(extensionRouter);
 router.use(agentsRouter);
+router.use(knowledgeGraphRouter);
+router.use(simulationRouter);
+router.use(laborIntelligenceRouter);
+router.use(migrationIntelligenceRouter);
 
 export default router;
