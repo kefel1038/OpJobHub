@@ -31,7 +31,7 @@ export function Navbar() {
 
         <nav className="hidden md:flex items-center gap-1">
           <Button variant="ghost" asChild className="text-foreground/80 hover:text-foreground">
-            <Link href="/">Find Jobs</Link>
+            <Link href="/jobs">Find Jobs</Link>
           </Button>
           <Button variant="ghost" asChild className="text-foreground/80 hover:text-foreground gap-1.5">
             <Link href="/employers">
@@ -108,7 +108,7 @@ export function Navbar() {
         <div className="md:hidden border-t border-border bg-background">
           <div className="container mx-auto px-4 py-3 flex flex-col gap-1">
             <Link
-              href="/"
+              href="/jobs"
               onClick={() => setOpen(false)}
               className="px-3 py-2 rounded-md hover:bg-muted text-sm"
             >
