@@ -10,28 +10,31 @@ import { authMiddleware } from "../lib/auth";
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
+/** Strip markdown code-fences that some LLMs add despite "Return ONLY valid JSON" */
+function stripJsonFences(raw: string): string {
+  return raw
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```\s*$/, "")
+    .trim();
+}
+
 async function runAiAnalysis(text: string) {
   const completion = await openrouter().chat.completions.create({
     model: "openrouter/free",
     messages: [
       {
         role: "system",
-        content: "You are an expert ATS and Career Intelligence AI. Return ONLY valid JSON.",
+        content: "You are an expert ATS and Career Intelligence AI. Return ONLY valid JSON with no markdown, no code fences, no explanation.",
       },
       {
         role: "user",
-        content: `Analyze this resume text:\n\n${text.slice(0, 3000)}\n\nReturn JSON:
-{
-  "parsed": { "fullName": "", "headline": "", "skills": [], "experience": [], "education": [] },
-  "scores": { "ats": 0-100, "keyword": 0-100, "readability": 0-100, "skills": 0-100, "market": 0-100 },
-  "suggestions": { "missingKeywords": [], "weakAreas": [], "optimizationTips": [] },
-  "marketPosition": { "rank": "", "demand": "High/Medium/Low", "salaryRange": "" }
-}`,
+        content: `Analyze this resume text:\n\n${text.slice(0, 3000)}\n\nRespond with ONLY this JSON object (no markdown):\n{"parsed":{"fullName":"","headline":"","skills":[],"experience":[],"education":[]},"scores":{"ats":0,"keyword":0,"readability":0,"skills":0,"market":0},"suggestions":{"missingKeywords":[],"weakAreas":[],"optimizationTips":[]},"marketPosition":{"rank":"","demand":"High","salaryRange":""}}`,
       },
     ],
   });
 
-  return JSON.parse(completion.choices[0].message.content || "{}");
+  const raw = completion.choices[0].message.content || "{}";
+  return JSON.parse(stripJsonFences(raw));
 }
 
 router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (req, res) => {
