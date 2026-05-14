@@ -57,7 +57,7 @@ export default function Home() {
                 side="left"
                 title="Evaluate top candidates"
                 description="Defining your hiring needs and criteria helps us find what you're looking for. We trust in our data-driven approach. It empowers you to make an unbiased decision and hire."
-                image="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400"
+                image="/assets/construction_workers.jpg"
               />
               <TimelineStep
                 number={3}
