@@ -49,7 +49,7 @@ export default function Home() {
               <TimelineStep
                 number={1}
                 title="Specify requirements"
-                description="Sign to your dashboard to specify your hiring requirements and skills needs in a very simple and easy steps."
+                description="Sign in to your dashboard and specify your hiring requirements and skills you need in simple and easy steps."
                 image="/assets/interview_office.png"
               />
               <TimelineStep
