@@ -1,16 +1,249 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BrainCircuit, TrendingUp, BarChart3, Target, Sparkles,
   Users, Briefcase, DollarSign, Clock, ArrowUpRight, ChevronDown,
   ChevronRight, Globe, Zap, BookOpen, MapPin, Star, Shield,
-  Rocket, ArrowRight, CheckCircle2, AlertTriangle, RefreshCw
+  Rocket, ArrowRight, CheckCircle2, AlertTriangle, RefreshCw,
+  X, Plus, Brain, Cpu, Lock
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+// --- Role skill requirements for match calculation ---
+const ROLE_REQUIREMENTS: Record<string, { required: string[]; bonus: string[]; label: string; color: string }> = {
+  devops: {
+    label: "DevOps Roles", color: "bg-emerald-500",
+    required: ["docker", "kubernetes", "linux", "ci/cd", "terraform", "ansible", "aws", "git"],
+    bonus: ["python", "prometheus", "grafana", "jenkins", "helm", "azure"],
+  },
+  cloud: {
+    label: "Cloud Engineer", color: "bg-blue-500",
+    required: ["aws", "azure", "gcp", "terraform", "networking", "iam", "s3", "ec2"],
+    bonus: ["docker", "kubernetes", "python", "cloudformation", "linux"],
+  },
+  ai: {
+    label: "AI Engineer", color: "bg-purple-500",
+    required: ["python", "tensorflow", "pytorch", "machine learning", "nlp", "langchain", "sql"],
+    bonus: ["aws", "docker", "mlops", "hugging face", "openai", "fastapi"],
+  },
+};
+
+const EXP_MULTIPLIERS: Record<string, number> = {
+  "0–1 yr": 0.7, "1–3 yrs": 0.85, "3–5 yrs": 1.0, "5–8 yrs": 1.1, "8+ yrs": 1.15
+};
+
+function calcMatch(roleKey: string, skills: string[], exp: string): number {
+  const r = ROLE_REQUIREMENTS[roleKey];
+  const s = skills.map(x => x.toLowerCase());
+  const reqHit = r.required.filter(x => s.includes(x)).length;
+  const bonusHit = r.bonus.filter(x => s.includes(x)).length;
+  const base = Math.round((reqHit / r.required.length) * 75 + (bonusHit / Math.max(r.bonus.length, 1)) * 25);
+  return Math.min(99, Math.round(base * (EXP_MULTIPLIERS[exp] ?? 1.0)));
+}
+
+// --- Improve My Match Modal ---
+const SUGGESTED_SKILLS = [
+  "Python", "Docker", "Kubernetes", "AWS", "Azure", "Terraform", "Linux",
+  "React", "Node.js", "SQL", "Git", "CI/CD", "Ansible", "GCP", "TensorFlow",
+  "Figma", "TypeScript", "Java", "PostgreSQL", "Machine Learning"
+];
+
+const EXP_OPTIONS = ["0–1 yr", "1–3 yrs", "3–5 yrs", "5–8 yrs", "8+ yrs"];
+
+function MatchModal({ onClose }: { onClose: () => void }) {
+  const [skills, setSkills] = useState<string[]>(["Docker", "Linux", "AWS"]);
+  const [inputVal, setInputVal] = useState("");
+  const [exp, setExp] = useState("3–5 yrs");
+  const [step, setStep] = useState<"input" | "results">("input");
+
+  const matches = useMemo(() => [
+    { key: "devops", ...ROLE_REQUIREMENTS.devops, pct: calcMatch("devops", skills, exp) },
+    { key: "cloud", ...ROLE_REQUIREMENTS.cloud, pct: calcMatch("cloud", skills, exp) },
+    { key: "ai", ...ROLE_REQUIREMENTS.ai, pct: calcMatch("ai", skills, exp) },
+  ].sort((a, b) => b.pct - a.pct), [skills, exp]);
+
+  const addSkill = (s: string) => {
+    const clean = s.trim();
+    if (clean && !skills.map(x => x.toLowerCase()).includes(clean.toLowerCase())) {
+      setSkills(prev => [...prev, clean]);
+    }
+    setInputVal("");
+  };
+
+  const removeSkill = (s: string) => setSkills(prev => prev.filter(x => x !== s));
+
+  const topMissing = useMemo(() => {
+    const best = matches[0];
+    const r = ROLE_REQUIREMENTS[best.key];
+    const s = skills.map(x => x.toLowerCase());
+    return [...r.required, ...r.bonus].filter(x => !s.includes(x)).slice(0, 3);
+  }, [matches, skills]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        transition={{ type: "spring", duration: 0.35 }}
+        className="relative z-10 w-full max-w-lg bg-card border border-border/60 rounded-2xl shadow-2xl overflow-hidden"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-border/40 bg-primary/5">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Brain className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-bold">Improve My Match</p>
+              <p className="text-[10px] text-muted-foreground">AI career fit analysis</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="h-8 w-8 rounded-full hover:bg-muted flex items-center justify-center transition-colors">
+            <X className="h-4 w-4 text-muted-foreground" />
+          </button>
+        </div>
+
+        <div className="p-5 space-y-5 max-h-[75vh] overflow-y-auto">
+          {/* Experience */}
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Experience Level</p>
+            <div className="flex flex-wrap gap-2">
+              {EXP_OPTIONS.map(e => (
+                <button
+                  key={e}
+                  onClick={() => setExp(e)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
+                    exp === e
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-muted/30 text-muted-foreground border-border/40 hover:border-primary/40"
+                  )}
+                >{e}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Skills Input */}
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Your Skills</p>
+            <div className="flex gap-2 mb-3">
+              <input
+                type="text"
+                value={inputVal}
+                onChange={e => setInputVal(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addSkill(inputVal); } }}
+                placeholder="Type a skill and press Enter..."
+                className="flex-1 h-9 px-3 rounded-xl bg-muted/40 border border-border/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground/50"
+              />
+              <Button size="sm" className="h-9 px-3 rounded-xl shrink-0" onClick={() => addSkill(inputVal)}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            {/* Current skills */}
+            <div className="flex flex-wrap gap-1.5 mb-3 min-h-[28px]">
+              {skills.map(s => (
+                <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium border border-primary/20">
+                  {s}
+                  <button onClick={() => removeSkill(s)} className="hover:text-red-400 transition-colors">
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </span>
+              ))}
+              {skills.length === 0 && <span className="text-xs text-muted-foreground italic">No skills added yet</span>}
+            </div>
+            {/* Suggestions */}
+            <p className="text-[10px] text-muted-foreground mb-1.5">Quick add:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {SUGGESTED_SKILLS.filter(s => !skills.map(x => x.toLowerCase()).includes(s.toLowerCase())).slice(0, 10).map(s => (
+                <button
+                  key={s}
+                  onClick={() => addSkill(s)}
+                  className="inline-flex items-center gap-0.5 px-2 py-1 rounded-full bg-muted/50 text-muted-foreground hover:text-primary hover:bg-primary/10 text-[10px] font-medium border border-border/40 hover:border-primary/30 transition-all"
+                >
+                  <Plus className="h-2.5 w-2.5" /> {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Live Match Scores */}
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Your Live Match Scores</p>
+            <div className="space-y-3">
+              {matches.map((m, i) => (
+                <div key={m.key}>
+                  <div className="flex items-center justify-between text-xs mb-1.5">
+                    <div className="flex items-center gap-1.5">
+                      {i === 0 && <Star className="h-3 w-3 text-amber-400 fill-amber-400" />}
+                      <span className="font-medium">{m.label}</span>
+                    </div>
+                    <span className={cn(
+                      "font-bold text-sm",
+                      m.pct >= 80 ? "text-emerald-500" : m.pct >= 60 ? "text-blue-400" : "text-amber-400"
+                    )}>{m.pct}% fit</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <motion.div
+                      className={cn("h-full rounded-full", m.color)}
+                      animate={{ width: `${m.pct}%` }}
+                      transition={{ duration: 0.5, type: "spring" }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Missing Skills Tip */}
+          {topMissing.length > 0 && (
+            <div className="rounded-xl bg-amber-500/5 border border-amber-500/20 p-4">
+              <p className="text-xs font-semibold text-amber-500 mb-2 flex items-center gap-1.5">
+                <Zap className="h-3 w-3" /> Add these to boost your top match:
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {topMissing.map(s => (
+                  <button
+                    key={s}
+                    onClick={() => addSkill(s.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "))}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 text-xs font-medium border border-amber-500/20 hover:bg-amber-500/20 transition-colors"
+                  >
+                    <Plus className="h-2.5 w-2.5" /> {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* CTA */}
+          <div className="flex gap-2 pt-1">
+            <Button className="flex-1 rounded-xl h-10 text-sm gap-1.5" asChild>
+              <a href="/jobs">
+                <Briefcase className="h-4 w-4" /> Find Matching Jobs
+              </a>
+            </Button>
+            <Button variant="outline" className="flex-1 rounded-xl h-10 text-sm" asChild>
+              <a href="/ai-matching">
+                Full AI Analysis
+              </a>
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
 
 // --- Data ---
 const insights = [
@@ -113,6 +346,7 @@ function CountUp({ target, duration = 1200, suffix = "" }: { target: number; dur
 export function AICareerInsights() {
   const [expandedRole, setExpandedRole] = useState<string | null>(null);
   const [selectedRegion, setSelectedRegion] = useState("qatar");
+  const [matchModalOpen, setMatchModalOpen] = useState(false);
   const [lastUpdated] = useState(() => {
     const mins = Math.floor(Math.random() * 20) + 5;
     return `${mins} mins ago`;
@@ -341,7 +575,11 @@ export function AICareerInsights() {
                   </div>
                 ))}
               </div>
-              <Button size="sm" className="w-full mt-4 rounded-xl text-xs h-9 gap-1.5">
+              <Button
+                size="sm"
+                className="w-full mt-4 rounded-xl text-xs h-9 gap-1.5"
+                onClick={() => setMatchModalOpen(true)}
+              >
                 Improve My Match <ArrowRight className="h-3 w-3" />
               </Button>
             </div>
@@ -419,6 +657,10 @@ export function AICareerInsights() {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {matchModalOpen && <MatchModal onClose={() => setMatchModalOpen(false)} />}
+      </AnimatePresence>
     </section>
   );
 }
