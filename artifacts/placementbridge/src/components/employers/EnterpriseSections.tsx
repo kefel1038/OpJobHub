@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Shield, Lock, Eye, CheckCircle2, AlertTriangle, Fingerprint, 
   Search, ShieldAlert, BadgeCheck, Zap, Globe, MessageSquare,
-  ChevronRight, BrainCircuit, Activity, BarChart3, ArrowRight
+  ChevronRight, BrainCircuit, Activity, BarChart3, ArrowRight, Sparkles
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";

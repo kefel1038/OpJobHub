@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { 
   Activity, Globe, Zap, BarChart3, TrendingUp, Users, ArrowUpRight, ArrowDownRight, 
-  MapPin, ShieldCheck, Database, BrainCircuit
+  MapPin, ShieldCheck, Database, BrainCircuit, Sparkles
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";

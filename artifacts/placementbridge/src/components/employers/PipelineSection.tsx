@@ -10,7 +10,7 @@ const pipelineStages = [
     label: "Applied",
     icon: FileText,
     count: 48,
-    color: "bg-blue-500lue-500",
+    color: "bg-blue-500",
     textColor: "text-blue-400lue-600",
     bgColor: "bg-blue-500lue-50",
     candidates: [

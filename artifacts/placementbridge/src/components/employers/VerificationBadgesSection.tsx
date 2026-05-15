@@ -134,7 +134,7 @@ export function VerificationBadgesSection() {
                   <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
                   Available Now
                 </Badge>
-                <Badge className="bg-blue-500lue-500/20 text-blue-400lue-300 border-blue-500/30 rounded-full px-3 py-1 flex items-center gap-1">
+                <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 rounded-full px-3 py-1 flex items-center gap-1">
                   <Sparkles className="h-3 w-3" />
                   AI Score: {candidateExample.matchScore}%
                 </Badge>
@@ -146,8 +146,8 @@ export function VerificationBadgesSection() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-white">{candidateExample.name}</h3>
-                  <p className="text-blue-400lue-200/70">{candidateExample.role}</p>
-                  <p className="text-xs text-blue-400lue-300/50">{candidateExample.location}</p>
+                  <p className="text-blue-200/70">{candidateExample.role}</p>
+                  <p className="text-xs text-blue-300/50">{candidateExample.location}</p>
                 </div>
               </div>
 
@@ -159,7 +159,7 @@ export function VerificationBadgesSection() {
                   { label: "Language", value: "English, Swahili" },
                 ].map((item) => (
                   <div key={item.label} className="bg-white/5 rounded-xl p-3 border border-white/5">
-                    <div className="text-xs text-blue-400lue-300/50">{item.label}</div>
+                    <div className="text-xs text-blue-300/50">{item.label}</div>
                     <div className="text-sm font-bold text-white">{item.value}</div>
                   </div>
                 ))}
@@ -167,7 +167,7 @@ export function VerificationBadgesSection() {
 
               {/* Verification Badges Row */}
               <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                <div className="text-xs text-blue-400lue-300/50 font-medium mb-3 flex items-center gap-1">
+                <div className="text-xs text-blue-300/50 font-medium mb-3 flex items-center gap-1">
                   <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
                   All 7 verifications passed
                 </div>
@@ -178,7 +178,7 @@ export function VerificationBadgesSection() {
                       className="inline-flex items-center gap-1.5 bg-white/10 rounded-full px-3 py-1 border border-white/5"
                     >
                       <badge.icon className="h-3 w-3 text-emerald-400" />
-                      <span className="text-[10px] text-blue-400lue-200 font-medium">{badge.title}</span>
+                      <span className="text-[10px] text-blue-200 font-medium">{badge.title}</span>
                     </div>
                   ))}
                 </div>
