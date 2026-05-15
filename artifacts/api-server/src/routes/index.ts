@@ -16,6 +16,7 @@ import knowledgeGraphRouter from "./knowledge-graph";
 import simulationRouter from "./simulation";
 import laborIntelligenceRouter from "./labor-intelligence";
 import migrationIntelligenceRouter from "./migration-intelligence";
+import forecastingRouter from "./forecasting";
 
 const router: IRouter = Router();
 
@@ -36,5 +37,6 @@ router.use(knowledgeGraphRouter);
 router.use(simulationRouter);
 router.use(laborIntelligenceRouter);
 router.use(migrationIntelligenceRouter);
+router.use(forecastingRouter);
 
 export default router;

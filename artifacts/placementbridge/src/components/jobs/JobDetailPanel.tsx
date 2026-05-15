@@ -4,7 +4,7 @@ import {
   X, MapPin, DollarSign, Building2, Clock, Calendar,
   Sparkles, Send, Bookmark, BookmarkCheck, Briefcase,
   CheckCircle2, GraduationCap, TrendingUp, ChevronRight,
-  ExternalLink, Share2, Flag, Mail, Phone, MessageCircle, ChevronDown
+  ExternalLink, Share2, Flag, Mail, Phone, MessageCircle, ChevronDown, Loader2, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,10 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import type { Job } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
+import { api, type Job } from "@/lib/api";
+import { toast } from "sonner";
+import { Twitter, Linkedin, MessageSquare, Copy, Check } from "lucide-react";
 
 /** Detect applyUrl type and build the correct href */
 function buildApplyHref(applyUrl?: string | null): { href: string; type: "email" | "whatsapp" | "phone" | "url" | null } {
@@ -130,6 +133,102 @@ const defaultSuggestions = [
   "Include relevant certifications",
   "Optimize your summary section for ATS scanning",
 ];
+
+function MarketingAgent({ jobId }: { jobId: number }) {
+  const [loading, setLoading] = useState(false);
+  const [content, setContent] = useState<{ linkedin: string; twitter: string; whatsapp: string; instagram: string } | null>(null);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const generate = async () => {
+    setLoading(true);
+    try {
+      const res = await api.generateSocialContent(jobId);
+      setContent(res);
+      toast.success("Social content generated!");
+    } catch (err) {
+      toast.error("Failed to generate content");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyToClipboard = (text: string, platform: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(platform);
+    setTimeout(() => setCopied(null), 2000);
+    toast.success(`${platform} content copied!`);
+  };
+
+  return (
+    <section className="mt-8 p-4 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-indigo-500" />
+          <h3 className="text-lg font-bold text-foreground">AI Marketing Agent</h3>
+        </div>
+        {!content && (
+          <Button 
+            variant="default" 
+            size="sm" 
+            onClick={generate} 
+            disabled={loading}
+            className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white"
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+            Generate Posts
+          </Button>
+        )}
+      </div>
+
+      {!content && !loading && (
+        <p className="text-sm text-muted-foreground">
+          Let our AI Agent create high-engagement social media posts to help you promote this job.
+        </p>
+      )}
+
+      {loading && (
+        <div className="space-y-3 py-4">
+          <Skeleton className="h-20 w-full rounded-xl" />
+          <Skeleton className="h-20 w-full rounded-xl" />
+        </div>
+      )}
+
+      {content && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-3">
+            {[
+              { id: "linkedin", label: "LinkedIn", icon: <Linkedin className="h-4 w-4 text-blue-600" />, text: content.linkedin },
+              { id: "twitter", label: "X / Twitter", icon: <Twitter className="h-4 w-4 text-sky-500" />, text: content.twitter },
+              { id: "whatsapp", label: "WhatsApp", icon: <MessageSquare className="h-4 w-4 text-emerald-500" />, text: content.whatsapp },
+            ].map((p) => (
+              <div key={p.id} className="p-3 rounded-xl bg-background/60 border border-border/40 relative group">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    {p.icon} {p.label}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
+                    onClick={() => copyToClipboard(p.text, p.label)}
+                  >
+                    {copied === p.label ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                  </Button>
+                </div>
+                <p className="text-sm text-foreground line-clamp-3 group-hover:line-clamp-none transition-all duration-300">
+                  {p.text}
+                </p>
+              </div>
+            ))}
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => setContent(null)} className="text-xs text-muted-foreground hover:text-foreground">
+            <RefreshCw className="h-3 w-3 mr-1" /> Regenerate
+          </Button>
+        </div>
+      )}
+    </section>
+  );
+}
 
 export function JobDetailPanel({ job, open, onClose }: JobDetailPanelProps) {
   const [saved, setSaved] = useState(false);
@@ -343,6 +442,8 @@ With a team of passionate professionals, we're committed to excellence and conti
                     </p>
                   </div>
                 </section>
+
+                <MarketingAgent jobId={job.id} />
               </div>
             </ScrollArea>
 

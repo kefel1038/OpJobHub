@@ -25,7 +25,7 @@ import {
   PieChart, Pie, Cell, AreaChart, Area, BarChart, Bar
 } from 'recharts';
 
-type TabId = "overview" | "jobs" | "candidates" | "messages" | "analytics" | "team" | "agents" | "observability" | "sourcing" | "knowledge-graph" | "predictive" | "labor" | "migration";
+type TabId = "overview" | "jobs" | "candidates" | "messages" | "analytics" | "team" | "agents" | "observability" | "sourcing" | "knowledge-graph" | "predictive" | "labor" | "migration" | "forecasting";
 
 const navItems: { id: TabId; label: string; icon: React.ElementType; count?: string }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -41,6 +41,7 @@ const navItems: { id: TabId; label: string; icon: React.ElementType; count?: str
   { id: "predictive", label: "Predictive AI", icon: BrainCircuit },
   { id: "labor", label: "Labor Intel", icon: Globe },
   { id: "migration", label: "Migration", icon: Network },
+  { id: "forecasting", label: "Forecasting", icon: TrendingUp },
 ];
 
 export default function EmployerDashboard() {
@@ -225,6 +226,7 @@ export default function EmployerDashboard() {
               {activeTab === "predictive" && <PredictiveIntelligenceTab />}
               {activeTab === "labor" && <LaborIntelligenceTab />}
               {activeTab === "migration" && <MigrationIntelligenceTab />}
+              {activeTab === "forecasting" && <ForecastingIntelligenceTab />}
             </motion.div>
           </AnimatePresence>
         </main>
@@ -4091,6 +4093,385 @@ function MigrationIntelligenceTab() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+// ─── Phase 9C: Forecasting Intelligence Tab ────────────────────
+
+function ForecastingIntelligenceTab() {
+  const [loading, setLoading] = useState(true);
+  const [summary, setSummary] = useState<any>(null);
+  const [demandForecasts, setDemandForecasts] = useState<any[]>([]);
+  const [skillForecasts, setSkillForecasts] = useState<any[]>([]);
+  const [migrationForecasts, setMigrationForecasts] = useState<any[]>([]);
+  const [riskForecasts, setRiskForecasts] = useState<any[]>([]);
+  const [calibrations, setCalibrations] = useState<any[]>([]);
+  const [emergingSkills, setEmergingSkills] = useState<any[]>([]);
+  const [decliningSkills, setDecliningSkills] = useState<any[]>([]);
+  const [selectedRole, setSelectedRole] = useState("");
+  const [selectedHorizon, setSelectedHorizon] = useState("90d");
+  const [roleResult, setRoleResult] = useState<any>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [demand, skill, migration, risk, cal, emerging, declining] = await Promise.allSettled([
+        api.getDemandForecasts(selectedHorizon),
+        api.getSkillForecasts(selectedHorizon),
+        api.getMigrationForecasts(selectedHorizon),
+        api.getRiskForecasts(selectedHorizon),
+        api.getForecastCalibrations(),
+        api.getEmergingSkills(selectedHorizon),
+        api.getDecliningSkills(selectedHorizon),
+      ]);
+      if (demand.status === "fulfilled") setDemandForecasts(demand.value.forecasts);
+      if (skill.status === "fulfilled") setSkillForecasts(skill.value.forecasts);
+      if (migration.status === "fulfilled") setMigrationForecasts(migration.value.forecasts);
+      if (risk.status === "fulfilled") setRiskForecasts(risk.value.forecasts);
+      if (cal.status === "fulfilled") setCalibrations(cal.value.calibrations);
+      if (emerging.status === "fulfilled") setEmergingSkills(emerging.value.skills);
+      if (declining.status === "fulfilled") setDecliningSkills(declining.value.skills);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedHorizon]);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  const handleAnalyzeRole = async () => {
+    if (!selectedRole) return;
+    setAnalyzing(true);
+    try {
+      const result = await api.getRoleForecast(selectedRole, selectedHorizon);
+      setRoleResult(result);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+        <span className="ml-3 text-white/60">Loading forecasting intelligence...</span>
+      </div>
+    );
+  }
+
+  const scoreColor = (s: number) =>
+    s >= 0.7 ? "text-emerald-400" : s >= 0.5 ? "text-amber-400" : "text-red-400";
+
+  const riskBadge = (level: string) => {
+    const colors: Record<string, string> = {
+      low: "bg-emerald-500/20 text-emerald-400",
+      medium: "bg-amber-500/20 text-amber-400",
+      high: "bg-red-500/20 text-red-400",
+      critical: "bg-rose-500/20 text-rose-400",
+    };
+    return colors[level] || "bg-gray-500/20 text-gray-400";
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Forecasting Intelligence</h2>
+          <p className="text-sm text-white/40 mt-1">
+            Predictive labor economics — adaptive, uncertainty-aware, migration-informed forecasting
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedHorizon}
+            onChange={e => setSelectedHorizon(e.target.value)}
+            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+          >
+            <option value="30d">30 Days</option>
+            <option value="90d">90 Days</option>
+            <option value="180d">180 Days</option>
+            <option value="1y">1 Year</option>
+          </select>
+          <Button onClick={fetchAll} variant="outline" size="sm" className="border-white/10 text-white/60">
+            <RotateCcw className="w-4 h-4 mr-1" /> Refresh
+          </Button>
+        </div>
+      </div>
+
+      {/* Role Forecaster */}
+      <Card className="bg-white/5 border-white/10">
+        <CardContent className="p-5">
+          <h3 className="text-lg font-bold text-white mb-4">Role Forecaster</h3>
+          <div className="flex gap-3 mb-4">
+            <input
+              type="text"
+              placeholder="Enter role (e.g. telecom engineer)"
+              value={selectedRole}
+              onChange={e => setSelectedRole(e.target.value)}
+              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm placeholder:text-white/20"
+            />
+            <Button onClick={handleAnalyzeRole} disabled={analyzing || !selectedRole} size="sm">
+              {analyzing ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <TrendingUp className="w-4 h-4 mr-1" />}
+              Forecast
+            </Button>
+          </div>
+
+          {roleResult && (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="text-xs text-white/40">Demand</div>
+                <div className={`text-lg font-bold ${scoreColor(roleResult.demand.predictedValue)}`}>
+                  {Math.round(roleResult.demand.predictedValue * 100)}%
+                </div>
+                <div className="text-xs text-white/30">
+                  Change: {roleResult.demand.predictedChange > 0 ? "+" : ""}{roleResult.demand.predictedChange}%
+                </div>
+              </div>
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="text-xs text-white/40">Shortage Risk</div>
+                <div className={`text-lg font-bold ${scoreColor(roleResult.shortageRisk.riskScore)}`}>
+                  {Math.round(roleResult.shortageRisk.riskScore * 100)}%
+                </div>
+                <Badge className={riskBadge(roleResult.shortageRisk.riskLevel)}>{roleResult.shortageRisk.riskLevel}</Badge>
+              </div>
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="text-xs text-white/40">Wage Pressure</div>
+                <div className={`text-lg font-bold ${scoreColor(roleResult.wage.predictedValue)}`}>
+                  {Math.round(roleResult.wage.predictedValue * 100)}%
+                </div>
+                <div className="text-xs text-white/30">{roleResult.wage.trendDirection}</div>
+              </div>
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="text-xs text-white/40">Saturation Risk</div>
+                <div className={`text-lg font-bold ${scoreColor(roleResult.saturationRisk.riskScore)}`}>
+                  {Math.round(roleResult.saturationRisk.riskScore * 100)}%
+                </div>
+                <Badge className={riskBadge(roleResult.saturationRisk.riskLevel)}>{roleResult.saturationRisk.riskLevel}</Badge>
+              </div>
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="text-xs text-white/40">Confidence</div>
+                <div className={`text-lg font-bold ${scoreColor(roleResult.demand.confidence)}`}>
+                  {Math.round(roleResult.demand.confidence * 100)}%
+                </div>
+                <div className="text-xs text-white/30">Volatility: {Math.round(roleResult.demand.volatility * 100)}%</div>
+              </div>
+            </div>
+          )}
+
+          {roleResult?.demand?.keyDrivers?.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {roleResult.demand.keyDrivers.map((d: string) => (
+                <Badge key={d} variant="outline" className="text-xs border-white/10 text-white/60">{d}</Badge>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Demand Forecasts */}
+      <Card className="bg-white/5 border-white/10">
+        <CardContent className="p-5">
+          <h3 className="text-lg font-bold text-white mb-3">Demand Forecasts</h3>
+          <div className="space-y-2">
+            {demandForecasts.slice(0, 10).map((f: any, i: number) => (
+              <div key={`${f.targetName}-${i}`} className="flex items-center justify-between bg-white/5 rounded-lg p-3">
+                <div className="flex-1">
+                  <div className="text-sm font-bold text-white">{f.targetName}</div>
+                  <div className="text-xs text-white/40">{f.forecastType} · {f.horizon} horizon</div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <div className={`text-sm font-bold ${scoreColor(f.predictedValue)}`}>
+                      {Math.round(f.predictedValue * 100)}%
+                    </div>
+                    <div className={`text-xs ${f.predictedChange > 0 ? "text-emerald-400" : "text-red-400"}`}>
+                      {f.predictedChange > 0 ? "+" : ""}{f.predictedChange}%
+                    </div>
+                  </div>
+                  <div className="text-xs text-white/30 w-16 text-right">
+                    CI: {Math.round(f.confidenceLower * 100)}–{Math.round(f.confidenceUpper * 100)}%
+                  </div>
+                  <div className="text-xs text-white/40 w-12 text-right">
+                    {Math.round(f.confidence * 100)}% conf
+                  </div>
+                  <div className="text-xs">
+                    <Badge className={f.trendDirection === "up" ? "bg-emerald-500/20 text-emerald-400" : f.trendDirection === "down" ? "bg-red-500/20 text-red-400" : "bg-white/10 text-white/40"}>
+                      {f.trendDirection}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Skill Forecasts + Emerging/Declining */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="p-5">
+            <h3 className="text-lg font-bold text-white mb-3">Skill Evolution Forecasts</h3>
+            <div className="space-y-2">
+              {skillForecasts.slice(0, 8).map((f: any, i: number) => (
+                <div key={`${f.skillName}-${i}`} className="flex items-center justify-between bg-white/5 rounded-lg p-2">
+                  <div>
+                    <span className="text-sm font-bold text-white">{f.skillName}</span>
+                    <span className={`ml-2 text-xs ${scoreColor(f.predictedScarcityIndex)}`}>
+                      Scarcity: {Math.round(f.predictedScarcityIndex * 100)}%
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-bold ${f.trendDirection === "rising" ? "text-emerald-400" : "text-red-400"}`}>
+                      {f.trendDirection}
+                    </span>
+                    {f.emergenceProbability > 0.4 && (
+                      <Badge className="bg-purple-500/20 text-purple-400 text-xs">Emerging</Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="space-y-4">
+          <Card className="bg-white/5 border-white/10">
+            <CardContent className="p-5">
+              <h3 className="text-lg font-bold text-white mb-3">Emerging Skills</h3>
+              {emergingSkills.length > 0 ? (
+                <div className="space-y-2">
+                  {emergingSkills.slice(0, 6).map((s: any) => (
+                    <div key={s.skill} className="flex items-center justify-between bg-white/5 rounded-lg p-2">
+                      <span className="text-sm text-white">{s.skill}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-emerald-400">{Math.round(s.probability * 100)}%</span>
+                        {s.adjacencies?.length > 0 && (
+                          <span className="text-xs text-white/30">→ {s.adjacencies.slice(0, 2).join(", ")}</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-white/40">No emerging skills predicted</div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/5 border-white/10">
+            <CardContent className="p-5">
+              <h3 className="text-lg font-bold text-white mb-3">Declining Skills</h3>
+              {decliningSkills.length > 0 ? (
+                <div className="space-y-2">
+                  {decliningSkills.slice(0, 6).map((s: any) => (
+                    <div key={s.skill} className="flex items-center justify-between bg-white/5 rounded-lg p-2">
+                      <span className="text-sm text-white">{s.skill}</span>
+                      <span className="text-xs text-red-400">{Math.round(s.probability * 100)}%</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-white/40">No declining skills predicted</div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Migration Forecasts */}
+      {migrationForecasts.length > 0 && (
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="p-5">
+            <h3 className="text-lg font-bold text-white mb-3">Corridor Growth Forecasts</h3>
+            <div className="space-y-2">
+              {migrationForecasts.slice(0, 8).map((f: any, i: number) => (
+                <div key={`${f.corridorSource}-${f.corridorDestination}-${i}`}
+                  className="flex items-center justify-between bg-white/5 rounded-lg p-3">
+                  <div>
+                    <span className="text-sm font-bold text-white">{f.corridorSource}</span>
+                    <ArrowRight className="w-3 h-3 inline mx-2 text-white/20" />
+                    <span className="text-sm font-bold text-white">{f.corridorDestination}</span>
+                    <span className="ml-2 text-xs text-white/40">{f.forecastType}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`text-sm font-bold ${scoreColor(f.confidence)}`}>
+                      {Math.round(f.predictedValue * 100)}%
+                    </span>
+                    <span className="text-xs text-white/30">
+                      {f.predictedChange > 0 ? "+" : ""}{f.predictedChange}%
+                    </span>
+                    <span className="text-xs text-white/40">{Math.round(f.confidence * 100)}% conf</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Risk Forecasts */}
+      {riskForecasts.length > 0 && (
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="p-5">
+            <h3 className="text-lg font-bold text-white mb-3">Risk Forecasts</h3>
+            <div className="space-y-2">
+              {riskForecasts.slice(0, 8).map((r: any, i: number) => (
+                <div key={`${r.riskType}-${i}`} className="bg-red-500/5 border border-red-500/10 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-red-400" />
+                      <span className="text-sm font-bold text-white">{r.riskName}</span>
+                      <Badge className={riskBadge(r.riskLevel)}>{r.riskLevel}</Badge>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <span className="text-white/60">P: {Math.round(r.probability * 100)}%</span>
+                      <span className="text-white/60">S: {Math.round(r.severity * 100)}%</span>
+                      <span className={`font-bold ${scoreColor(r.riskScore)}`}>{Math.round(r.riskScore * 100)}%</span>
+                    </div>
+                  </div>
+                  {r.keyDrivers?.length > 0 && (
+                    <div className="text-xs text-white/40 ml-6">
+                      {r.keyDrivers.slice(0, 2).join("; ")}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Confidence Calibration */}
+      {calibrations.length > 0 && (
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="p-5">
+            <h3 className="text-lg font-bold text-white mb-3">Forecast Confidence & Calibration</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {calibrations.map((c: any) => (
+                <div key={c.forecastType} className="bg-white/5 rounded-lg p-3">
+                  <div className="text-xs text-white/40 mb-1">{c.forecastType}</div>
+                  <div className="flex items-center justify-between">
+                    <span className={`text-lg font-bold ${c.isReliable ? "text-emerald-400" : "text-amber-400"}`}>
+                      {Math.round(c.confidenceCalibration * 100)}%
+                    </span>
+                    <span className="text-xs text-white/30">{c.sampleSize} records</span>
+                  </div>
+                  <div className="text-xs text-white/30 mt-1">
+                    MAE: {Math.round(c.meanAbsoluteError * 1000)}‰ · Bias: {Math.round(c.bias * 1000)}‰
+                  </div>
+                  {c.horizonBreakdown?.length > 0 && (
+                    <div className="text-xs text-white/20 mt-1">
+                      {c.horizonBreakdown.map((h: any) => `${h.horizon}: ${Math.round(h.mae * 1000)}‰`).join(" · ")}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>

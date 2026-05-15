@@ -718,3 +718,111 @@ export type RelocationProfile = typeof relocationProfiles.$inferSelect;
 export type NewRelocationProfile = typeof relocationProfiles.$inferInsert;
 export type MigrationForecast = typeof migrationForecasts.$inferSelect;
 export type NewMigrationForecast = typeof migrationForecasts.$inferInsert;
+
+// ─── Phase 9C: Forecasting Engine ────────────────────────────
+
+export const laborForecasts = pgTable("labor_forecasts", {
+  id: serial("id").primaryKey(),
+  forecastType: text("forecast_type").notNull(), // hiring_demand, labor_shortage, wage_pressure, retention_trend, workforce_growth
+  forecastSubtype: text("forecast_subtype"), // role, industry, region, employer
+  targetId: text("target_id"), // specific entity being forecast
+  targetName: text("target_name"),
+  region: text("region"),
+  industry: text("industry"),
+  role: text("role"),
+  forecastPeriod: text("forecast_period").notNull(), // 30d, 90d, 180d, 1y
+  predictedValue: doublePrecision("predicted_value").default(0),
+  predictedChange: doublePrecision("predicted_change").default(0), // % change
+  confidenceLower: doublePrecision("confidence_lower").default(0),
+  confidenceUpper: doublePrecision("confidence_upper").default(0),
+  confidence: doublePrecision("confidence").default(0.5),
+  volatility: doublePrecision("volatility").default(0), // uncertainty measure
+  trendDirection: text("trend_direction"), // up, down, stable, volatile
+  keyDrivers: jsonb("key_drivers").default([]),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const skillForecasts = pgTable("skill_forecasts", {
+  id: serial("id").primaryKey(),
+  skillName: text("skill_name").notNull(),
+  forecastType: text("forecast_type").notNull(), // demand, supply, scarcity, premium, certification
+  forecastPeriod: text("forecast_period").notNull(), // 30d, 90d, 180d, 1y
+  predictedDemand: doublePrecision("predicted_demand").default(0.5),
+  predictedSupply: doublePrecision("predicted_supply").default(0.5),
+  predictedScarcityIndex: doublePrecision("predicted_scarcity_index").default(0),
+  predictedSalaryPremium: doublePrecision("predicted_salary_premium").default(0),
+  emergenceProbability: doublePrecision("emergence_probability").default(0), // probability skill becomes trending
+  declineProbability: doublePrecision("decline_probability").default(0),
+  adjacencyTargets: jsonb("adjacency_targets").default([]), // predicted adjacent skills
+  confidence: doublePrecision("confidence").default(0.5),
+  keyDrivers: jsonb("key_drivers").default([]),
+  industry: text("industry"),
+  region: text("region"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const forecastAccuracy = pgTable("forecast_accuracy", {
+  id: serial("id").primaryKey(),
+  forecastType: text("forecast_type").notNull(), // hiring_demand, skill_demand, migration, risk
+  forecastId: integer("forecast_id"), // reference to source forecast
+  predictedValue: doublePrecision("predicted_value").default(0),
+  actualValue: doublePrecision("actual_value").default(0),
+  absoluteError: doublePrecision("absolute_error").default(0),
+  percentageError: doublePrecision("percentage_error").default(0),
+  bias: doublePrecision("bias").default(0), // systematic over/under
+  confidenceCalibration: doublePrecision("confidence_calibration").default(0), // how well confidence tracked reality
+  drift: doublePrecision("drift").default(0), // accuracy change over time
+  forecastHorizon: text("forecast_horizon"), // 30d, 90d, 180d, 1y
+  region: text("region"),
+  industry: text("industry"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const forecastScenarios = pgTable("forecast_scenarios", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  scenarioType: text("scenario_type").notNull(), // what_if, sensitivity, stress_test, economic_shift
+  baseParameters: jsonb("base_parameters").default({}),
+  modifiedParameters: jsonb("modified_parameters").default({}),
+  simulationType: text("simulation_type"), // links to simulation engine
+  simulationId: integer("simulation_id"),
+  results: jsonb("results").default({}),
+  confidence: doublePrecision("confidence").default(0.5),
+  impactScore: doublePrecision("impact_score").default(0), // estimated ecosystem impact
+  riskLevel: text("risk_level").default("medium"),
+  employerId: integer("employer_id"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const economicSignals = pgTable("economic_signals", {
+  id: serial("id").primaryKey(),
+  signalType: text("signal_type").notNull(), // gdp_growth, inflation, policy_change, industry_investment, trade_agreement
+  signalName: text("signal_name").notNull(),
+  signalValue: doublePrecision("signal_value").default(0),
+  previousValue: doublePrecision("previous_value").default(0),
+  changeRate: doublePrecision("change_rate").default(0),
+  region: text("region"),
+  industry: text("industry"),
+  source: text("source"),
+  confidence: doublePrecision("confidence").default(0.5),
+  impact: text("impact"), // positive, negative, neutral
+  metadata: jsonb("metadata").default({}),
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type LaborForecast = typeof laborForecasts.$inferSelect;
+export type NewLaborForecast = typeof laborForecasts.$inferInsert;
+export type SkillForecast = typeof skillForecasts.$inferSelect;
+export type NewSkillForecast = typeof skillForecasts.$inferInsert;
+export type ForecastAccuracy = typeof forecastAccuracy.$inferSelect;
+export type NewForecastAccuracy = typeof forecastAccuracy.$inferInsert;
+export type ForecastScenario = typeof forecastScenarios.$inferSelect;
+export type NewForecastScenario = typeof forecastScenarios.$inferInsert;
+export type EconomicSignal = typeof economicSignals.$inferSelect;
+export type NewEconomicSignal = typeof economicSignals.$inferInsert;

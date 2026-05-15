@@ -567,6 +567,12 @@ export const api = {
       { method: "POST", body: JSON.stringify(payload) }
     );
   },
+  generateSocialContent(jobId: number, platform?: string) {
+    return request<{ linkedin: string; twitter: string; whatsapp: string; instagram: string }>(
+      "/ai/generate-social-content",
+      { method: "POST", body: JSON.stringify({ jobId, platform }) }
+    );
+  },
   // ─── Agent System APIs ──────────────────────────────────────────
   startAgents() {
     return request<{ status: string; message: string }>("/agents/start", { method: "POST" });
@@ -1297,5 +1303,164 @@ export const api = {
   },
   resolveMigrationRisk(id: number) {
     return request<{ success: boolean }>(`/migration/risk/resolve/${id}`, { method: "POST" });
+  },
+
+  // ─── Forecasting Engine (Phase 9C) ─────────────────────────
+
+  refreshForecasts(horizon?: string) {
+    const qs = horizon ? `?horizon=${horizon}` : "";
+    return request<any>(`/forecast/refresh${qs}`, { method: "POST" });
+  },
+  getForecastSummary(horizon?: string) {
+    const qs = horizon ? `?horizon=${horizon}` : "";
+    return request<any>(`/forecast/summary${qs}`);
+  },
+  getDemandForecasts(horizon?: string) {
+    const qs = horizon ? `?horizon=${horizon}` : "";
+    return request<{ forecasts: any[] }>(`/forecast/demand${qs}`);
+  },
+  getRoleForecast(role: string, horizon?: string) {
+    const qs = horizon ? `?horizon=${horizon}` : "";
+    return request<any>(`/forecast/demand/role/${encodeURIComponent(role)}${qs}`);
+  },
+  getIndustryForecast(industry: string, region?: string, horizon?: string) {
+    const qs = new URLSearchParams();
+    if (region) qs.set("region", region);
+    if (horizon) qs.set("horizon", horizon);
+    const qstr = qs.toString();
+    return request<any>(`/forecast/demand/industry/${encodeURIComponent(industry)}${qstr ? `?${qstr}` : ""}`);
+  },
+  getRegionalDemandForecast(region: string, horizon?: string) {
+    const qs = horizon ? `?horizon=${horizon}` : "";
+    return request<any>(`/forecast/demand/region/${encodeURIComponent(region)}${qs}`);
+  },
+  getShortageForecast(role: string, region?: string, horizon?: string) {
+    const qs = new URLSearchParams();
+    if (region) qs.set("region", region);
+    if (horizon) qs.set("horizon", horizon);
+    const qstr = qs.toString();
+    return request<any>(`/forecast/shortage/${encodeURIComponent(role)}${qstr ? `?${qstr}` : ""}`);
+  },
+  getWageForecast(role: string, region?: string, horizon?: string) {
+    const qs = new URLSearchParams();
+    if (region) qs.set("region", region);
+    if (horizon) qs.set("horizon", horizon);
+    const qstr = qs.toString();
+    return request<any>(`/forecast/wage/${encodeURIComponent(role)}${qstr ? `?${qstr}` : ""}`);
+  },
+  getEmployerDemandForecast(employerId: number, horizon?: string) {
+    const qs = horizon ? `?horizon=${horizon}` : "";
+    return request<any>(`/forecast/demand/employer/${employerId}${qs}`);
+  },
+  getSkillForecasts(horizon?: string) {
+    const qs = horizon ? `?horizon=${horizon}` : "";
+    return request<{ forecasts: any[] }>(`/forecast/skills${qs}`);
+  },
+  getEmergingSkills(horizon?: string) {
+    const qs = horizon ? `?horizon=${horizon}` : "";
+    return request<{ skills: any[] }>(`/forecast/skills/emerging${qs}`);
+  },
+  getDecliningSkills(horizon?: string) {
+    const qs = horizon ? `?horizon=${horizon}` : "";
+    return request<{ skills: any[] }>(`/forecast/skills/declining${qs}`);
+  },
+  getSkillForecast(skillName: string, horizon?: string) {
+    const qs = horizon ? `?horizon=${horizon}` : "";
+    return request<any>(`/forecast/skills/${encodeURIComponent(skillName)}${qs}`);
+  },
+  getMigrationForecasts(horizon?: string) {
+    const qs = horizon ? `?horizon=${horizon}` : "";
+    return request<{ forecasts: any[] }>(`/forecast/migration${qs}`);
+  },
+  getCorridorForecast(source: string, destination: string, horizon?: string) {
+    const qs = new URLSearchParams({ source, destination });
+    if (horizon) qs.set("horizon", horizon);
+    return request<any>(`/forecast/migration/corridor?${qs.toString()}`);
+  },
+  getCorridorVolumeForecast(source: string, destination: string, horizon?: string) {
+    const qs = new URLSearchParams({ source, destination });
+    if (horizon) qs.set("horizon", horizon);
+    return request<any>(`/forecast/migration/volume?${qs.toString()}`);
+  },
+  getSponsorshipDemandForecast(source: string, destination: string, horizon?: string) {
+    const qs = new URLSearchParams({ source, destination });
+    if (horizon) qs.set("horizon", horizon);
+    return request<any>(`/forecast/migration/sponsorship?${qs.toString()}`);
+  },
+  getRiskForecasts(horizon?: string) {
+    const qs = horizon ? `?horizon=${horizon}` : "";
+    return request<{ forecasts: any[] }>(`/forecast/risks${qs}`);
+  },
+  getShortageRiskForecast(role: string, region?: string, horizon?: string) {
+    const qs = new URLSearchParams();
+    if (region) qs.set("region", region);
+    if (horizon) qs.set("horizon", horizon);
+    const qstr = qs.toString();
+    return request<any>(`/forecast/risks/shortage/${encodeURIComponent(role)}${qstr ? `?${qstr}` : ""}`);
+  },
+  getChurnRiskForecast(industry?: string, region?: string, horizon?: string) {
+    const qs = new URLSearchParams();
+    if (industry) qs.set("industry", industry);
+    if (region) qs.set("region", region);
+    if (horizon) qs.set("horizon", horizon);
+    const qstr = qs.toString();
+    return request<any>(`/forecast/risks/churn${qstr ? `?${qstr}` : ""}`);
+  },
+  getCorridorInstabilityRisk(source: string, destination: string, horizon?: string) {
+    const qs = new URLSearchParams({ source, destination });
+    if (horizon) qs.set("horizon", horizon);
+    return request<any>(`/forecast/risks/instability?${qs.toString()}`);
+  },
+  getSponsorshipBottleneckRisk(nationality: string, destination: string, horizon?: string) {
+    const qs = new URLSearchParams({ nationality, destination });
+    if (horizon) qs.set("horizon", horizon);
+    return request<any>(`/forecast/risks/bottleneck?${qs.toString()}`);
+  },
+  getSaturationRiskForecast(role: string, region?: string, horizon?: string) {
+    const qs = new URLSearchParams();
+    if (region) qs.set("region", region);
+    if (horizon) qs.set("horizon", horizon);
+    const qstr = qs.toString();
+    return request<any>(`/forecast/risks/saturation/${encodeURIComponent(role)}${qstr ? `?${qstr}` : ""}`);
+  },
+  getForecastCalibrations() {
+    return request<{ calibrations: any[] }>("/forecast/calibrations");
+  },
+  getForecastCalibration(type: string) {
+    return request<any>(`/forecast/calibrations/${encodeURIComponent(type)}`);
+  },
+  recordForecastAccuracy(params: { forecastType: string; forecastId?: number; predictedValue: number; actualValue: number; forecastHorizon?: string; region?: string; industry?: string }) {
+    return request<{ success: boolean }>("/forecast/accuracy/record", {
+      method: "POST",
+      body: JSON.stringify(params),
+    });
+  },
+  getForecastAccuracyHistory(forecastType?: string, limit?: number) {
+    const qs = new URLSearchParams();
+    if (forecastType) qs.set("forecastType", forecastType);
+    if (limit) qs.set("limit", String(limit));
+    const qstr = qs.toString();
+    return request<{ history: any[] }>(`/forecast/accuracy/history${qstr ? `?${qstr}` : ""}`);
+  },
+  getForecastHistory(forecastType?: string, limit?: number) {
+    const qs = new URLSearchParams();
+    if (forecastType) qs.set("forecastType", forecastType);
+    if (limit) qs.set("limit", String(limit));
+    const qstr = qs.toString();
+    return request<{ history: any[] }>(`/forecast/history${qstr ? `?${qstr}` : ""}`);
+  },
+  getSkillForecastHistory(skillName?: string, limit?: number) {
+    const qs = new URLSearchParams();
+    if (skillName) qs.set("skill", skillName);
+    if (limit) qs.set("limit", String(limit));
+    const qstr = qs.toString();
+    return request<{ history: any[] }>(`/forecast/history/skills${qstr ? `?${qstr}` : ""}`);
+  },
+  getMigrationForecastHistory(forecastType?: string, limit?: number) {
+    const qs = new URLSearchParams();
+    if (forecastType) qs.set("forecastType", forecastType);
+    if (limit) qs.set("limit", String(limit));
+    const qstr = qs.toString();
+    return request<{ history: any[] }>(`/forecast/history/migration${qstr ? `?${qstr}` : ""}`);
   },
 };

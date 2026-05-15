@@ -95,6 +95,53 @@ router.post("/generate-job-description", authMiddleware, async (req, res) => {
   }
 });
 
+const SOCIAL_SYSTEM_PROMPT = `You are a social media marketing expert for the Gulf recruitment market.
+Generate high-engagement social media posts for job listings.
+Respond with ONLY valid JSON — no markdown, no code fences.`;
+
+router.post("/generate-social-content", authMiddleware, async (req, res) => {
+  try {
+    const { jobId, platform } = req.body ?? {};
+    if (!jobId) return res.status(400).json({ error: "jobId is required" });
+
+    const [job] = await db.select().from(jobs).where(eq(jobs.id, jobId)).limit(1);
+    if (!job) return res.status(404).json({ error: "Job not found" });
+
+    const prompt = `Generate a viral-style social media post for this job:
+Title: ${job.title}
+Company: ${job.company}
+Location: ${job.location}
+Description: ${job.description?.slice(0, 500)}
+
+Platform: ${platform || "all"}
+
+Respond with ONLY this JSON:
+{
+  "linkedin": "A professional yet engaging LinkedIn post with hashtags",
+  "twitter": "A short, punchy X/Twitter post with emojis",
+  "whatsapp": "A concise WhatsApp-friendly broadcast message",
+  "instagram": "A visually descriptive caption for an Instagram post"
+}`;
+
+    const completion = await openrouter().chat.completions.create({
+      model: "openrouter/free",
+      messages: [
+        { role: "system", content: SOCIAL_SYSTEM_PROMPT },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.8,
+    });
+
+    const raw = completion.choices[0].message.content || "{}";
+    const parsed = JSON.parse(stripJsonFences(raw));
+
+    res.json(parsed);
+  } catch (error: unknown) {
+    logger.error({ err: error }, "Error generating social content");
+    res.status(500).json({ error: "Failed to generate social content: " + (error instanceof Error ? error.message : String(error)) });
+  }
+});
+
 // ─── Protected: require employer/admin ────────────────────────────
 
 const requireEmployerOrAdmin = requireRole("employer", "admin");
