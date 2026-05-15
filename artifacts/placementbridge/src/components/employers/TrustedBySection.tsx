@@ -2,14 +2,14 @@ import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 
 const logos = [
-  { name: "Qatar Construction Co", industry: "Construction" },
-  { name: "Gulf Security Services", industry: "Security" },
-  { name: "Dubai Hospitality Group", industry: "Hospitality" },
-  { name: "Saudi Telecom", industry: "Telecom" },
-  { name: "Emirates Healthcare", industry: "Healthcare" },
-  { name: "Kuwait Oil & Gas", industry: "Oil & Gas" },
-  { name: "Abu Dhabi Engineering", industry: "Engineering" },
-  { name: "Bahrain Logistics", industry: "Logistics" },
+  { name: "Qatar Construction Co", industry: "Construction", logo: "/assets/logos/qcon.png" },
+  { name: "Gulf Security Services", industry: "Security", logo: "/assets/logos/gulf_security.jpg" },
+  { name: "Dubai Hospitality Group", industry: "Hospitality", logo: "/assets/logos/nbn_group.jpg" },
+  { name: "Saudi Telecom", industry: "Telecom", logo: "/assets/logos/saudi_telecom.png" },
+  { name: "Emirates Healthcare", industry: "Healthcare", logo: "/assets/logos/emirates_health.jpg" },
+  { name: "Kuwait Oil & Gas", industry: "Oil & Gas", logo: "/assets/logos/kuwait_oil.png" },
+  { name: "Abu Dhabi Engineering", industry: "Engineering", logo: "/assets/logos/abu_dhabi_engineering.jpg" },
+  { name: "Bahrain Logistics", industry: "Logistics", logo: "/assets/logos/nbn_group.jpg" },
 ];
 
 const testimonials = [
@@ -68,8 +68,16 @@ export function TrustedBySection() {
               transition={{ delay: i * 0.05 }}
               className="group bg-elevated hover:bg-blue-500lue-50 rounded-2xl p-6 text-center transition-all duration-300 border border-[#2C2C2E] hover:border-blue-200"
             >
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center mx-auto mb-3">
-                <span className="text-white font-black text-lg">{logo.name.charAt(0)}</span>
+              <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-blue-600/20 to-indigo-600/20 flex items-center justify-center mx-auto mb-3 overflow-hidden group-hover:from-blue-600 group-hover:to-indigo-600 transition-all duration-500">
+                {logo.logo ? (
+                  <img 
+                    src={logo.logo} 
+                    alt={logo.name} 
+                    className="h-full w-full object-contain p-2 filter grayscale group-hover:grayscale-0 transition-all duration-500 bg-white"
+                  />
+                ) : (
+                  <span className="text-white font-black text-2xl">{logo.name.charAt(0)}</span>
+                )}
               </div>
               <div className="font-bold text-gray-100 text-sm">{logo.name}</div>
               <div className="text-xs text-gray-400 mt-1">{logo.industry}</div>
