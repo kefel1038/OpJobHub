@@ -403,6 +403,12 @@ importers:
         specifier: ^0.31.9
         version: 0.31.10
 
+  lib/enterprise-sdk:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+
 packages:
 
   '@ampproject/remapping@2.3.0':
