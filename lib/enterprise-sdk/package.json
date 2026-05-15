@@ -1,0 +1,22 @@
+{
+  "name": "@workspace/enterprise-sdk",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./workforce": "./src/workforce.ts",
+    "./migration": "./src/migration.ts",
+    "./skills": "./src/skills.ts",
+    "./graph": "./src/graph.ts",
+    "./hiring": "./src/hiring.ts",
+    "./economic": "./src/economic.ts",
+    "./risk": "./src/risk.ts",
+    "./sponsorship": "./src/sponsorship.ts"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "zod": "catalog:"
+  }
+}

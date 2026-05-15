@@ -11,7 +11,8 @@ import {
   Loader2, AlertCircle, GripVertical, ArrowRight,
   Bot, Play, Square, Cpu, History, Activity, RotateCcw,
   Radio, GitBranch, Network, Shield, MapIcon, Target, MapPin,
-  Share2, GitFork, Route, Compass, Database
+  Share2, GitFork, Route, Compass, Database,
+  Key, Server, UserCog, Webhook, Link2, BarChart4
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ import {
   PieChart, Pie, Cell, AreaChart, Area, BarChart, Bar
 } from 'recharts';
 
-type TabId = "overview" | "jobs" | "candidates" | "messages" | "analytics" | "team" | "agents" | "observability" | "sourcing" | "knowledge-graph" | "predictive" | "labor" | "migration" | "forecasting";
+type TabId = "overview" | "jobs" | "candidates" | "messages" | "analytics" | "team" | "agents" | "observability" | "sourcing" | "knowledge-graph" | "predictive" | "labor" | "migration" | "forecasting" | "orchestration" | "infrastructure";
 
 const navItems: { id: TabId; label: string; icon: React.ElementType; count?: string }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -42,6 +43,8 @@ const navItems: { id: TabId; label: string; icon: React.ElementType; count?: str
   { id: "labor", label: "Labor Intel", icon: Globe },
   { id: "migration", label: "Migration", icon: Network },
   { id: "forecasting", label: "Forecasting", icon: TrendingUp },
+  { id: "orchestration", label: "Orchestration", icon: Cpu },
+  { id: "infrastructure", label: "Infrastructure", icon: Server },
 ];
 
 export default function EmployerDashboard() {
@@ -227,6 +230,8 @@ export default function EmployerDashboard() {
               {activeTab === "labor" && <LaborIntelligenceTab />}
               {activeTab === "migration" && <MigrationIntelligenceTab />}
               {activeTab === "forecasting" && <ForecastingIntelligenceTab />}
+              {activeTab === "orchestration" && <WorkforceOrchestrationTab />}
+              {activeTab === "infrastructure" && <InfrastructureConsoleTab />}
             </motion.div>
           </AnimatePresence>
         </main>
@@ -4475,6 +4480,882 @@ function ForecastingIntelligenceTab() {
             </div>
           </CardContent>
         </Card>
+      )}
+    </div>
+  );
+}
+
+// ─── Phase 10A: Workforce Orchestration Tab ────────────────────
+
+function WorkforceOrchestrationTab() {
+  const [loading, setLoading] = useState(true);
+  const [summary, setSummary] = useState<any>(null);
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [balances, setBalances] = useState<any[]>([]);
+  const [interventions, setInterventions] = useState<any[]>([]);
+  const [actions, setActions] = useState<any[]>([]);
+  const [outlook, setOutlook] = useState<any>(null);
+  const [twinResult, setTwinResult] = useState<any>(null);
+  const [selectedRole, setSelectedRole] = useState("");
+  const [balanceResult, setBalanceResult] = useState<any>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+
+  const [twinParams, setTwinParams] = useState({
+    demandShift: 0.05, supplyShift: -0.02, migrationImpact: 0.03,
+    sponsorshipChange: 0, wageGrowth: 0.04, automationImpact: 0.02,
+    horizon: "90d",
+  });
+
+  const fetchAll = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [alertsData, balancesData, interventionsData, actionsData, outlookData] = await Promise.allSettled([
+        api.getEcosystemAlerts(true, 20),
+        api.getMarketBalances(),
+        api.getInterventions(10),
+        api.getOrchestratorActions(10),
+        api.getMacroEconomicOutlook(),
+      ]);
+      if (alertsData.status === "fulfilled") setAlerts(alertsData.value.alerts);
+      if (balancesData.status === "fulfilled") setBalances(balancesData.value.balances);
+      if (interventionsData.status === "fulfilled") setInterventions(interventionsData.value.interventions);
+      if (actionsData.status === "fulfilled") setActions(actionsData.value.actions);
+      if (outlookData.status === "fulfilled") setOutlook(outlookData.value);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  const handleRunOrchestration = async () => {
+    setAnalyzing(true);
+    try {
+      const result = await api.runOrchestration();
+      setSummary(result);
+      if (result.alerts) setAlerts(result.alerts);
+      if (result.imbalances) setBalances(result.imbalances);
+      if (result.interventions) setInterventions(result.interventions);
+      if (result.actions) setActions(result.actions);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const handleSimulateEcosystem = async () => {
+    setAnalyzing(true);
+    try {
+      const result = await api.simulateEcosystem(twinParams);
+      setTwinResult(result);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const handleAnalyzeBalance = async () => {
+    if (!selectedRole) return;
+    setAnalyzing(true);
+    try {
+      const result = await api.getRoleMarketBalance(selectedRole);
+      setBalanceResult(result);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+        <span className="ml-3 text-white/60">Loading workforce orchestration...</span>
+      </div>
+    );
+  }
+
+  const scoreColor = (s: number) =>
+    s >= 0.7 ? "text-emerald-400" : s >= 0.5 ? "text-amber-400" : "text-red-400";
+
+  const severityBadge = (sev: string) => {
+    const colors: Record<string, string> = {
+      critical: "bg-rose-500/20 text-rose-400",
+      high: "bg-red-500/20 text-red-400",
+      medium: "bg-amber-500/20 text-amber-400",
+      low: "bg-emerald-500/20 text-emerald-400",
+      info: "bg-blue-500/20 text-blue-400",
+    };
+    return colors[sev] || "bg-gray-500/20 text-gray-400";
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white">Workforce Orchestration</h2>
+          <p className="text-sm text-white/40 mt-1">
+            Autonomous labor ecosystem coordination — detecting imbalances, launching interventions, simulating futures
+          </p>
+        </div>
+        <Button onClick={handleRunOrchestration} disabled={analyzing} size="sm">
+          {analyzing ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Cpu className="w-4 h-4 mr-1" />}
+          Run Orchestration
+        </Button>
+      </div>
+
+      {/* Ecosystem Alerts */}
+      <Card className="bg-white/5 border-white/10">
+        <CardContent className="p-5">
+          <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-400" />
+            Ecosystem Alerts
+            <span className="text-sm text-white/40 font-normal">({alerts.length} active)</span>
+          </h3>
+          <div className="space-y-2">
+            {alerts.slice(0, 10).map((a: any) => (
+              <div key={a.id} className="bg-white/5 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <Badge className={severityBadge(a.severity)}>{a.severity}</Badge>
+                    <span className="text-sm font-bold text-white">{a.title}</span>
+                  </div>
+                  <Button size="sm" variant="ghost" className="h-6 text-xs text-white/40"
+                    onClick={async () => { await api.resolveEcosystemAlert(a.id); fetchAll(); }}>
+                    Resolve
+                  </Button>
+                </div>
+                <div className="text-xs text-white/40">{a.description}</div>
+                {a.recommendedActions?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {a.recommendedActions.slice(0, 3).map((r: string) => (
+                      <Badge key={r} variant="outline" className="text-xs border-white/10 text-white/40">{r}</Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+            {alerts.length === 0 && (
+              <div className="text-sm text-white/40 text-center py-4">No active alerts — ecosystem is balanced</div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Market Balances */}
+      <Card className="bg-white/5 border-white/10">
+        <CardContent className="p-5">
+          <h3 className="text-lg font-bold text-white mb-3">Market Balance Assessment</h3>
+
+          {/* Balance Search */}
+          <div className="flex gap-3 mb-4">
+            <input
+              type="text"
+              placeholder="Check role balance (e.g. telecom engineer)"
+              value={selectedRole}
+              onChange={e => setSelectedRole(e.target.value)}
+              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white text-sm placeholder:text-white/20"
+            />
+            <Button onClick={handleAnalyzeBalance} disabled={analyzing || !selectedRole} size="sm">
+              <Cpu className="w-4 h-4 mr-1" /> Assess
+            </Button>
+          </div>
+
+          {balanceResult && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="text-xs text-white/40">Balance</div>
+                <div className={`text-lg font-bold ${scoreColor(balanceResult.balanceScore)}`}>
+                  {Math.round(balanceResult.balanceScore * 100)}%
+                </div>
+                <Badge className={balanceResult.imbalanceDirection === "shortage" ? "bg-red-500/20 text-red-400" : balanceResult.imbalanceDirection === "surplus" ? "bg-blue-500/20 text-blue-400" : "bg-emerald-500/20 text-emerald-400"}>
+                  {balanceResult.imbalanceDirection}
+                </Badge>
+              </div>
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="text-xs text-white/40">Demand</div>
+                <div className={`text-lg font-bold ${scoreColor(balanceResult.demandIndex)}`}>{Math.round(balanceResult.demandIndex * 100)}%</div>
+              </div>
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="text-xs text-white/40">Supply</div>
+                <div className={`text-lg font-bold ${scoreColor(balanceResult.supplyIndex)}`}>{Math.round(balanceResult.supplyIndex * 100)}%</div>
+              </div>
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="text-xs text-white/40">Scarcity</div>
+                <div className={`text-lg font-bold ${scoreColor(balanceResult.scarcityIndex)}`}>{Math.round(balanceResult.scarcityIndex * 100)}%</div>
+              </div>
+            </div>
+          )}
+
+          {balanceResult?.topDrivers?.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {balanceResult.topDrivers.map((d: string) => (
+                <Badge key={d} variant="outline" className="text-xs border-white/10 text-white/60">{d}</Badge>
+              ))}
+            </div>
+          )}
+
+          {/* All Balances */}
+          <div className="space-y-2">
+            {balances.slice(0, 8).map((b: any, i: number) => (
+              <div key={`${b.targetName}-${i}`} className="flex items-center justify-between bg-white/5 rounded-lg p-3">
+                <div className="flex-1">
+                  <span className="text-sm font-bold text-white">{b.targetName}</span>
+                  <span className="ml-2 text-xs text-white/40">{b.snapshotType}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className={`text-lg font-bold ${scoreColor(b.balanceScore)}`}>
+                    {Math.round(b.balanceScore * 100)}%
+                  </div>
+                  <Badge className={b.imbalanceDirection === "shortage" ? "bg-red-500/20 text-red-400" : b.imbalanceDirection === "surplus" ? "bg-blue-500/20 text-blue-400" : "bg-emerald-500/20 text-emerald-400"}>
+                    {b.imbalanceDirection}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Interventions */}
+      {interventions.length > 0 && (
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="p-5">
+            <h3 className="text-lg font-bold text-white mb-3">Active Interventions</h3>
+            <div className="space-y-2">
+              {interventions.slice(0, 6).map((iv: any) => (
+                <div key={iv.id} className="bg-white/5 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <Badge className={iv.priority === "critical" ? "bg-rose-500/20 text-rose-400" : iv.priority === "high" ? "bg-red-500/20 text-red-400" : "bg-amber-500/20 text-amber-400"}>
+                        {iv.priority}
+                      </Badge>
+                      <span className="text-sm font-bold text-white">{iv.title}</span>
+                    </div>
+                    <span className="text-xs text-white/40">{iv.interventionType}</span>
+                  </div>
+                  <div className="text-xs text-white/40">{iv.description}</div>
+                  <div className="flex items-center gap-4 mt-1 text-xs text-white/30">
+                    <span>Confidence: {Math.round(iv.confidence * 100)}%</span>
+                    <span>Est. ROI: {iv.roi}%</span>
+                    <Button size="sm" variant="ghost" className="h-5 text-xs text-white/40 ml-auto"
+                      onClick={async () => { await api.updateInterventionStatus(iv.id, "active"); fetchAll(); }}>
+                      Activate
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Macro Outlook */}
+      {outlook && (
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="p-5">
+            <h3 className="text-lg font-bold text-white mb-3">Macro Economic Outlook</h3>
+            <div className="text-sm text-white/60 mb-3">{outlook.summary}</div>
+            <div className="grid grid-cols-3 gap-3 mb-3">
+              <div className="bg-white/5 rounded-lg p-3 text-center">
+                <div className="text-xs text-white/40">Demand</div>
+                <div className={`text-lg font-bold ${outlook.demandOutlook === "Positive" ? "text-emerald-400" : outlook.demandOutlook === "Cautionary" ? "text-amber-400" : "text-white"}`}>
+                  {outlook.demandOutlook}
+                </div>
+              </div>
+              <div className="bg-white/5 rounded-lg p-3 text-center">
+                <div className="text-xs text-white/40">Migration</div>
+                <div className={`text-lg font-bold ${outlook.migrationOutlook === "Increasing" ? "text-amber-400" : "text-white"}`}>
+                  {outlook.migrationOutlook}
+                </div>
+              </div>
+              <div className="bg-white/5 rounded-lg p-3 text-center">
+                <div className="text-xs text-white/40">Wages</div>
+                <div className={`text-lg font-bold ${outlook.wageOutlook === "Rising" ? "text-amber-400" : "text-white"}`}>
+                  {outlook.wageOutlook}
+                </div>
+              </div>
+            </div>
+            {outlook.riskFlags?.length > 0 && (
+              <div className="space-y-1">
+                {outlook.riskFlags.map((f: string) => (
+                  <div key={f} className="flex items-center gap-2 text-xs text-amber-400/80">
+                    <AlertCircle className="w-3 h-3" /> {f}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Digital Twin Simulator */}
+      <Card className="bg-white/5 border-white/10">
+        <CardContent className="p-5">
+          <h3 className="text-lg font-bold text-white mb-3">Ecosystem Digital Twin Simulator</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+            {[
+              { key: "demandShift", label: "Demand Shift", def: 0.05 },
+              { key: "supplyShift", label: "Supply Shift", def: -0.02 },
+              { key: "migrationImpact", label: "Migration Impact", def: 0.03 },
+              { key: "sponsorshipChange", label: "Sponsorship Change", def: 0 },
+              { key: "wageGrowth", label: "Wage Growth", def: 0.04 },
+              { key: "automationImpact", label: "Automation Impact", def: 0.02 },
+            ].map(p => (
+              <div key={p.key}>
+                <label className="text-xs text-white/40 block mb-1">{p.label}</label>
+                <input type="number" step="0.01"
+                  value={(twinParams as any)[p.key]}
+                  onChange={e => setTwinParams({ ...twinParams, [p.key]: parseFloat(e.target.value) || 0 })}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+                />
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center gap-3 mb-4">
+            <select
+              value={twinParams.horizon}
+              onChange={e => setTwinParams({ ...twinParams, horizon: e.target.value })}
+              className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm"
+            >
+              <option value="90d">90 Days</option>
+              <option value="180d">180 Days</option>
+              <option value="1y">1 Year</option>
+            </select>
+            <Button onClick={handleSimulateEcosystem} disabled={analyzing} size="sm">
+              <Cpu className="w-4 h-4 mr-1" /> Simulate Ecosystem
+            </Button>
+          </div>
+
+          {twinResult && (
+            <div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                {twinResult.projectedStates?.slice(-1).map((ps: any) => (
+                  Object.entries(ps.state).filter(([k]) => k !== "confidence").map(([key, val]: any) => (
+                    <div key={key} className="bg-white/5 rounded-lg p-2">
+                      <div className="text-xs text-white/40 capitalize">{key.replace(/([A-Z])/g, " $1")}</div>
+                      <div className={`text-sm font-bold ${scoreColor(val)}`}>{Math.round(val * 100)}%</div>
+                    </div>
+                  ))
+                ))}
+              </div>
+              {twinResult.keyFindings?.length > 0 && (
+                <div className="space-y-1">
+                  {twinResult.keyFindings.map((f: string) => (
+                    <div key={f} className="text-xs text-white/60 flex items-start gap-2">
+                      <span className="text-purple-400 mt-0.5">◆</span> {f}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Recent Actions */}
+      {actions.length > 0 && (
+        <Card className="bg-white/5 border-white/10">
+          <CardContent className="p-5">
+            <h3 className="text-lg font-bold text-white mb-3">Orchestrator Actions</h3>
+            <div className="space-y-2">
+              {actions.slice(0, 8).map((a: any) => (
+                <div key={a.id} className="flex items-center justify-between bg-white/5 rounded-lg p-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-white/40">{a.actionType.replace(/_/g, " ")}</span>
+                    <span className="text-sm text-white">{a.description}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge className={a.status === "completed" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}>
+                      {a.status}
+                    </Badge>
+                    <span className="text-xs text-white/30">{new Date(a.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+// ─── Infrastructure Console Tab ────────────────────────────────────
+function InfrastructureConsoleTab() {
+  const [activeSection, setActiveSection] = useState<string>("overview");
+  const [tenants, setTenants] = useState<any[]>([]);
+  const [tenantStats, setTenantStats] = useState<any>(null);
+  const [partners, setPartners] = useState<any[]>([]);
+  const [partnerStats, setPartnerStats] = useState<any>(null);
+  const [apiKeys, setApiKeys] = useState<any[]>([]);
+  const [selectedTenant, setSelectedTenant] = useState<number | null>(null);
+  const [quotas, setQuotas] = useState<any[]>([]);
+  const [auditLog, setAuditLog] = useState<any[]>([]);
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [createdKey, setCreatedKey] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [tRes, sRes, pRes, psRes] = await Promise.all([
+        api.getEnterpriseTenants().catch(() => ({ tenants: [] })),
+        api.getEnterpriseStats().catch(() => null),
+        api.getEnterprisePartners().catch(() => ({ partners: [] })),
+        api.getEnterprisePartnerStats().catch(() => null),
+      ]);
+      setTenants(tRes.tenants ?? []);
+      setTenantStats(sRes);
+      setPartners(pRes.partners ?? []);
+      setPartnerStats(psRes);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const loadTenantDetails = async (tenantId: number) => {
+    setSelectedTenant(tenantId);
+    try {
+      const [kRes, qRes, aRes, subRes] = await Promise.all([
+        api.getEnterpriseApiKeys(tenantId).catch(() => ({ keys: [] })),
+        api.getEnterpriseQuotas(tenantId).catch(() => ({ quotas: [] })),
+        api.getEnterpriseAuditLog(tenantId, 20).catch(() => ({ log: [] })),
+        api.getEnterpriseSignalSubscriptions(tenantId).catch(() => ({ subscriptions: [] })),
+      ]);
+      setApiKeys(kRes.keys ?? []);
+      setQuotas(qRes.quotas ?? []);
+      setAuditLog(aRes.log ?? []);
+      setSubscriptions(subRes.subscriptions ?? []);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const sections = [
+    { id: "overview", label: "Overview", icon: LayoutDashboard },
+    { id: "tenants", label: "Tenants", icon: Building2 },
+    { id: "partners", label: "Partner Network", icon: Link2 },
+    { id: "api-keys", label: "API Keys", icon: Key },
+    { id: "signals", label: "Signals", icon: Webhook },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-2 mb-2">
+        <Server className="h-5 w-5 text-indigo-400" />
+        <h2 className="text-lg font-semibold text-white">Infrastructure Console</h2>
+        <Badge className="bg-indigo-500/20 text-indigo-400 ml-2">Enterprise</Badge>
+      </div>
+      <p className="text-sm text-white/40">Manage enterprise tenants, API access, partner network, and signal subscriptions.</p>
+
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-sm">{error}</div>
+      )}
+
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {sections.map(s => (
+          <button key={s.id} onClick={() => setActiveSection(s.id)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors whitespace-nowrap ${
+              activeSection === s.id ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30" : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10"
+            }`}
+          >
+            <s.icon className="h-4 w-4" /> {s.label}
+          </button>
+        ))}
+      </div>
+
+      {activeSection === "overview" && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-4">
+                <div className="text-xs text-white/40 mb-1">Total Tenants</div>
+                <div className="text-3xl font-bold text-white">{tenantStats?.totalTenants ?? 0}</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-4">
+                <div className="text-xs text-white/40 mb-1">Active Tenants</div>
+                <div className="text-3xl font-bold text-emerald-400">{tenantStats?.activeTenants ?? 0}</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-4">
+                <div className="text-xs text-white/40 mb-1">Active API Keys</div>
+                <div className="text-3xl font-bold text-indigo-400">{tenantStats?.totalApiKeys ?? 0}</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-4">
+                <div className="text-xs text-white/40 mb-1">Total API Calls</div>
+                <div className="text-3xl font-bold text-amber-400">{tenantStats?.totalApiCalls ?? 0}</div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-4">
+                <h3 className="text-sm font-semibold text-white mb-3">Tenants by Type</h3>
+                {tenantStats?.tenantsByType ? (
+                  <div className="space-y-2">
+                    {Object.entries(tenantStats.tenantsByType).map(([type, count]) => (
+                      <div key={type} className="flex items-center justify-between">
+                        <span className="text-sm text-white/60 capitalize">{type.replace(/_/g, " ")}</span>
+                        <Badge className="bg-white/10 text-white">{String(count)}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-white/30">No tenant data</div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-4">
+                <h3 className="text-sm font-semibold text-white mb-3">Partner Network</h3>
+                {partnerStats ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-white/60">Total Partners</span>
+                      <Badge className="bg-white/10 text-white">{partnerStats.total}</Badge>
+                    </div>
+                    {Object.entries(partnerStats.byType ?? {}).map(([type, count]) => (
+                      <div key={type} className="flex items-center justify-between">
+                        <span className="text-sm text-white/60 capitalize">{type.replace(/_/g, " ")}</span>
+                        <Badge className="bg-white/10 text-white">{String(count)}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-white/30">No partner data</div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {activeSection === "tenants" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-white">Enterprise Tenants</h3>
+            <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600 text-white"
+              onClick={async () => {
+                const name = prompt("Tenant name:");
+                if (!name) return;
+                const slug = prompt("Tenant slug (lowercase, no spaces):");
+                if (!slug) return;
+                const tenantType = prompt("Tenant type (enterprise/government/ngo/university/staffing/migration_agency):");
+                if (!tenantType) return;
+                try {
+                  await api.createEnterpriseTenant({ name, slug, tenantType });
+                  fetchData();
+                } catch (err: any) { setError(err.message); }
+              }}
+            >
+              <Plus className="h-4 w-4 mr-1" /> New Tenant
+            </Button>
+          </div>
+
+          {tenants.length === 0 ? (
+            <div className="text-sm text-white/30 text-center py-8">No enterprise tenants configured</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {tenants.map(t => (
+                <Card key={t.id} className={`bg-white/5 border-white/10 cursor-pointer transition-all ${selectedTenant === t.id ? "ring-1 ring-indigo-500" : ""}`}
+                  onClick={() => loadTenantDetails(t.id)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-semibold text-white">{t.name}</span>
+                      <Badge className="bg-white/10 text-white/80 text-xs">{t.tenantType}</Badge>
+                    </div>
+                    <div className="text-xs text-white/40">Slug: {t.slug}</div>
+                    {t.region && <div className="text-xs text-white/40">Region: {t.region}</div>}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {selectedTenant && (
+            <div className="space-y-4 mt-4">
+              <div className="flex items-center gap-2">
+                <UserCog className="h-4 w-4 text-indigo-400" />
+                <h4 className="text-sm font-semibold text-white">Tenant Details</h4>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="bg-white/5 border-white/10">
+                  <CardContent className="p-3">
+                    <div className="text-xs text-white/40 mb-1">Quotas</div>
+                    {quotas.map(q => (
+                      <div key={q.quotaType} className="flex items-center justify-between py-1">
+                        <span className="text-xs text-white/60">{q.quotaType.replace(/_/g, " ")}</span>
+                        <span className="text-xs text-white">{q.used}/{q.limit}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/5 border-white/10">
+                  <CardContent className="p-3">
+                    <div className="text-xs text-white/40 mb-1">API Keys ({apiKeys.length})</div>
+                    {apiKeys.slice(0, 5).map(k => (
+                      <div key={k.id} className="flex items-center justify-between py-1">
+                        <span className="text-xs text-white/80">{k.name}</span>
+                        <span className="text-xs text-white/40">{k.keyPrefix}...</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/5 border-white/10">
+                  <CardContent className="p-3">
+                    <div className="text-xs text-white/40 mb-1">Recent API Activity</div>
+                    {auditLog.slice(0, 5).map(a => (
+                      <div key={a.id} className="flex items-center justify-between py-1">
+                        <span className="text-xs text-white/60">{a.method} {a.path.substring(0, 20)}</span>
+                        <span className={`text-xs ${(a.statusCode ?? 0) < 400 ? "text-emerald-400" : "text-red-400"}`}>{a.statusCode}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="bg-white/5 border-white/10">
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-white/40">Signal Subscriptions</span>
+                      <Button size="sm" variant="ghost" className="text-indigo-400 h-6 text-xs"
+                        onClick={async () => {
+                          const signalType = prompt("Signal type (labor_shortage/migration_event/skill_emergence/corridor_instability):");
+                          if (!signalType) return;
+                          try {
+                            await api.createEnterpriseSignalSubscription({ tenantId: selectedTenant, signalType });
+                            loadTenantDetails(selectedTenant);
+                          } catch (err: any) { setError(err.message); }
+                        }}
+                      >
+                        <Plus className="h-3 w-3 mr-1" /> Add
+                      </Button>
+                    </div>
+                    {subscriptions.map(s => (
+                      <div key={s.id} className="flex items-center justify-between py-1">
+                        <div className="flex items-center gap-2">
+                          <Webhook className="h-3 w-3 text-white/40" />
+                          <span className="text-xs text-white/80">{s.signalType.replace(/_/g, " ")}</span>
+                        </div>
+                        <Badge className={s.active ? "bg-emerald-500/20 text-emerald-400 text-xs" : "bg-white/5 text-white/40 text-xs"}>
+                          {s.channel}
+                        </Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/5 border-white/10">
+                  <CardContent className="p-3">
+                    <div className="text-xs text-white/40 mb-2">Actions</div>
+                    <div className="flex flex-wrap gap-2">
+                      <Button size="sm" variant="outline" className="text-xs border-white/10 text-white/60"
+                        onClick={async () => {
+                          try {
+                            const result = await api.createEnterpriseApiKey(selectedTenant, `key-${Date.now()}`);
+                            setCreatedKey(result.rawKey);
+                            loadTenantDetails(selectedTenant);
+                          } catch (err: any) { setError(err.message); }
+                        }}
+                      >
+                        <Key className="h-3 w-3 mr-1" /> Generate API Key
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-xs border-white/10 text-white/60"
+                        onClick={async () => {
+                          try {
+                            await api.triggerSignalDetection();
+                          } catch (err: any) { setError(err.message); }
+                        }}
+                      >
+                        <Webhook className="h-3 w-3 mr-1" /> Detect Signals
+                      </Button>
+                    </div>
+                    {createdKey && (
+                      <div className="mt-3 bg-amber-500/10 border border-amber-500/20 rounded p-2">
+                        <div className="text-xs text-amber-400 font-mono break-all">{createdKey}</div>
+                        <div className="text-xs text-amber-400/60 mt-1">Save this key — it will not be shown again.</div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeSection === "partners" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-white">Partner Network</h3>
+            <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600 text-white"
+              onClick={async () => {
+                const name = prompt("Organization name:");
+                if (!name) return;
+                const slug = prompt("Slug:");
+                if (!slug) return;
+                const pType = prompt("Type (migration_agency/university/certification_provider/employer/workforce_program/government/staffing_firm):");
+                if (!pType) return;
+                try {
+                  await api.registerEnterprisePartner({ partnerType: pType, organizationName: name, slug });
+                  fetchData();
+                } catch (err: any) { setError(err.message); }
+              }}
+            >
+              <Plus className="h-4 w-4 mr-1" /> Register Partner
+            </Button>
+          </div>
+
+          {partnerStats && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="p-3 text-center">
+                  <div className="text-2xl font-bold text-white">{partnerStats.total}</div>
+                  <div className="text-xs text-white/40">Total Partners</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="p-3 text-center">
+                  <div className="text-2xl font-bold text-emerald-400">{partnerStats.verified ?? 0}</div>
+                  <div className="text-xs text-white/40">Verified</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="p-3 text-center">
+                  <div className="text-2xl font-bold text-indigo-400">{Object.keys(partnerStats.byType ?? {}).length}</div>
+                  <div className="text-xs text-white/40">Partner Types</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="p-3 text-center">
+                  <div className="text-2xl font-bold text-amber-400">{Object.keys(partnerStats.byRegion ?? {}).length}</div>
+                  <div className="text-xs text-white/40">Regions</div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {partners.map(p => (
+              <Card key={p.id} className="bg-white/5 border-white/10">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold text-white text-sm">{p.organizationName}</span>
+                    {p.verifiedAt && <Badge className="bg-emerald-500/20 text-emerald-400 text-xs">Verified</Badge>}
+                  </div>
+                  <div className="text-xs text-white/40 mb-1 capitalize">{p.partnerType.replace(/_/g, " ")}</div>
+                  {p.region && <div className="text-xs text-white/30">{p.region}{p.country ? ` · ${p.country}` : ""}</div>}
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="text-xs text-white/50">Trust:</div>
+                    <div className="flex-1 bg-white/10 h-1.5 rounded-full overflow-hidden">
+                      <div className="h-full bg-emerald-400 rounded-full" style={{ width: `${(p.trustScore ?? 0.5) * 100}%` }} />
+                    </div>
+                    <span className="text-xs text-white/50">{Math.round((p.trustScore ?? 0.5) * 100)}%</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeSection === "api-keys" && (
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-white">API Key Management</h3>
+          {selectedTenant ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm text-white/40 mb-2">
+                <Building2 className="h-4 w-4" />
+                Viewing keys for tenant #{selectedTenant}
+              </div>
+              <div className="grid grid-cols-1 gap-2">
+                {apiKeys.map(k => (
+                  <Card key={k.id} className="bg-white/5 border-white/10">
+                    <CardContent className="p-3 flex items-center justify-between">
+                      <div>
+                        <div className="text-sm text-white font-medium">{k.name}</div>
+                        <div className="text-xs text-white/40 font-mono">{k.keyPrefix}...</div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge className="bg-white/10 text-white/80 text-xs">{k.rateLimitTier}</Badge>
+                        <Badge className="bg-white/10 text-white/60 text-xs">{k.permissions?.length ?? 0} permissions</Badge>
+                        <Button size="sm" variant="ghost" className="text-red-400 h-7 text-xs"
+                          onClick={async () => {
+                            if (!confirm("Revoke this API key?")) return;
+                            try {
+                              await api.revokeEnterpriseApiKey(k.id, selectedTenant);
+                              loadTenantDetails(selectedTenant);
+                            } catch (err: any) { setError(err.message); }
+                          }}
+                        >Revoke</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-white/30 text-center py-8">Select a tenant to view its API keys</div>
+          )}
+        </div>
+      )}
+
+      {activeSection === "signals" && (
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-white">Signal Subscriptions</h3>
+          {selectedTenant ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm text-white/40 mb-2">
+                <Building2 className="h-4 w-4" />
+                Signals for tenant #{selectedTenant}
+              </div>
+              <div className="grid grid-cols-1 gap-2">
+                {subscriptions.map(s => (
+                  <Card key={s.id} className="bg-white/5 border-white/10">
+                    <CardContent className="p-3 flex items-center justify-between">
+                      <div>
+                        <div className="text-sm text-white font-medium capitalize">{s.signalType.replace(/_/g, " ")}</div>
+                        <div className="text-xs text-white/40">Channel: {s.channel}{s.endpoint ? ` · ${s.endpoint}` : ""}</div>
+                      </div>
+                      <Badge className={s.active ? "bg-emerald-500/20 text-emerald-400" : "bg-white/5 text-white/40"}>
+                        {s.active ? "Active" : "Inactive"}
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600 text-white mt-2"
+                onClick={async () => {
+                  try {
+                    const result = await api.triggerSignalDetection();
+                    alert(`Detected ${result.count} signal events`);
+                  } catch (err: any) { setError(err.message); }
+                }}
+              >
+                <Webhook className="h-4 w-4 mr-1" /> Run Signal Detection
+              </Button>
+            </div>
+          ) : (
+            <div className="text-sm text-white/30 text-center py-8">Select a tenant to view its signal subscriptions</div>
+          )}
+        </div>
       )}
     </div>
   );

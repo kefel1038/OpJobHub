@@ -17,6 +17,8 @@ import simulationRouter from "./simulation";
 import laborIntelligenceRouter from "./labor-intelligence";
 import migrationIntelligenceRouter from "./migration-intelligence";
 import forecastingRouter from "./forecasting";
+import orchestrationRouter from "./orchestration";
+import enterpriseRouter from "./enterprise";
 
 const router: IRouter = Router();
 
@@ -38,5 +40,7 @@ router.use(simulationRouter);
 router.use(laborIntelligenceRouter);
 router.use(migrationIntelligenceRouter);
 router.use(forecastingRouter);
+router.use(orchestrationRouter);
+router.use(enterpriseRouter);
 
 export default router;

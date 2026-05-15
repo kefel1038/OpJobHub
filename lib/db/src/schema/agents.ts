@@ -826,3 +826,295 @@ export type ForecastScenario = typeof forecastScenarios.$inferSelect;
 export type NewForecastScenario = typeof forecastScenarios.$inferInsert;
 export type EconomicSignal = typeof economicSignals.$inferSelect;
 export type NewEconomicSignal = typeof economicSignals.$inferInsert;
+
+// ─── Phase 10A: Workforce Orchestration ─────────────────────
+
+export const ecosystemAlerts = pgTable("ecosystem_alerts", {
+  id: serial("id").primaryKey(),
+  alertType: text("alert_type").notNull(), // shortage_detected, imbalance, churn_risk, bottleneck, saturation, opportunity
+  severity: text("severity").notNull().default("info"), // critical, high, medium, low, info
+  title: text("title").notNull(),
+  description: text("description"),
+  category: text("category"), // demand, supply, migration, retention, skills, economic
+  targetType: text("target_type"), // role, industry, region, corridor, employer
+  targetId: text("target_id"),
+  targetName: text("target_name"),
+  confidence: doublePrecision("confidence").default(0.5),
+  impactScore: doublePrecision("impact_score").default(0),
+  affectedCount: integer("affected_count").default(0),
+  recommendedActions: jsonb("recommended_actions").default([]),
+  metadata: jsonb("metadata").default({}),
+  active: boolean("active").default(true),
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const orchestratorActions = pgTable("orchestrator_actions", {
+  id: serial("id").primaryKey(),
+  actionType: text("action_type").notNull(), // alert_created, intervention_launched, sourcing_priority, sponsorship_boost, market_rebalance, agent_task, recommendation
+  description: text("description").notNull(),
+  triggerType: text("trigger_type"), // automatic, threshold, scheduled, manual
+  status: text("status").notNull().default("pending"), // pending, active, completed, failed, cancelled
+  sourceAlertId: integer("source_alert_id"),
+  targetType: text("target_type"),
+  targetId: text("target_id"),
+  parameters: jsonb("parameters").default({}),
+  results: jsonb("results").default({}),
+  confidence: doublePrecision("confidence").default(0.5),
+  employerId: integer("employer_id"),
+  metadata: jsonb("metadata").default({}),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const interventions = pgTable("interventions", {
+  id: serial("id").primaryKey(),
+  interventionType: text("intervention_type").notNull(), // sourcing, migration, retention, upskilling, sponsorship, compensation, market
+  title: text("title").notNull(),
+  description: text("description"),
+  priority: text("priority").notNull().default("medium"), // critical, high, medium, low
+  status: text("status").notNull().default("proposed"), // proposed, active, completed, dismissed
+  sourceAlertId: integer("source_alert_id"),
+  targetType: text("target_type"),
+  targetId: text("target_id"),
+  targetName: text("target_name"),
+  expectedImpact: jsonb("expected_impact").default({}),
+  actualImpact: jsonb("actual_impact").default({}),
+  confidence: doublePrecision("confidence").default(0.5),
+  costEstimate: doublePrecision("cost_estimate").default(0),
+  roi: doublePrecision("roi").default(0),
+  employerId: integer("employer_id"),
+  metadata: jsonb("metadata").default({}),
+  activatedAt: timestamp("activated_at"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const marketBalanceSnapshots = pgTable("market_balance_snapshots", {
+  id: serial("id").primaryKey(),
+  snapshotType: text("snapshot_type").notNull(), // market, corridor, region, industry, role
+  targetName: text("target_name"),
+  targetType: text("target_type"),
+  demandIndex: doublePrecision("demand_index").default(0.5),
+  supplyIndex: doublePrecision("supply_index").default(0.5),
+  scarcityIndex: doublePrecision("scarcity_index").default(0),
+  migrationPressure: doublePrecision("migration_pressure").default(0),
+  sponsorshipPressure: doublePrecision("sponsorship_pressure").default(0),
+  wagePressure: doublePrecision("wage_pressure").default(0),
+  churnRate: doublePrecision("churn_rate").default(0),
+  balanceScore: doublePrecision("balance_score").default(0.5), // 0 = severely imbalanced, 1 = perfectly balanced
+  imbalanceDirection: text("imbalance_direction"), // surplus, shortage, stable
+  topDrivers: jsonb("top_drivers").default([]),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const digitalTwinModels = pgTable("digital_twin_models", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  modelType: text("model_type").notNull(), // industry, employer, region, corridor, ecosystem
+  targetType: text("target_type"),
+  targetId: text("target_id"),
+  configuration: jsonb("configuration").default({}),
+  state: jsonb("state").default({}), // current simulated state
+  parameters: jsonb("parameters").default({}), // tunable parameters
+  confidence: doublePrecision("confidence").default(0.5),
+  calibrationScore: doublePrecision("calibration_score").default(0),
+  version: integer("version").default(1),
+  metadata: jsonb("metadata").default({}),
+  active: boolean("active").default(true),
+  lastSimulatedAt: timestamp("last_simulated_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const upskillingRecommendations = pgTable("upskilling_recommendations", {
+  id: serial("id").primaryKey(),
+  candidateId: integer("candidate_id"),
+  currentSkill: text("current_skill"),
+  targetSkill: text("target_skill").notNull(),
+  recommendationType: text("recommendation_type").notNull(), // upskill, reskill, cross_skill, certify
+  title: text("title").notNull(),
+  description: text("description"),
+  skillGap: doublePrecision("skill_gap").default(0),
+  estimatedTimeMonths: integer("estimated_time_months").default(3),
+  confidence: doublePrecision("confidence").default(0.5),
+  demandProjection: doublePrecision("demand_projection").default(0),
+  salaryPremium: doublePrecision("salary_premium").default(0),
+  certifications: jsonb("certifications").default([]),
+  learningPathways: jsonb("learning_pathways").default([]),
+  employerId: integer("employer_id"),
+  status: text("status").default("recommended"), // recommended, in_progress, completed, dismissed
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const coordinationAgentLogs = pgTable("coordination_agent_logs", {
+  id: serial("id").primaryKey(),
+  agentName: text("agent_name").notNull(),
+  actionType: text("action_type").notNull(),
+  description: text("description").notNull(),
+  triggerSource: text("trigger_source"), // orchestrator, alert, schedule, manual
+  targetType: text("target_type"),
+  targetId: text("target_id"),
+  status: text("status").notNull().default("completed"),
+  confidence: doublePrecision("confidence").default(0.5),
+  resultSummary: jsonb("result_summary").default({}),
+  errorDetails: text("error_details"),
+  executionTimeMs: integer("execution_time_ms").default(0),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type EcosystemAlert = typeof ecosystemAlerts.$inferSelect;
+export type NewEcosystemAlert = typeof ecosystemAlerts.$inferInsert;
+export type OrchestratorAction = typeof orchestratorActions.$inferSelect;
+export type NewOrchestratorAction = typeof orchestratorActions.$inferInsert;
+export type Intervention = typeof interventions.$inferSelect;
+export type NewIntervention = typeof interventions.$inferInsert;
+export type MarketBalanceSnapshot = typeof marketBalanceSnapshots.$inferSelect;
+export type NewMarketBalanceSnapshot = typeof marketBalanceSnapshots.$inferInsert;
+export type DigitalTwinModel = typeof digitalTwinModels.$inferSelect;
+export type NewDigitalTwinModel = typeof digitalTwinModels.$inferInsert;
+export type UpskillingRecommendation = typeof upskillingRecommendations.$inferSelect;
+export type NewUpskillingRecommendation = typeof upskillingRecommendations.$inferInsert;
+export type CoordinationAgentLog = typeof coordinationAgentLogs.$inferSelect;
+export type NewCoordinationAgentLog = typeof coordinationAgentLogs.$inferInsert;
+
+// ─── Phase 10B: Enterprise Infrastructure ─────────────────
+
+export const enterpriseTenants = pgTable("enterprise_tenants", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  tenantType: text("tenant_type").notNull(),
+  industry: text("industry"),
+  region: text("region"),
+  size: text("size"),
+  contactName: text("contact_name"),
+  contactEmail: text("contact_email"),
+  contactPhone: text("contact_phone"),
+  domain: text("domain"),
+  settings: jsonb("settings").default({}),
+  features: jsonb("features").default({}),
+  compliance: jsonb("compliance").default({}),
+  active: boolean("active").default(true),
+  trialEndsAt: timestamp("trial_ends_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const apiKeys = pgTable("api_keys", {
+  id: serial("id").primaryKey(),
+  tenantId: integer("tenant_id").notNull().references(() => enterpriseTenants.id),
+  keyPrefix: text("key_prefix").notNull(),
+  keyHash: text("key_hash").notNull(),
+  name: text("name").notNull(),
+  permissions: jsonb("permissions").default([]),
+  rateLimitTier: text("rate_limit_tier").default("standard"),
+  allowedIps: jsonb("allowed_ips").default([]),
+  allowedDomains: jsonb("allowed_domains").default([]),
+  expiresAt: timestamp("expires_at"),
+  lastUsedAt: timestamp("last_used_at"),
+  active: boolean("active").default(true),
+  createdBy: integer("created_by"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const apiAuditLog = pgTable("api_audit_log", {
+  id: serial("id").primaryKey(),
+  tenantId: integer("tenant_id").references(() => enterpriseTenants.id),
+  apiKeyId: integer("api_key_id"),
+  method: text("method").notNull(),
+  path: text("path").notNull(),
+  statusCode: integer("status_code"),
+  durationMs: integer("duration_ms"),
+  requestBody: jsonb("request_body"),
+  responseSummary: jsonb("response_summary"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  rateLimitRemaining: integer("rate_limit_remaining"),
+  errorDetails: text("error_details"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const partnerNetwork = pgTable("partner_network", {
+  id: serial("id").primaryKey(),
+  partnerType: text("partner_type").notNull(),
+  organizationName: text("organization_name").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description"),
+  website: text("website"),
+  contactName: text("contact_name"),
+  contactEmail: text("contact_email"),
+  region: text("region"),
+  country: text("country"),
+  specializations: jsonb("specializations").default([]),
+  certifications: jsonb("certifications").default([]),
+  integrationCapabilities: jsonb("integration_capabilities").default([]),
+  dataSharingLevel: text("data_sharing_level").default("standard"),
+  trustScore: doublePrecision("trust_score").default(0.5),
+  active: boolean("active").default(true),
+  verifiedAt: timestamp("verified_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const partnerIntegrations = pgTable("partner_integrations", {
+  id: serial("id").primaryKey(),
+  partnerId: integer("partner_id").notNull().references(() => partnerNetwork.id),
+  tenantId: integer("tenant_id").references(() => enterpriseTenants.id),
+  integrationType: text("integration_type").notNull(),
+  name: text("name").notNull(),
+  status: text("status").notNull().default("pending"),
+  configuration: jsonb("configuration").default({}),
+  credentialsRef: text("credentials_ref"),
+  lastSyncAt: timestamp("last_sync_at"),
+  lastSyncStatus: text("last_sync_status"),
+  errorDetails: text("error_details"),
+  metadata: jsonb("metadata").default({}),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const signalSubscriptions = pgTable("signal_subscriptions", {
+  id: serial("id").primaryKey(),
+  tenantId: integer("tenant_id").notNull().references(() => enterpriseTenants.id),
+  signalType: text("signal_type").notNull(),
+  channel: text("channel").notNull().default("webhook"),
+  endpoint: text("endpoint"),
+  filters: jsonb("filters").default({}),
+  throttleSeconds: integer("throttle_seconds").default(300),
+  active: boolean("active").default(true),
+  lastFiredAt: timestamp("last_fired_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const enterpriseQuotas = pgTable("enterprise_quotas", {
+  id: serial("id").primaryKey(),
+  tenantId: integer("tenant_id").notNull().references(() => enterpriseTenants.id),
+  quotaType: text("quota_type").notNull(),
+  limit: integer("limit").notNull(),
+  used: integer("used").default(0),
+  resetAt: timestamp("reset_at"),
+  overageAllowed: boolean("overage_allowed").default(false),
+  overageCost: doublePrecision("overage_cost").default(0),
+  billingCode: text("billing_code"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type EnterpriseTenant = typeof enterpriseTenants.$inferSelect;
+export type NewEnterpriseTenant = typeof enterpriseTenants.$inferInsert;
+export type ApiKey = typeof apiKeys.$inferSelect;
+export type NewApiKey = typeof apiKeys.$inferInsert;
+export type ApiAuditLogEntry = typeof apiAuditLog.$inferSelect;
+export type NewApiAuditLogEntry = typeof apiAuditLog.$inferInsert;
+export type PartnerNetwork = typeof partnerNetwork.$inferSelect;
+export type NewPartnerNetwork = typeof partnerNetwork.$inferInsert;
+export type PartnerIntegration = typeof partnerIntegrations.$inferSelect;
+export type NewPartnerIntegration = typeof partnerIntegrations.$inferInsert;
+export type SignalSubscription = typeof signalSubscriptions.$inferSelect;
+export type NewSignalSubscription = typeof signalSubscriptions.$inferInsert;
+export type EnterpriseQuota = typeof enterpriseQuotas.$inferSelect;
+export type NewEnterpriseQuota = typeof enterpriseQuotas.$inferInsert;

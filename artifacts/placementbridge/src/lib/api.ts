@@ -1463,4 +1463,197 @@ export const api = {
     const qstr = qs.toString();
     return request<{ history: any[] }>(`/forecast/history/migration${qstr ? `?${qstr}` : ""}`);
   },
+
+  // ─── Workforce Orchestration (Phase 10A) ─────────────────────
+
+  runOrchestration() {
+    return request<any>("/orchestrate/run", { method: "POST" });
+  },
+  getOrchestrationSummary() {
+    return request<any>("/orchestrate/summary");
+  },
+  getEcosystemAlerts(activeOnly?: boolean, limit?: number) {
+    const qs = new URLSearchParams();
+    if (activeOnly !== undefined) qs.set("activeOnly", String(activeOnly));
+    if (limit) qs.set("limit", String(limit));
+    const qstr = qs.toString();
+    return request<{ alerts: any[] }>(`/orchestrate/alerts${qstr ? `?${qstr}` : ""}`);
+  },
+  resolveEcosystemAlert(id: number) {
+    return request<{ success: boolean }>(`/orchestrate/alerts/${id}/resolve`, { method: "POST" });
+  },
+  getOrchestratorActions(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ actions: any[] }>(`/orchestrate/actions${qs}`);
+  },
+  getMarketBalances() {
+    return request<{ balances: any[] }>("/orchestrate/balance");
+  },
+  getRoleMarketBalance(role: string, region?: string) {
+    const qs = region ? `?region=${encodeURIComponent(region)}` : "";
+    return request<any>(`/orchestrate/balance/role/${encodeURIComponent(role)}${qs}`);
+  },
+  getCorridorMarketBalance(source: string, destination: string) {
+    const qs = new URLSearchParams({ source, destination });
+    return request<any>(`/orchestrate/balance/corridor?${qs.toString()}`);
+  },
+  getMarketBalanceHistory(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ history: any[] }>(`/orchestrate/balance/history${qs}`);
+  },
+  getInterventions(limit?: number, status?: string) {
+    const qs = new URLSearchParams();
+    if (limit) qs.set("limit", String(limit));
+    if (status) qs.set("status", status);
+    const qstr = qs.toString();
+    return request<{ interventions: any[] }>(`/orchestrate/interventions${qstr ? `?${qstr}` : ""}`);
+  },
+  getInterventionById(id: number) {
+    return request<any>(`/orchestrate/interventions/${id}`);
+  },
+  updateInterventionStatus(id: number, status: string) {
+    return request<{ success: boolean }>(`/orchestrate/interventions/${id}/status`, {
+      method: "POST",
+      body: JSON.stringify({ status }),
+    });
+  },
+  createDigitalTwin(params: { name: string; description?: string; modelType: string; targetType?: string; targetId?: string; configuration?: Record<string, unknown> }) {
+    return request<{ id: number }>("/orchestrate/twin/create", {
+      method: "POST",
+      body: JSON.stringify(params),
+    });
+  },
+  simulateDigitalTwin(id: number, scenarioParams?: Record<string, unknown>) {
+    return request<any>(`/orchestrate/twin/${id}/simulate`, {
+      method: "POST",
+      body: JSON.stringify({ scenarioParams }),
+    });
+  },
+  simulateEcosystem(params: { demandShift?: number; supplyShift?: number; migrationImpact?: number; sponsorshipChange?: number; wageGrowth?: number; automationImpact?: number; horizon?: string }) {
+    return request<any>("/orchestrate/twin/simulate-ecosystem", {
+      method: "POST",
+      body: JSON.stringify(params),
+    });
+  },
+  getDigitalTwinModels(modelType?: string) {
+    const qs = modelType ? `?modelType=${modelType}` : "";
+    return request<{ models: any[] }>(`/orchestrate/twin/models${qs}`);
+  },
+  getDigitalTwinModel(id: number) {
+    return request<any>(`/orchestrate/twin/models/${id}`);
+  },
+  getUpskillingPathways(skill: string) {
+    return request<{ pathways: any[] }>(`/orchestrate/upskilling/pathways/${encodeURIComponent(skill)}`);
+  },
+  getUpskillingRecommendations(candidateId?: number, limit?: number) {
+    const qs = new URLSearchParams();
+    if (candidateId) qs.set("candidateId", String(candidateId));
+    if (limit) qs.set("limit", String(limit));
+    const qstr = qs.toString();
+    return candidateId
+      ? request<any>(`/orchestrate/upskilling/recommendations/${candidateId}${qstr ? `?${qstr}` : ""}`)
+      : request<{ recommendations: any[] }>(`/orchestrate/upskilling/recommendations${qstr ? `?${qstr}` : ""}`);
+  },
+  getCertificationRecommendations(skill: string) {
+    return request<{ certifications: any[] }>(`/orchestrate/upskilling/certifications/${encodeURIComponent(skill)}`);
+  },
+  recordEconomicSignal(params: { signalType: string; signalName: string; signalValue: number; previousValue?: number; region?: string; industry?: string; source?: string; confidence?: number; impact?: string }) {
+    return request<{ id: number }>("/orchestrate/signals/record", {
+      method: "POST",
+      body: JSON.stringify(params),
+    });
+  },
+  getEconomicSignals(signalType?: string, limit?: number) {
+    const qs = new URLSearchParams();
+    if (signalType) qs.set("signalType", signalType);
+    if (limit) qs.set("limit", String(limit));
+    const qstr = qs.toString();
+    return request<{ signals: any[] }>(`/orchestrate/signals${qstr ? `?${qstr}` : ""}`);
+  },
+  getEconomicSignalImpact(id: number) {
+    return request<any>(`/orchestrate/signals/impact/${id}`);
+  },
+  getActiveEconomicImpacts(limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ impacts: any[] }>(`/orchestrate/signals/impacts${qs}`);
+  },
+  getMacroEconomicOutlook() {
+    return request<any>("/orchestrate/signals/outlook");
+  },
+
+  // ─── Enterprise Infrastructure API ──────────────────────
+
+  getEnterpriseTenants(activeOnly?: boolean) {
+    const qs = activeOnly !== undefined ? `?activeOnly=${activeOnly}` : "";
+    return request<{ tenants: any[] }>(`/enterprise/tenants${qs}`);
+  },
+  getEnterpriseTenant(id: number) {
+    return request<any>(`/enterprise/tenants/${id}`);
+  },
+  createEnterpriseTenant(params: { name: string; slug: string; tenantType: string; industry?: string; region?: string; size?: string; contactName?: string; contactEmail?: string; domain?: string; features?: Record<string, unknown> }) {
+    return request<any>("/enterprise/tenants", { method: "POST", body: JSON.stringify(params) });
+  },
+  updateEnterpriseTenant(id: number, params: Record<string, unknown>) {
+    return request<any>(`/enterprise/tenants/${id}`, { method: "PUT", body: JSON.stringify(params) });
+  },
+  getEnterpriseStats() {
+    return request<any>("/enterprise/stats");
+  },
+  createEnterpriseApiKey(tenantId: number, name: string, permissions?: string[], rateLimitTier?: string, expiresAt?: string) {
+    return request<{ apiKey: any; rawKey: string }>("/enterprise/api-keys", {
+      method: "POST", body: JSON.stringify({ tenantId, name, permissions, rateLimitTier, expiresAt }),
+    });
+  },
+  getEnterpriseApiKeys(tenantId: number) {
+    return request<{ keys: any[] }>(`/enterprise/api-keys/${tenantId}`);
+  },
+  revokeEnterpriseApiKey(id: number, tenantId: number) {
+    return request<{ success: boolean }>(`/enterprise/api-keys/${id}/revoke`, {
+      method: "POST", body: JSON.stringify({ tenantId }),
+    });
+  },
+  getEnterpriseQuotas(tenantId: number) {
+    return request<{ quotas: any[] }>(`/enterprise/quotas/${tenantId}`);
+  },
+  getEnterpriseAuditLog(tenantId: number, limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ log: any[] }>(`/enterprise/audit-log/${tenantId}${qs}`);
+  },
+  getEnterprisePartners(partnerType?: string, region?: string, activeOnly?: boolean, limit?: number) {
+    const qs = new URLSearchParams();
+    if (partnerType) qs.set("partnerType", partnerType);
+    if (region) qs.set("region", region);
+    if (activeOnly !== undefined) qs.set("activeOnly", String(activeOnly));
+    if (limit) qs.set("limit", String(limit));
+    const qstr = qs.toString();
+    return request<{ partners: any[] }>(`/enterprise/partners${qstr ? `?${qstr}` : ""}`);
+  },
+  getEnterprisePartnerStats() {
+    return request<any>("/enterprise/partners/stats");
+  },
+  getEnterprisePartner(id: number) {
+    return request<any>(`/enterprise/partners/${id}`);
+  },
+  registerEnterprisePartner(params: { partnerType: string; organizationName: string; slug: string; description?: string; website?: string; region?: string; country?: string; specializations?: string[] }) {
+    return request<any>("/enterprise/partners", { method: "POST", body: JSON.stringify(params) });
+  },
+  verifyEnterprisePartner(id: number) {
+    return request<any>(`/enterprise/partners/${id}/verify`, { method: "POST" });
+  },
+  getEnterpriseIntegrations(partnerId: number) {
+    return request<{ integrations: any[] }>(`/enterprise/integrations/${partnerId}`);
+  },
+  createEnterpriseIntegration(params: { partnerId: number; integrationType: string; name: string; configuration?: Record<string, unknown>; tenantId?: number }) {
+    return request<any>("/enterprise/integrations", { method: "POST", body: JSON.stringify(params) });
+  },
+  getEnterpriseSignalSubscriptions(tenantId: number, activeOnly?: boolean) {
+    const qs = activeOnly !== undefined ? `?activeOnly=${activeOnly}` : "";
+    return request<{ subscriptions: any[] }>(`/enterprise/signal-subscriptions/${tenantId}${qs}`);
+  },
+  createEnterpriseSignalSubscription(params: { tenantId: number; signalType: string; channel?: string; endpoint?: string; filters?: Record<string, unknown>; throttleSeconds?: number }) {
+    return request<any>("/enterprise/signal-subscriptions", { method: "POST", body: JSON.stringify(params) });
+  },
+  triggerSignalDetection() {
+    return request<{ events: any[]; count: number }>("/enterprise/signal-subscriptions/detect", { method: "POST" });
+  },
 };
