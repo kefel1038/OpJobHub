@@ -121,9 +121,9 @@ router.post("/simulation/outcomes/record", authMiddleware, requireEmployer, asyn
   }
 });
 
-router.get("/simulation/accuracy/:simulationType?", authMiddleware, requireEmployer, async (req: Request, res: Response) => {
+router.get("/simulation/accuracy", authMiddleware, requireEmployer, async (req: Request, res: Response) => {
   try {
-    const simulationType = req.params.simulationType as string | undefined;
+    const simulationType = req.query.simulationType as string | undefined;
     if (simulationType) {
       const stats = await outcomeLearner.computeAccuracy({
         employerId: req.user!.id,
@@ -135,6 +135,20 @@ router.get("/simulation/accuracy/:simulationType?", authMiddleware, requireEmplo
       const allStats = await outcomeLearner.getAccuracyByEmployer(req.user!.id);
       res.json(allStats);
     }
+  } catch (error: unknown) {
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
+  }
+});
+
+router.get("/simulation/accuracy/:simulationType", authMiddleware, requireEmployer, async (req: Request, res: Response) => {
+  try {
+    const simulationType = req.params.simulationType;
+    const stats = await outcomeLearner.computeAccuracy({
+      employerId: req.user!.id,
+      simulationType,
+      windowDays: parseInt(req.query.windowDays as string) || undefined,
+    });
+    res.json(stats);
   } catch (error: unknown) {
     res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
   }
