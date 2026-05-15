@@ -1,261 +1,168 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Sparkles, ArrowRight, PlayCircle, Users, Briefcase,
-  Globe, ShieldCheck, BarChart3, MessageSquare, CheckCircle2,
-  Star, ChevronRight
-} from "lucide-react";
+import { Sparkles, ArrowRight, Activity, Globe, Zap, BarChart3, Shield, Workflow } from "lucide-react";
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
+} from "recharts";
 
-const stats = [
-  { label: "Active Employers", value: "2,400+", icon: Users },
-  { label: "Verified Candidates", value: "50,000+", icon: ShieldCheck },
-  { label: "Successful Placements", value: "12,000+", icon: Briefcase },
-  { label: "Countries Reached", value: "25+", icon: Globe },
-];
-
-const floatingMetrics = [
-  { label: "AI Match Rate", value: "94%", color: "text-emerald-400" },
-  { label: "Avg. Hire Time", value: "48hrs", color: "text-blue-400lue-400" },
-  { label: "Candidate Quality", value: "Top 5%", color: "text-amber-400" },
+const data = [
+  { name: '00:00', value: 400 },
+  { name: '04:00', value: 300 },
+  { name: '08:00', value: 600 },
+  { name: '12:00', value: 800 },
+  { name: '16:00', value: 500 },
+  { name: '20:00', value: 900 },
+  { name: '23:59', value: 700 },
 ];
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen hero-gradient-employer overflow-hidden">
-      <div className="absolute inset-0 bg-grid-white opacity-[0.03] pointer-events-none" />
+    <section className="relative min-h-screen bg-[#050505] overflow-hidden pt-20">
+      {/* Dynamic Background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(60,80,255,0.08),transparent_50%)]" />
+        <div className="absolute inset-0 bg-grid-white/[0.02]" />
+      </div>
 
-      <div className="absolute top-40 -left-32 w-96 h-96 bg-blue-500lue-500/10 rounded-full blur-[100px] animate-pulse-soft" />
-      <div className="absolute bottom-40 -right-32 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px] animate-pulse-soft" style={{ animationDelay: "1s" }} />
-
-      <div className="container mx-auto px-4 relative z-10 pt-28 pb-20">
-        <div className="grid lg:grid-cols-2 gap-16 items-center min-h-[calc(100vh-120px)]">
+      <div className="container mx-auto px-4 relative z-10 py-20">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="max-w-3xl"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
           >
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 mb-8"
-            >
-              <Sparkles className="h-4 w-4 text-blue-400lue-400" />
-              <span className="text-sm text-blue-400lue-300 font-medium">AI-Powered Recruitment Platform</span>
-            </motion.div>
-
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-black leading-[0.95] mb-8">
-              <span className="text-white">Hire Verified</span>
-              <br />
-              <span className="text-gradient">Talent Faster</span>
-              <br />
-              <span className="text-white/80">Across Africa & The Gulf</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider mb-6">
+              <Sparkles className="h-3 w-3" />
+              AI-Native Workforce Intelligence
+            </div>
+            <h1 className="text-5xl md:text-7xl font-black text-white leading-[1.1] mb-6">
+              AI Workforce <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">Intelligence</span> for Global Employers
             </h1>
-
-            <p className="text-lg md:text-xl text-blue-400lue-200/70 max-w-2xl mb-10 leading-relaxed font-medium">
-              AI-powered workforce recruitment platform connecting employers with pre-screened,
-              verified candidates across East Africa and the Gulf. Reduce hiring time by 70%
-              with smart matching, automated screening, and end-to-end deployment support.
+            <p className="text-lg md:text-xl text-gray-400 max-w-xl mb-10 leading-relaxed">
+              Source, forecast, simulate, and orchestrate workforce pipelines across Africa and the GCC using autonomous labor intelligence.
             </p>
-
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-12">
-              <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white border-0 rounded-full px-10 h-14 text-blue-400ase font-bold shadow-lg shadow-blue-600/25 group">
-                <Link href="/post-job">
-                  Post a Job
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
+            <div className="flex flex-wrap gap-4 mb-12">
+              <Button size="lg" className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-8 h-14 font-bold text-base group">
+                Start Hiring
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button variant="outline" asChild className="border-blue-400/30 text-blue-400lue-300 hover:bg-blue-500lue-500/10 rounded-full px-10 h-14 text-blue-400ase font-bold">
-                <Link href="/jobs?type=candidates">
-                  <Users className="mr-2 h-5 w-5" />
-                  Browse Candidates
-                </Link>
+              <Button variant="outline" size="lg" className="rounded-full border-white/10 bg-white/5 text-white hover:bg-white/10 px-8 h-14 font-bold text-base">
+                Book Enterprise Demo
               </Button>
-              <Button variant="ghost" asChild className="text-blue-400lue-300 hover:text-white hover:bg-white/5 rounded-full px-6 h-14 text-blue-400ase font-medium gap-2">
-                <Link href="/contact">
-                  <PlayCircle className="h-5 w-5" />
-                  Book Consultation
-                </Link>
+              <Button variant="ghost" size="lg" className="rounded-full text-blue-400 hover:text-blue-300 hover:bg-blue-400/5 px-8 h-14 font-bold text-base">
+                Explore Workforce Intelligence
               </Button>
             </div>
 
-            <div className="flex items-center gap-6 flex-wrap">
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="h-10 w-10 rounded-full border-2 border-blue-900/50 overflow-hidden">
-                    <img
-                      src={`https://i.pravatar.cc/100?u=employer_${i}`}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
+            <div className="grid grid-cols-3 gap-6">
+              {[
+                { label: "AI Forecast Confidence", value: "98.4%", icon: Zap },
+                { label: "Active Corridors", value: "24", icon: Globe },
+                { label: "Intelligence Nodes", value: "1.2M", icon: Activity },
+              ].map((stat, i) => (
+                <div key={i} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-gray-500 text-xs font-semibold uppercase tracking-tighter">
+                    <stat.icon className="h-3 w-3" />
+                    {stat.label}
                   </div>
-                ))}
-              </div>
-              <div className="text-sm">
-                <div className="flex items-center gap-1 text-amber-400 mb-0.5">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star key={i} className="h-3.5 w-3.5 fill-amber-400" />
-                  ))}
+                  <div className="text-2xl font-black text-white">{stat.value}</div>
                 </div>
-                <p className="text-blue-400lue-300/70 font-medium">
-                  Trusted by <span className="text-white font-bold">500+</span> employers
-                </p>
-              </div>
+              ))}
             </div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="hidden lg:block relative"
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="relative"
           >
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-b from-blue-500/20 to-indigo-500/20 rounded-3xl blur-3xl -translate-y-4 translate-x-4" />
-
-              <div className="relative bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
-                {/* Dashboard Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+            <div className="relative rounded-3xl border border-white/10 bg-black/40 backdrop-blur-3xl overflow-hidden p-1 shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10" />
+              
+              <div className="relative bg-[#0a0a0a] rounded-[22px] p-6">
+                <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex gap-1.5">
-                      <div className="h-3 w-3 rounded-full bg-red-500/60" />
-                      <div className="h-3 w-3 rounded-full bg-yellow-500/60" />
-                      <div className="h-3 w-3 rounded-full bg-green-500/60" />
-                    </div>
-                    <span className="text-xs text-blue-400lue-300/50 font-mono">Employer Dashboard</span>
+                    <BarChart3 className="h-5 w-5 text-blue-400" />
+                    <span className="text-sm font-bold text-white tracking-tight">Real-Time Labor Mobility Score</span>
                   </div>
-                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs px-3 py-0.5 rounded-full">
-                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
-                    Live
-                  </Badge>
+                  <div className="flex items-center gap-2 px-2 py-1 rounded bg-blue-500/10 text-blue-400 text-[10px] font-bold">
+                    <span className="animate-pulse h-1.5 w-1.5 rounded-full bg-blue-400" />
+                    LIVE
+                  </div>
                 </div>
 
-                {/* Dashboard Content */}
-                <div className="p-6 space-y-5">
-                  {/* Stats Row */}
-                  <div className="grid grid-cols-3 gap-3">
-                    {stats.slice(0, 3).map((stat, i) => (
-                      <motion.div
-                        key={stat.label}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6 + i * 0.1 }}
-                        className="bg-white/5 rounded-2xl p-4 border border-white/5"
-                      >
-                        <stat.icon className="h-4 w-4 text-blue-400lue-400 mb-2" />
-                        <div className="text-2xl font-black text-white">{stat.value}</div>
-                        <div className="text-xs text-blue-400lue-300/50 mt-0.5">{stat.label}</div>
-                      </motion.div>
-                    ))}
+                <div className="h-[240px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={data}>
+                      <defs>
+                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <Area 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="#3b82f6" 
+                        strokeWidth={3}
+                        fillOpacity={1} 
+                        fill="url(#colorValue)" 
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">Migration Flow Velocity</div>
+                    <div className="text-xl font-black text-emerald-400">+12.4%</div>
                   </div>
-
-                  {/* AI Matching Visualization */}
-                  <div className="bg-gradient-to-r from-blue-600/10 to-indigo-600/10 rounded-2xl p-5 border border-blue-500/10">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-blue-400lue-400" />
-                        <span className="text-sm font-semibold text-white">AI Smart Matching</span>
-                      </div>
-                      <span className="text-xs text-emerald-400 font-medium flex items-center gap-1">
-                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                        Active
-                      </span>
-                    </div>
-
-                    <div className="space-y-3">
-                      {[
-                        { role: "Construction Manager", match: 96, candidates: 12 },
-                        { role: "Security Personnel", match: 92, candidates: 28 },
-                        { role: "Software Engineer", match: 88, candidates: 8 },
-                      ].map((item, i) => (
-                        <motion.div
-                          key={item.role}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.9 + i * 0.1 }}
-                          className="flex items-center justify-between py-2 border-b border-white/5 last:border-0"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="h-2 w-2 rounded-full bg-blue-500lue-400" />
-                            <span className="text-sm text-blue-400lue-200">{item.role}</span>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <span className="text-xs text-blue-400lue-300/60">{item.candidates} candidates</span>
-                            <div className="flex items-center gap-1.5">
-                              <div className="h-1.5 w-16 bg-white/10 rounded-full overflow-hidden">
-                                <div
-                                  className="h-full bg-gradient-to-r from-blue-500 to-emerald-400 rounded-full"
-                                  style={{ width: `${item.match}%` }}
-                                />
-                              </div>
-                              <span className="text-xs font-bold text-emerald-400">{item.match}%</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Hiring Pipeline */}
-                  <div className="grid grid-cols-6 gap-2">
-                    {["Applied", "Reviewed", "Shortlisted", "Interviewed", "Hired", "Deployed"].map((stage, i) => (
-                      <motion.div
-                        key={stage}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 1.2 + i * 0.05 }}
-                        className="text-center"
-                      >
-                        <div className={`h-1.5 rounded-full mb-1.5 ${i <= 2 ? "bg-blue-500lue-500" : i <= 4 ? "bg-amber-500" : "bg-emerald-500"}`} />
-                        <div className="text-[10px] text-blue-400lue-300/50 font-medium truncate">{stage}</div>
-                      </motion.div>
-                    ))}
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <div className="text-[10px] font-bold text-gray-500 uppercase mb-1">Skill Shortage Index</div>
+                    <div className="text-xl font-black text-blue-400">8.2 / 10</div>
                   </div>
                 </div>
               </div>
-
-              {/* Floating Metric Badges */}
-              {floatingMetrics.map((metric, i) => (
-                <motion.div
-                  key={metric.label}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 1.5 + i * 0.2, type: "spring" }}
-                  className={`absolute -${i % 2 === 0 ? "right" : "left"}-${(i + 1) * 4} top-${60 + i * 20} bg-white/10 backdrop-blur-xl rounded-2xl px-4 py-3 border border-white/10 shadow-xl`}
-                  style={{
-                    right: i % 2 === 0 ? `${-20 + i * 10}px` : undefined,
-                    left: i % 2 !== 0 ? `${-20 + (i - 1) * 10}px` : undefined,
-                    top: `${10 + i * 25}%`,
-                  }}
-                >
-                  <div className={`text-lg font-black ${metric.color}`}>{metric.value}</div>
-                  <div className="text-[10px] text-blue-400lue-300/60 font-medium whitespace-nowrap">{metric.label}</div>
-                </motion.div>
-              ))}
             </div>
+
+            {/* Floating Visualizations */}
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-6 -right-6 p-4 rounded-2xl bg-[#111] border border-white/10 shadow-2xl z-20"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <Shield className="h-4 w-4 text-emerald-400" />
+                <span className="text-xs font-bold text-white">Sponsorship Verified</span>
+              </div>
+              <div className="flex -space-x-2">
+                {[1,2,3].map(i => (
+                  <div key={i} className="h-6 w-6 rounded-full bg-gray-800 border border-white/20" />
+                ))}
+                <div className="h-6 w-6 rounded-full bg-blue-600 border border-white/20 flex items-center justify-center text-[8px] font-bold text-white">+84</div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+              className="absolute -bottom-6 -left-6 p-4 rounded-2xl bg-[#111] border border-white/10 shadow-2xl z-20"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <Workflow className="h-4 w-4 text-purple-400" />
+                <span className="text-xs font-bold text-white">Pipeline Active</span>
+              </div>
+              <div className="flex items-center gap-1">
+                {[1,2,3,4].map(i => (
+                  <div key={i} className={`h-1 w-4 rounded-full ${i <= 3 ? 'bg-purple-500' : 'bg-gray-800'}`} />
+                ))}
+              </div>
+            </motion.div>
           </motion.div>
         </div>
-
-        {/* Bottom Stats Bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.4 }}
-          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
-        >
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="text-3xl md:text-4xl font-black text-white mb-1">{stat.value}</div>
-              <div className="text-sm text-blue-400lue-300/50 font-medium">{stat.label}</div>
-            </div>
-          ))}
-        </motion.div>
       </div>
-
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
     </section>
   );
 }

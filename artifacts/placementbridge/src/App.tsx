@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import NotFound from "@/pages/not-found";
 import { GoogleTranslateInit } from "@/components/GoogleTranslate";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 import Home from "@/pages/home";
 import Login from "@/pages/login";
@@ -19,6 +20,7 @@ import Resources from "@/pages/resources";
 import Pricing from "@/pages/pricing";
 import Employers from "@/pages/employers";
 import EmployerDashboard from "@/pages/employer-dashboard";
+import EmployerOnboarding from "@/pages/employer-onboarding";
 import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import Freelance from "@/pages/freelance";
@@ -41,7 +43,16 @@ function Router() {
       <Route path="/resources" component={Resources} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/employers" component={Employers} />
-      <Route path="/employer/dashboard" component={EmployerDashboard} />
+      <Route path="/employer/dashboard">
+        <ProtectedRoute requiredRole="employer">
+          <EmployerDashboard />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/employer/onboarding">
+        <ProtectedRoute requiredRole="employer">
+          <EmployerOnboarding />
+        </ProtectedRoute>
+      </Route>
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
       <Route path="/freelance" component={Freelance} />

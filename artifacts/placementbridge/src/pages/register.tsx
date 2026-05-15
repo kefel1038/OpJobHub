@@ -24,7 +24,7 @@ export default function Register() {
     try {
       const { token, user } = await api.register(email, password, role);
       setAuth(token, user);
-      navigate(role === "employer" ? "/post-job" : "/");
+      navigate(role === "employer" ? "/employer/onboarding" : "/");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Registration failed.");
     } finally {

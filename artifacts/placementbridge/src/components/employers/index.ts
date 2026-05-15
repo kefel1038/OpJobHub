@@ -1,6 +1,7 @@
 export { HeroSection } from "./HeroSection";
+export * from "./IntelligenceSections";
+export * from "./EnterpriseSections";
 export { TrustedBySection } from "./TrustedBySection";
-export { SolutionsSection } from "./SolutionsSection";
 export { AIFeaturesSection } from "./AIFeaturesSection";
 export { VerificationBadgesSection } from "./VerificationBadgesSection";
 export { PipelineSection } from "./PipelineSection";
