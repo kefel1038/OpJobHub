@@ -47,7 +47,7 @@ export function Footer() {
               <li><a href="/jobs?type=candidates" className="hover:text-white transition-colors">Browse Candidates</a></li>
               <li><Link href="/employer/dashboard" className="hover:text-white transition-colors">Employer Dashboard</Link></li>
               <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-              <li><Link href="/ai-matching" className="hover:text-white transition-colors">AI Matching</Link></li>
+              <li><Link href="/ai-matching" className="hover:text-white transition-colors">Workforce Intel</Link></li>
             </ul>
           </div>
 
@@ -56,7 +56,7 @@ export function Footer() {
             <h4 className="text-[#FFBF00] font-black uppercase italic mb-8 tracking-widest">For Jobseekers</h4>
             <ul className="space-y-4 font-bold text-white/60">
               <li><Link href="/jobs" className="hover:text-white transition-colors">Browse Jobs</Link></li>
-              <li><Link href="/ai-matching" className="hover:text-white transition-colors">AI Career Match</Link></li>
+              <li><Link href="/ai-matching" className="hover:text-white transition-colors">Workforce Matching</Link></li>
               <li><Link href="/resources" className="hover:text-white transition-colors">Career Resources</Link></li>
               <li><Link href="/register" className="hover:text-white transition-colors">Create Profile</Link></li>
             </ul>

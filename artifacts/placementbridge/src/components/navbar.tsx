@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Shield, Menu, Sparkles, Building2, Briefcase, Globe } from "lucide-react";
+import { Shield, Menu, Cpu, Building2, Briefcase, Globe } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,8 +43,8 @@ export function Navbar() {
             For Employers
           </Link>
           <Link href="/ai-matching" className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
-            <Sparkles className="h-4 w-4 text-primary" />
-            AI Matching
+            <Cpu className="h-4 w-4 text-primary" />
+            Workforce Intel
           </Link>
           <Link href="/solutions/freelance" className="flex items-center gap-2 text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
             <Briefcase className="h-4 w-4 text-primary" />
@@ -110,8 +110,8 @@ export function Navbar() {
               onClick={() => setOpen(false)}
               className="px-3 py-2 rounded-md hover:bg-muted text-sm flex items-center gap-2"
             >
-              <Sparkles className="h-4 w-4 text-primary" />
-              AI Matching
+              <Cpu className="h-4 w-4 text-primary" />
+              Workforce Intel
             </Link>
             {user && (user.role === "employer" || user.role === "admin") && (
               <Link

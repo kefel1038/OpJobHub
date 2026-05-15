@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Shield, Menu, Sparkles, Building2, Briefcase, ChevronDown, Languages, Globe, Check } from "lucide-react";
+import { Shield, Menu, Cpu, Building2, Briefcase, ChevronDown, Languages, Globe, Check } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,8 +41,8 @@ export function Navbar() {
           </Button>
           <Button variant="ghost" asChild className="text-foreground/80 hover:text-foreground gap-1.5">
             <Link href="/ai-matching">
-              <Sparkles className="h-4 w-4 text-primary" />
-              AI Matching
+              <Cpu className="h-4 w-4 text-primary" />
+              Workforce Intel
             </Link>
           </Button>
           <Button variant="ghost" asChild className="text-foreground/80 hover:text-foreground gap-1.5">
@@ -127,8 +127,8 @@ export function Navbar() {
               onClick={() => setOpen(false)}
               className="px-3 py-2 rounded-md hover:bg-muted text-sm flex items-center gap-2"
             >
-              <Sparkles className="h-4 w-4 text-primary" />
-              AI Matching
+              <Cpu className="h-4 w-4 text-primary" />
+              Workforce Intel
             </Link>
             <Link
               href="/freelance"
