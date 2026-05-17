@@ -1,15 +1,16 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Briefcase, Loader2, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight,
-  Search, X, ArrowUp, Clock, Bell, ShieldCheck, Sparkles, Users, AlertCircle, RefreshCw
+  Search, X, ArrowUp, Clock, Bell, ShieldCheck, Sparkles, Users, AlertCircle, RefreshCw, WifiOff
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useQueryClient } from "@tanstack/react-query";
 import { type Job } from "@/lib/api";
-import { useJobSearch, type JobSearchApiParams } from "@/hooks/use-jobs-query";
+import { useJobSearch, type JobSearchApiParams, usePrefetchJobSearch } from "@/hooks/use-jobs-query";
 import { useDebounce } from "@/hooks/use-debounce";
 import { JobsNavbar } from "@/components/jobs/JobsNavbar";
 import { JobsHero } from "@/components/jobs/JobsHero";
@@ -134,6 +135,31 @@ export default function Jobs() {
   const { data, isLoading, isFetching, error } = useJobSearch(apiParams);
   const jobs = data?.jobs ?? [];
   const pagination = data?.pagination ?? { page: 1, total: 0, totalPages: 0, hasMore: false, limit: PAGE_SIZE };
+
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+  const staleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (isLoading) {
+      if (!staleTimerRef.current) {
+        staleTimerRef.current = setTimeout(() => {
+          setLoadingTimedOut(true);
+        }, 10000);
+      }
+    } else {
+      if (staleTimerRef.current) {
+        clearTimeout(staleTimerRef.current);
+        staleTimerRef.current = null;
+      }
+      setLoadingTimedOut(false);
+    }
+    return () => {
+      if (staleTimerRef.current) {
+        clearTimeout(staleTimerRef.current);
+        staleTimerRef.current = null;
+      }
+    };
+  }, [isLoading]);
 
   const setParams = useCallback((updates: Record<string, string | number | boolean | null | undefined>) => {
     let resetPage = true;
@@ -358,7 +384,7 @@ export default function Jobs() {
                 </div>
               </div>
 
-              {isLoading ? (
+              {isLoading && !loadingTimedOut ? (
                 <div className="space-y-4">
                   {[...Array(5)].map((_, i) => (
                     <div key={i} className="rounded-2xl border border-border/60 p-5">
@@ -382,15 +408,22 @@ export default function Jobs() {
                     </div>
                   ))}
                 </div>
-              ) : error ? (
+              ) : error || loadingTimedOut ? (
                 <div className="text-center py-20">
                   <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-                    <AlertCircle className="h-8 w-8 text-destructive" />
+                    {loadingTimedOut ? <WifiOff className="h-8 w-8 text-destructive" /> : <AlertCircle className="h-8 w-8 text-destructive" />}
                   </div>
-                  <p className="text-destructive font-medium mb-2">Failed to load jobs</p>
-                  <p className="text-sm text-muted-foreground mb-4">{(error as Error)?.message || "Something went wrong"}</p>
+                  <p className="text-destructive font-medium mb-2">
+                    {loadingTimedOut ? "Taking too long to load" : "Failed to load jobs"}
+                  </p>
+                  <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
+                    {loadingTimedOut
+                      ? "The server is taking longer than expected. This may be due to high demand or a temporary network issue."
+                      : (error as Error)?.message || "Something went wrong while fetching jobs."
+                    }
+                  </p>
                   <div className="flex items-center justify-center gap-3">
-                    <Button variant="outline" onClick={() => window.location.reload()} className="rounded-full gap-2">
+                    <Button variant="outline" onClick={() => { setLoadingTimedOut(false); window.location.reload(); }} className="rounded-full gap-2">
                       <RefreshCw className="h-4 w-4" /> Try Again
                     </Button>
                     <Button variant="default" className="rounded-full gap-2" onClick={() => setShowJobAlerts(true)}>
@@ -407,9 +440,9 @@ export default function Jobs() {
                   <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                     {hasActiveFilters
                       ? "Try adjusting your search terms or filters to find more opportunities in Qatar."
-                      : "No active job listings right now. Check back later or set up job alerts."}
+                      : "No active job listings right now. Check back later or upload your resume for AI matching."}
                   </p>
-                  <div className="flex items-center justify-center gap-3">
+                  <div className="flex items-center justify-center gap-3 flex-wrap">
                     {hasActiveFilters && (
                       <Button variant="outline" onClick={clearAllFilters} className="rounded-full">
                         Clear all filters
@@ -417,6 +450,9 @@ export default function Jobs() {
                     )}
                     <Button variant="default" className="rounded-full gap-2" onClick={() => setShowJobAlerts(true)}>
                       <Bell className="h-4 w-4" /> Get Job Alerts
+                    </Button>
+                    <Button variant="secondary" className="rounded-full gap-2" onClick={() => window.location.href = "/ai-matching"} disabled={!window.location.href.includes("ai-matching") && false}>
+                      <Sparkles className="h-4 w-4" /> AI Match My Profile
                     </Button>
                   </div>
                   {hasActiveFilters && (
@@ -438,6 +474,33 @@ export default function Jobs() {
                         <li className="flex items-start gap-2">
                           <span className="text-primary mt-0.5">•</span>
                           Remove some filters to see more results
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary mt-0.5">•</span>
+                          Describe your ideal job in AI search for semantic matching
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                  {!hasActiveFilters && (
+                    <div className="mt-8 text-left max-w-md mx-auto">
+                      <p className="text-sm font-medium text-muted-foreground mb-3">Try these:</p>
+                      <ul className="space-y-2 text-sm text-muted-foreground">
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary mt-0.5">•</span>
+                          Search for "Engineer", "Driver", "Nurse", or "IT"
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary mt-0.5">•</span>
+                          Browse by industry tabs at the top
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary mt-0.5">•</span>
+                          Enable Visa Sponsored filter for international roles
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-primary mt-0.5">•</span>
+                          Upload your resume for AI-powered job matching
                         </li>
                       </ul>
                     </div>

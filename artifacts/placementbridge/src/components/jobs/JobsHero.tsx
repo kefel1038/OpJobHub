@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, MapPin, Briefcase, Sparkles, TrendingUp, Clock, Users } from "lucide-react";
+import { Search, MapPin, Briefcase, Sparkles, TrendingUp, Clock, Users, Wand2, BrainCircuit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api";
@@ -27,6 +27,15 @@ const quickCategories = [
   { label: "Nursing", icon: "👩‍⚕️" },
 ];
 
+const aiSearchSuggestions = [
+  "Telecom jobs in Qatar with visa sponsorship",
+  "Remote AI engineering roles",
+  "Electrical technician GCC jobs",
+  "Oil & gas engineer Doha",
+  "Hotel receptionist salary negotiable",
+  "IT support with valid QID",
+];
+
 interface JobsHeroProps {
   q: string;
   onQChange: (q: string) => void;
@@ -37,6 +46,7 @@ interface JobsHeroProps {
 export function JobsHero({ q, onQChange, location, onLocationChange }: JobsHeroProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [stats, setStats] = useState<{ totalJobs: number; recentJobs: number }>({ totalJobs: 0, recentJobs: 0 });
+  const [aiSearchMode, setAiSearchMode] = useState(false);
 
   useEffect(() => {
     api.searchStats().then((s) => {
@@ -44,7 +54,7 @@ export function JobsHero({ q, onQChange, location, onLocationChange }: JobsHeroP
     }).catch(() => {});
   }, []);
 
-  const suggestions = [
+  const suggestions = aiSearchMode ? aiSearchSuggestions : [
     "Driver with valid QID", "Senior Electrical Engineer", "Hotel Receptionist",
     "Safety Officer", "Graphic Designer", "Accountant - Arabic Speaker"
   ];
@@ -119,12 +129,30 @@ export function JobsHero({ q, onQChange, location, onLocationChange }: JobsHeroP
           className="max-w-4xl mx-auto"
         >
           <div className="glass-card rounded-2xl p-2 shadow-2xl glow-yellow">
-            <div className="flex flex-col lg:flex-row gap-2">
+            <div className="flex items-center gap-1.5 px-3 pt-1">
+              <button
+                onClick={() => setAiSearchMode(false)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${!aiSearchMode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <Search className="h-3 w-3 inline mr-1" />Keyword
+              </button>
+              <button
+                onClick={() => setAiSearchMode(true)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${aiSearchMode ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <BrainCircuit className="h-3 w-3 inline mr-1" />AI Semantic
+              </button>
+            </div>
+            <div className="flex flex-col lg:flex-row gap-2 px-2 pb-2">
               <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                {aiSearchMode ? (
+                  <Wand2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                ) : (
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                )}
                   <input
                     type="text"
-                    placeholder="Job title, keyword, or company..."
+                    placeholder={aiSearchMode ? "Describe your ideal job…" : "Job title, keyword, or company..."}
                     value={q}
                     onChange={(e) => { onQChange(e.target.value); setShowSuggestions(true); }}
                     onFocus={() => setShowSuggestions(true)}
@@ -139,7 +167,7 @@ export function JobsHero({ q, onQChange, location, onLocationChange }: JobsHeroP
                           onMouseDown={() => { onQChange(s); setShowSuggestions(false); }}
                           className="w-full px-4 py-3 text-left text-sm hover:bg-muted flex items-center gap-3 transition-colors"
                         >
-                          <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+                          {aiSearchMode ? <Wand2 className="h-3.5 w-3.5 text-primary" /> : <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />}
                           {s}
                         </button>
                       ))}

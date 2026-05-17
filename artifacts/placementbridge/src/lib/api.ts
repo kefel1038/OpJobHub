@@ -122,6 +122,8 @@ export function clearAuth() {
   window.dispatchEvent(new Event("auth-change"));
 }
 
+const FETCH_TIMEOUT = 15000;
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {
@@ -132,27 +134,49 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
-  const text = await res.text();
-  let data: any = {};
-  try {
-    data = text ? JSON.parse(text) : {};
-  } catch {
-    // Non-JSON response (HTML error page, etc.)
-    if (!res.ok) {
-      throw new Error(`Server error (${res.status}). Please try again later.`);
-    }
-    throw new Error("Unexpected response from server");
-  }
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
 
-  if (!res.ok) {
-    const message =
-      (data && typeof data === "object" && "error" in data && typeof data.error === "string")
-        ? data.error
-        : `Request failed with status ${res.status}`;
-    throw new Error(message);
+  const signal = (options.signal instanceof AbortSignal)
+    ? anySignal(options.signal, controller.signal)
+    : controller.signal;
+
+  try {
+    const res = await fetch(`${API_BASE}${path}`, { ...options, headers, signal });
+    const text = await res.text();
+    let data: any = {};
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      if (!res.ok) {
+        throw new Error(`Server error (${res.status}). Please try again later.`);
+      }
+      throw new Error("Unexpected response from server");
+    }
+
+    if (!res.ok) {
+      const message =
+        (data && typeof data === "object" && "error" in data && typeof data.error === "string")
+          ? data.error
+          : `Request failed with status ${res.status}`;
+      throw new Error(message);
+    }
+    return data as T;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  return data as T;
+}
+
+function anySignal(...signals: AbortSignal[]): AbortSignal {
+  const controller = new AbortController();
+  for (const signal of signals) {
+    if (signal.aborted) {
+      controller.abort(signal.reason);
+      return controller.signal;
+    }
+    signal.addEventListener("abort", () => controller.abort(signal.reason), { once: true });
+  }
+  return controller.signal;
 }
 
 export interface EmployerStats {
@@ -287,14 +311,14 @@ export const api = {
     sort?: string;
     page?: number;
     limit?: number;
-  }) {
+  }, signal?: AbortSignal) {
     const qs = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") {
         qs.set(key, String(value));
       }
     });
-    return request<SearchResult>(`/search?${qs.toString()}`);
+    return request<SearchResult>(`/search?${qs.toString()}`, { signal });
   },
   searchSuggestions(q: string) {
     return request<{ suggestions: string[] }>(`/search/suggestions?q=${encodeURIComponent(q)}`);
