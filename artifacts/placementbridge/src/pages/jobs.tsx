@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useLocation } from "wouter";
+import { useSearchParams } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Briefcase, Loader2, SlidersHorizontal, ChevronDown, ChevronLeft, ChevronRight,
@@ -61,8 +61,7 @@ interface URLParams {
   page: number;
 }
 
-function parseURLParams(location: string): URLParams {
-  const sp = new URLSearchParams(location.split("?")[1] || "");
+function parseURLSearchParams(sp: URLSearchParams): URLParams {
   return {
     q: sp.get("q") || "",
     location: sp.get("location") || "",
@@ -112,24 +111,12 @@ function paramsToAPI(p: URLParams, debouncedQ: string): JobSearchApiParams {
   return api;
 }
 
-function buildURL(base: string, updates: Record<string, string | number | boolean | null | undefined>, location: string): string {
-  const sp = new URLSearchParams(location.split("?")[1] || "");
-  for (const [key, value] of Object.entries(updates)) {
-    if (value === null || value === undefined || value === "" || value === false) {
-      sp.delete(key);
-    } else {
-      sp.set(key, String(value));
-    }
-  }
-  const qs = sp.toString();
-  return qs ? `${base}?${qs}` : base;
-}
+
 
 export default function Jobs() {
-  const [loc, setLocation] = useLocation();
-  const basePath = loc.split("?")[0];
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const params = useMemo(() => parseURLParams(loc), [loc]);
+  const params = useMemo(() => parseURLSearchParams(searchParams), [searchParams]);
 
   const debouncedQ = useDebounce(params.q, 400);
 
@@ -165,12 +152,23 @@ export default function Jobs() {
   }, [isLoading]);
 
   const setParams = useCallback((updates: Record<string, string | number | boolean | null | undefined>) => {
-    let resetPage = true;
-    for (const key of Object.keys(updates)) {
-      if (key === "page") { resetPage = false; break; }
-    }
-    setLocation(buildURL(basePath, { ...(resetPage ? { page: null } : {}), ...updates }, loc), { replace: true });
-  }, [basePath, loc, setLocation]);
+    setSearchParams(prev => {
+      const sp = new URLSearchParams(prev);
+      let shouldResetPage = true;
+      for (const key of Object.keys(updates)) {
+        if (key === "page") { shouldResetPage = false; break; }
+      }
+      for (const [key, value] of Object.entries(updates)) {
+        if (value === null || value === undefined || value === "" || value === false) {
+          sp.delete(key);
+        } else {
+          sp.set(key, String(value));
+        }
+      }
+      if (shouldResetPage) sp.delete("page");
+      return sp;
+    }, { replace: true });
+  }, [setSearchParams]);
 
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
@@ -205,8 +203,8 @@ export default function Jobs() {
   }, [params]);
 
   const clearAllFilters = useCallback(() => {
-    setLocation(basePath, { replace: true });
-  }, [basePath, setLocation]);
+    setSearchParams(new URLSearchParams(), { replace: true });
+  }, [setSearchParams]);
 
   const handleTabClick = useCallback((tabId: string) => {
     setParams({ categories: tabId || null });
