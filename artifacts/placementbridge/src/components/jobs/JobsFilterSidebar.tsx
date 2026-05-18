@@ -46,6 +46,10 @@ const nationalities = [
   "Egyptian", "Nepali", "Sri Lankan", "Kenyan", "Ugandan"
 ];
 
+const jobSources = [
+  "bayt", "indeed", "tanqeeb", "naukrigulf", "gulf-talent", "qatar-living"
+];
+
 function toggleCSV(current: string, value: string): string {
   const arr = current ? current.split(",") : [];
   const idx = arr.indexOf(value);
@@ -217,6 +221,15 @@ export function JobsFilterSidebar({ params, setParams, isMobileOpen, setIsMobile
             />
           </label>
           <label className="flex items-center justify-between py-2 cursor-pointer">
+            <span className="text-sm text-muted-foreground">Migration Friendly</span>
+            <input
+              type="checkbox"
+              checked={params.visaSponsored}
+              onChange={(e) => setParams({ visa: e.target.checked || null })}
+              className="h-4 w-4 rounded accent-primary"
+            />
+          </label>
+          <label className="flex items-center justify-between py-2 cursor-pointer">
             <span className="text-sm text-muted-foreground">Remote Only</span>
             <input
               type="checkbox"
@@ -338,6 +351,17 @@ export function JobsFilterSidebar({ params, setParams, isMobileOpen, setIsMobile
             label={nat}
             checked={hasCSV(params.nationalities, nat)}
             onChange={() => toggleFilter("nationalities", nat)}
+          />
+        ))}
+      </FilterSection>
+
+      <FilterSection title="Source">
+        {jobSources.map((src) => (
+          <FilterCheckbox
+            key={src}
+            label={src.replace("-", " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}
+            checked={hasCSV(params.source || "", src)}
+            onChange={() => toggleFilter("source", src)}
           />
         ))}
       </FilterSection>

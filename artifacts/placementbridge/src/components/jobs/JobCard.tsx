@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   MapPin, Clock, Bookmark, BookmarkCheck, Send, Building2,
-  DollarSign, Sparkles, ChevronRight, ShieldCheck, Flag, ExternalLink
+  DollarSign, Sparkles, ChevronRight, ShieldCheck, Flag, ExternalLink, Globe
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -112,6 +112,12 @@ export function JobCard({ job, index, onSelect, isSelected }: JobCardProps) {
                 {job.isFeatured && (
                   <Badge className="bg-primary/15 text-primary border-primary/20 text-[10px] px-2 py-0 rounded-md font-semibold">
                     HOT JOB
+                  </Badge>
+                )}
+                {(job.visaSponsored || (job.nationalityFriendly && job.nationalityFriendly.length > 0)) && (
+                  <Badge className="bg-amber-500/15 text-amber-600 border-amber-500/20 text-[10px] px-2 py-0 rounded-md font-semibold dark:text-amber-400">
+                    <Globe className="h-2.5 w-2.5 mr-0.5 inline" />
+                    MIGRATION FRIENDLY
                   </Badge>
                 )}
               </div>

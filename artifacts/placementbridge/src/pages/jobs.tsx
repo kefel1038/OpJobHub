@@ -56,6 +56,7 @@ interface URLParams {
   isRemote: boolean;
   isUrgent: boolean;
   aiMatchScore: string;
+  source: string;
   sort: string;
   page: number;
 }
@@ -79,6 +80,7 @@ function parseURLParams(location: string): URLParams {
     isRemote: sp.get("remote") === "true",
     isUrgent: sp.get("urgent") === "true",
     aiMatchScore: sp.get("matchScore") || "",
+    source: sp.get("source") || "",
     sort: sp.get("sort") || "newest",
     page: parseInt(sp.get("page") || "1", 10),
   };
@@ -105,6 +107,7 @@ function paramsToAPI(p: URLParams, debouncedQ: string): JobSearchApiParams {
   if (p.visaSponsored) api.visaSponsored = true;
   if (p.isRemote) api.isRemote = true;
   if (p.isUrgent) api.isUrgent = true;
+  if (p.source) api.source = p.source;
   if (p.aiMatchScore) api.aiMatchScore = Number(p.aiMatchScore);
   return api;
 }
@@ -197,7 +200,8 @@ export default function Jobs() {
     return !!(params.q || params.location || params.categories || params.employmentType ||
       params.locations || params.experienceLevels || params.workTypes || params.skills ||
       params.nationalities || params.datePosted || params.salaryMin || params.salaryMax ||
-      params.visaSponsored || params.isRemote || params.isUrgent || params.aiMatchScore);
+      params.visaSponsored || params.isRemote || params.isUrgent || params.aiMatchScore ||
+      params.source);
   }, [params]);
 
   const clearAllFilters = useCallback(() => {
