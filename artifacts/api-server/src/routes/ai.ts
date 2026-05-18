@@ -18,6 +18,38 @@ function stripJsonFences(raw: string): string {
     .trim();
 }
 
+/** Extract the first valid JSON object from potentially messy LLM output */
+function extractFirstJson(raw: string): string {
+  const cleaned = stripJsonFences(raw);
+  
+  // Try direct parse first
+  try {
+    JSON.parse(cleaned);
+    return cleaned;
+  } catch {}
+  
+  // Find first { and last matching }
+  const firstBrace = cleaned.indexOf("{");
+  if (firstBrace === -1) throw new Error("No JSON object found in LLM response");
+  
+  let depth = 0;
+  let end = -1;
+  for (let i = firstBrace; i < cleaned.length; i++) {
+    if (cleaned[i] === "{") depth++;
+    else if (cleaned[i] === "}") {
+      depth--;
+      if (depth === 0) {
+        end = i;
+        break;
+      }
+    }
+  }
+  
+  if (end === -1) throw new Error("Unbalanced JSON in LLM response");
+  
+  return cleaned.substring(firstBrace, end + 1);
+}
+
 const JD_MODEL = "openrouter/free";
 
 const JD_SYSTEM_PROMPT = `You are an expert HR and Recruitment Assistant for the Gulf / Middle East job market.
@@ -454,7 +486,8 @@ async function runAiAnalysis(text: string) {
   });
 
   const raw = completion.choices[0].message.content || "{}";
-  return JSON.parse(stripJsonFences(raw));
+  const jsonStr = extractFirstJson(raw);
+  return JSON.parse(jsonStr);
 }
 
 router.post("/analyze-resume", authMiddleware, upload.single("resume"), async (req, res) => {
