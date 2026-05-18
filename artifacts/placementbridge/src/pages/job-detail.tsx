@@ -122,9 +122,9 @@ export default function JobDetail() {
                 <SocialShareButtons job={job} />
               </div>
 
-              {job.responsibilities && job.responsibilities.length > 0 && (
-                <div className="mb-6">
-                  <h2 className="text-xl font-bold mb-3">Key Responsibilities</h2>
+              <div className="mb-6">
+                <h2 className="text-xl font-bold mb-3">Key Responsibilities</h2>
+                {job.responsibilities && job.responsibilities.length > 0 ? (
                   <ul className="space-y-2">
                     {job.responsibilities.map((item, i) => (
                       <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
@@ -133,11 +133,18 @@ export default function JobDetail() {
                       </li>
                     ))}
                   </ul>
-                </div>
-              )}
+                ) : (
+                  <p className="text-sm text-muted-foreground">No description available. <Link href={job.applyUrl || job.sourceUrl || "#"} className="text-primary underline">View on employer website</Link></p>
+                )}
+              </div>
 
               <div className="prose prose-sm max-w-none whitespace-pre-wrap text-foreground">
-                {job.description}
+                {job.description || (
+                  <p className="text-muted-foreground italic">
+                    No description available.{" "}
+                    {job.applyUrl && <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">View on employer website</a>}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>

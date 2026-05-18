@@ -1,8 +1,9 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Suspense, lazy } from "react";
+import { Loader2 } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
-import NotFound from "@/pages/not-found";
 import { GoogleTranslateInit } from "@/components/GoogleTranslate";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
@@ -11,21 +12,30 @@ import Login from "@/pages/login";
 import Register from "@/pages/register";
 import PostJob from "@/pages/post-job";
 import EditJob from "@/pages/edit-job";
-import JobDetail from "@/pages/job-detail";
-import Jobs from "@/pages/jobs";
-import Admin from "@/pages/admin";
-import AdminSignup from "@/pages/admin-signup";
-import AIMatching from "@/pages/ai-matching";
-import Resources from "@/pages/resources";
-import Pricing from "@/pages/pricing";
-import Employers from "@/pages/employers";
-import EmployerDashboard from "@/pages/employer-dashboard";
-import EmployerOnboarding from "@/pages/employer-onboarding";
-import About from "@/pages/about";
-import Contact from "@/pages/contact";
-import Freelance from "@/pages/freelance";
-import Privacy from "@/pages/privacy";
-import Terms from "@/pages/terms";
+
+const JobDetail = lazy(() => import("@/pages/job-detail"));
+const Jobs = lazy(() => import("@/pages/jobs"));
+const Admin = lazy(() => import("@/pages/admin"));
+const AdminSignup = lazy(() => import("@/pages/admin-signup"));
+const AIMatching = lazy(() => import("@/pages/ai-matching"));
+const Resources = lazy(() => import("@/pages/resources"));
+const Pricing = lazy(() => import("@/pages/pricing"));
+const Employers = lazy(() => import("@/pages/employers"));
+const EmployerDashboard = lazy(() => import("@/pages/employer-dashboard"));
+const EmployerOnboarding = lazy(() => import("@/pages/employer-onboarding"));
+const About = lazy(() => import("@/pages/about"));
+const Contact = lazy(() => import("@/pages/contact"));
+const Freelance = lazy(() => import("@/pages/freelance"));
+const Privacy = lazy(() => import("@/pages/privacy"));
+const Terms = lazy(() => import("@/pages/terms"));
+
+function SuspendedPage({ Component }: { Component: React.LazyExoticComponent<React.ComponentType> }) {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+      <Component />
+    </Suspense>
+  );
+}
 
 function Router() {
   return (
@@ -35,29 +45,29 @@ function Router() {
       <Route path="/register" component={Register} />
       <Route path="/post-job" component={PostJob} />
       <Route path="/jobs/:id/edit" component={EditJob} />
-      <Route path="/jobs/:id" component={JobDetail} />
-      <Route path="/jobs" component={Jobs} />
-      <Route path="/admin" component={Admin} />
-      <Route path="/admin/signup" component={AdminSignup} />
-      <Route path="/ai-matching" component={AIMatching} />
-      <Route path="/resources" component={Resources} />
-      <Route path="/pricing" component={Pricing} />
-      <Route path="/employers" component={Employers} />
+      <Route path="/jobs/:id">{() => <SuspendedPage Component={JobDetail} />}</Route>
+      <Route path="/jobs">{() => <SuspendedPage Component={Jobs} />}</Route>
+      <Route path="/admin">{() => <SuspendedPage Component={Admin} />}</Route>
+      <Route path="/admin/signup">{() => <SuspendedPage Component={AdminSignup} />}</Route>
+      <Route path="/ai-matching">{() => <SuspendedPage Component={AIMatching} />}</Route>
+      <Route path="/resources">{() => <SuspendedPage Component={Resources} />}</Route>
+      <Route path="/pricing">{() => <SuspendedPage Component={Pricing} />}</Route>
+      <Route path="/employers">{() => <SuspendedPage Component={Employers} />}</Route>
       <Route path="/employer/dashboard">
         <ProtectedRoute requiredRole="employer">
-          <EmployerDashboard />
+          <SuspendedPage Component={EmployerDashboard} />
         </ProtectedRoute>
       </Route>
       <Route path="/employer/onboarding">
         <ProtectedRoute requiredRole="employer">
-          <EmployerOnboarding />
+          <SuspendedPage Component={EmployerOnboarding} />
         </ProtectedRoute>
       </Route>
-      <Route path="/about" component={About} />
-      <Route path="/contact" component={Contact} />
-      <Route path="/freelance" component={Freelance} />
-      <Route path="/privacy" component={Privacy} />
-      <Route path="/terms" component={Terms} />
+      <Route path="/about">{() => <SuspendedPage Component={About} />}</Route>
+      <Route path="/contact">{() => <SuspendedPage Component={Contact} />}</Route>
+      <Route path="/freelance">{() => <SuspendedPage Component={Freelance} />}</Route>
+      <Route path="/privacy">{() => <SuspendedPage Component={Privacy} />}</Route>
+      <Route path="/terms">{() => <SuspendedPage Component={Terms} />}</Route>
       <Route component={NotFound} />
     </Switch>
   );

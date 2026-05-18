@@ -1,0 +1,13 @@
+
+> @workspace/placementbridge@0.0.0 dev E:\opn\job-hub\artifacts\placementbridge
+> vite --config vite.config.ts --host 0.0.0.0
+
+
+  [32m[1mVITE[22m v7.3.2[39m  [2mready in [0m[1m9844[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m3000[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.127.1:[1m3000[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.106.1:[1m3000[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://10.10.30.117:[1m3000[22m/[39m
+[2m7:07:35 AM[22m [36m[1m[vite][22m[39m [32mvite.config.ts changed, restarting server...[39m
+[2m7:07:35 AM[22m [36m[1m[vite][22m[39m server restarted.

@@ -1,44 +1,57 @@
 import type { ScrapedJob } from "../lib/scraper-engine";
+import { PlaywrightScraper } from "../lib/playwright-scraper";
+import { logger } from "../lib/logger";
+
+const URL = "https://qatar.tanqeeb.com/en";
+
+const CARD_SELECTORS = [
+  "#home-jobs article.latest-job-card",
+  "article.latest-job-card",
+  ".job-card",
+  "div[class*='job-card']",
+  ".job-listing",
+];
 
 export async function scrapeTanqeeb(): Promise<ScrapedJob[]> {
-  const jobs: ScrapedJob[] = [];
+  const pw = PlaywrightScraper.getInstance();
+  const page = await pw.navigate(URL, { timeout: 45_000, retries: 2 });
 
   try {
-    const url = "https://www.tanqeeb.com/qatar-jobs";
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        Accept: "text/html,application/xhtml+xml",
-      },
-    });
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
 
-    if (!response.ok) return jobs;
-
-    const html = await response.text();
-
-    const jobCards = html.match(/<div[^>]*class="[^"]*job-card[^"]*"[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/gi) || [];
-
-    for (const card of jobCards.slice(0, 25)) {
-      const titleMatch = card.match(/<h[23][^>]*class="[^"]*job-title[^"]*"[^>]*>([\s\S]*?)<\/h[23]>/i);
-      const companyMatch = card.match(/<div[^>]*class="[^"]*company[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-      const locationMatch = card.match(/<div[^>]*class="[^"]*location[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-      const descMatch = card.match(/<p[^>]*class="[^"]*description[^"]*"[^>]*>([\s\S]*?)<\/p>/i);
-      const linkMatch = card.match(/<a[^>]*href="([^"]*)"[^>]*class="[^"]*apply[^"]*"/i);
-
-      jobs.push({
-        title: titleMatch ? titleMatch[1].replace(/<[^>]*>/g, "").trim() : "Unknown Position",
-        company: companyMatch ? companyMatch[1].replace(/<[^>]*>/g, "").trim() : "Unknown",
-        location: locationMatch ? locationMatch[1].replace(/<[^>]*>/g, "").trim() : "Doha, Qatar",
-        description: descMatch ? descMatch[1].replace(/<[^>]*>/g, "").trim() : "No description available",
-        source: "Tanqeeb",
-        sourceUrl: linkMatch ? `https://www.tanqeeb.com${linkMatch[1]}` : url,
-        applyUrl: linkMatch ? `https://www.tanqeeb.com${linkMatch[1]}` : url,
-        postedAt: new Date(),
-      });
+    let cardSelector = "";
+    for (const sel of CARD_SELECTORS) {
+      const count = await page.locator(sel).count();
+      if (count > 0) {
+        cardSelector = sel;
+        logger.info({ selector: sel, count }, "Tanqeeb: found card selector");
+        break;
+      }
     }
-  } catch (err: any) {
-    console.warn("Tanqeeb scraper error:", err.message);
-  }
 
-  return jobs;
+    if (!cardSelector) {
+      await pw.captureDebug(page, "tanqeeb-no-selector");
+      logger.warn("Tanqeeb: no known card selector matched");
+      return [];
+    }
+
+    const jobs = await pw.extractJobs(
+      page,
+      cardSelector,
+      {
+        title: "h5.mb-2, h5 a, h5 [class*=text-truncate]",
+        company: "span.latest-job-company-name, [class*=company-name]",
+        location: "span.latest-job-location-text, [class*=location-text]",
+        description: ".latest-job-description, .description",
+        link: "a.link-block, a[href*='/jobs-in-qatar/'], a[href*='/job/']",
+      },
+      "Tanqeeb",
+      URL,
+    );
+
+    return jobs;
+  } finally {
+    await page.close().catch(() => {});
+  }
 }

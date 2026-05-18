@@ -1,46 +1,59 @@
 import type { ScrapedJob } from "../lib/scraper-engine";
+import { PlaywrightScraper } from "../lib/playwright-scraper";
+import { logger } from "../lib/logger";
+
+const URL = "https://www.gulftalent.com/qatar/jobs";
+
+const CARD_SELECTORS = [
+  "tr.content-visibility-auto",
+  ".job-listing",
+  "div[class*='job-listing']",
+  "div[class*='job-card']",
+  "li[class*=job]",
+  "article",
+  ".search-result",
+];
 
 export async function scrapeGulfTalent(): Promise<ScrapedJob[]> {
-  const jobs: ScrapedJob[] = [];
+  const pw = PlaywrightScraper.getInstance();
+  const page = await pw.navigate(URL, { timeout: 45_000, retries: 2 });
 
   try {
-    const url = "https://www.gulftalent.com/qatar/jobs";
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        Accept: "text/html,application/xhtml+xml",
-      },
-    });
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
 
-    if (!response.ok) return jobs;
-
-    const html = await response.text();
-
-    const jobRegex = /<div[^>]*class="[^"]*job-listing[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/gi;
-    const cards: string[] = [];
-    let m;
-    while ((m = jobRegex.exec(html)) !== null) cards.push(m[1]);
-
-    for (const card of cards.slice(0, 25)) {
-      const titleMatch = card.match(/<h[23][^>]*>([\s\S]*?)<\/h[23]>/i);
-      const companyMatch = card.match(/<div[^>]*class="[^"]*company[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-      const locationMatch = card.match(/<div[^>]*class="[^"]*location[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-      const descMatch = card.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
-
-      jobs.push({
-        title: titleMatch ? titleMatch[1].replace(/<[^>]*>/g, "").trim() : "Unknown Position",
-        company: companyMatch ? companyMatch[1].replace(/<[^>]*>/g, "").trim() : "Unknown",
-        location: locationMatch ? locationMatch[1].replace(/<[^>]*>/g, "").trim() : "Qatar",
-        description: descMatch ? descMatch[1].trim() : "No description available",
-        source: "GulfTalent",
-        sourceUrl: url,
-        applyUrl: url,
-        postedAt: new Date(),
-      });
+    let cardSelector = "";
+    for (const sel of CARD_SELECTORS) {
+      const count = await page.locator(sel).count();
+      if (count > 0) {
+        cardSelector = sel;
+        logger.info({ selector: sel, count }, "GulfTalent: found card selector");
+        break;
+      }
     }
-  } catch (err: any) {
-    console.warn("GulfTalent scraper error:", err.message);
-  }
 
-  return jobs;
+    if (!cardSelector) {
+      await pw.captureDebug(page, "gulf-talent-no-selector");
+      logger.warn("GulfTalent: no known card selector matched");
+      return [];
+    }
+
+    const jobs = await pw.extractJobs(
+      page,
+      cardSelector,
+      {
+        title: "h2 a.ga-job-click, h2 a, h3 a, .job-title a, a[class*=title]",
+        company: "a.text-secondary-hover, .company, .company-name, .employer",
+        location: "td:nth-child(2) span, td:nth-child(2) a, .location, .loc, .job-location",
+        description: ".job-description-in-listing, .desc p, .summary, .job-description",
+        link: "h2 a.ga-job-click, h2 a, h3 a, a[href*='/job/'], a[href*='/position/']",
+      },
+      "GulfTalent",
+      URL,
+    );
+
+    return jobs;
+  } finally {
+    await page.close().catch(() => {});
+  }
 }

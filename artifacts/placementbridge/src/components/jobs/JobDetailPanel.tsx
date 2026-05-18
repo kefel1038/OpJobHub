@@ -339,65 +339,58 @@ export function JobDetailPanel({ job, open, onClose }: JobDetailPanelProps) {
                       <Briefcase className="h-4 w-4 text-primary" /> Job Description
                     </h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      {job.description ?? "We are looking for a talented professional to join our growing team. You will work on cutting-edge projects, collaborate with cross-functional teams, and help shape the future of our platform."}
+                      {job.description || (
+                        <span className="italic">No description available. {job.applyUrl && <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">View on employer website</a>}</span>
+                      )}
                     </p>
                   </section>
 
                   <section>
                     <h3 className="text-lg font-bold mb-3">Key Responsibilities</h3>
-                    <ul className="space-y-2">
-                      {((job.responsibilities && job.responsibilities.length > 0) ? job.responsibilities : [
-                        "Design and implement scalable software solutions",
-                        "Collaborate with product and design teams",
-                        "Write clean, maintainable, and tested code",
-                        "Participate in code reviews and technical discussions",
-                        "Mentor junior developers and contribute to team growth",
-                      ]).map((item, i) => (
-                        <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                          <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
+                    {job.responsibilities && job.responsibilities.length > 0 ? (
+                      <ul className="space-y-2">
+                        {job.responsibilities.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                            <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">Not specified. {job.applyUrl && <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">View on employer website</a>}</p>
+                    )}
                   </section>
 
                   <section>
                     <h3 className="text-lg font-bold mb-3">Requirements</h3>
-                    <ul className="space-y-2">
-                      {((job.requirements && job.requirements.length > 0) ? job.requirements : [
-                        "5+ years of experience in software development",
-                        "Strong proficiency in React, TypeScript, and Node.js",
-                        "Experience with cloud services (AWS/GCP/Azure)",
-                        "Excellent problem-solving and communication skills",
-                        "Bachelor's degree in Computer Science or related field",
-                      ]).map((item, i) => (
-                        <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                          <GraduationCap className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
+                    {job.requirements && job.requirements.length > 0 ? (
+                      <ul className="space-y-2">
+                        {job.requirements.map((item, i) => (
+                          <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                            <GraduationCap className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">Not specified. {job.applyUrl && <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">View on employer website</a>}</p>
+                    )}
                   </section>
 
                   <section>
                     <h3 className="text-lg font-bold mb-3">Benefits</h3>
-                    <div className="grid grid-cols-2 gap-2">
-                      {((job.benefits && job.benefits.length > 0) ? job.benefits : [
-                        "Competitive salary & equity",
-                        "Health, dental & vision insurance",
-                        "Flexible work hours",
-                        "Remote-first culture",
-                        "401(k) with company match",
-                        "Unlimited PTO",
-                        "Learning & development budget",
-                        "Home office stipend",
-                      ]).map((benefit, i) => (
-                        <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground p-2 rounded-lg bg-muted/30">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
-                          {benefit}
-                        </div>
-                      ))}
-                    </div>
+                    {job.benefits && job.benefits.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        {job.benefits.map((benefit, i) => (
+                          <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground p-2 rounded-lg bg-muted/30">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                            {benefit}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">Not specified. {job.applyUrl && <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">View on employer website</a>}</p>
+                    )}
                   </section>
                 </div>
 

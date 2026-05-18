@@ -1,61 +1,58 @@
 import type { ScrapedJob } from "../lib/scraper-engine";
+import { PlaywrightScraper } from "../lib/playwright-scraper";
+import { logger } from "../lib/logger";
+
+const URL = "https://www.bayt.com/en/qatar/jobs/";
+
+const CARD_SELECTORS = [
+  "li[data-js-job]",
+  "li.job-card",
+  "div.has-details",
+  ".media-list > li[data-job-id]",
+  "article[data-job-id]",
+];
 
 export async function scrapeBaytQatar(): Promise<ScrapedJob[]> {
-  const jobs: ScrapedJob[] = [];
+  const pw = PlaywrightScraper.getInstance();
+  const page = await pw.navigate(URL, { timeout: 45_000, retries: 2 });
 
   try {
-    const url = "https://www.bayt.com/en/qatar/jobs/";
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(2000);
+
+    let cardSelector = "";
+    for (const sel of CARD_SELECTORS) {
+      const count = await page.locator(sel).count();
+      if (count > 0) {
+        cardSelector = sel;
+        logger.info({ selector: sel, count }, "Bayt: found card selector");
+        break;
+      }
+    }
+
+    if (!cardSelector) {
+      await pw.captureDebug(page, "bayt-no-selector");
+      logger.warn("Bayt: no known card selector matched");
+      return [];
+    }
+
+    const jobs = await pw.extractJobs(
+      page,
+      cardSelector,
+      {
+        title: "h2 a",
+        company: ".job-company-location-wrapper .t-default.t-bold, .job-company-location-wrapper a[class*=t-default]",
+        location: ".job-company-location-wrapper .t-mute",
+        description: ".jb-descr",
+        salary: ".jb-label-salary",
+        link: "h2 a",
       },
-    });
+      "Bayt Qatar",
+      URL,
+    );
 
-    if (!response.ok) {
-      console.warn(`Bayt returned status ${response.status}`);
-      return jobs;
-    }
-
-    const html = await response.text();
-
-    const titleRegex = /<h2[^>]*class="[^"]*job-title[^"]*"[^>]*>([\s\S]*?)<\/h2>/gi;
-    const companyRegex = /<b[^>]*class="[^"]*company-name[^"]*"[^>]*>([\s\S]*?)<\/b>/gi;
-    const locationRegex = /<span[^>]*class="[^"]*location[^"]*"[^>]*>([\s\S]*?)<\/span>/gi;
-    const descRegex = /<p[^>]*class="[^"]*description[^"]*"[^>]*>([\s\S]*?)<\/p>/gi;
-    const linkRegex = /<a[^>]*class="[^"]*job-link[^"]*"[^>]*href="([^"]*)"[^>]*>/gi;
-
-    const titles: string[] = [];
-    const companies: string[] = [];
-    const locations: string[] = [];
-    const descriptions: string[] = [];
-    const links: string[] = [];
-
-    let m;
-    while ((m = titleRegex.exec(html)) !== null) titles.push(m[1].replace(/<[^>]*>/g, "").trim());
-    while ((m = companyRegex.exec(html)) !== null) companies.push(m[1].replace(/<[^>]*>/g, "").trim());
-    while ((m = locationRegex.exec(html)) !== null) locations.push(m[1].replace(/<[^>]*>/g, "").trim());
-    while ((m = descRegex.exec(html)) !== null) descriptions.push(m[1].replace(/<[^>]*>/g, "").trim());
-    while ((m = linkRegex.exec(html)) !== null) links.push(m[1].trim());
-
-    const count = Math.min(titles.length, 25);
-    for (let i = 0; i < count; i++) {
-      jobs.push({
-        title: titles[i] || "Unknown Position",
-        company: companies[i] || "Unknown Company",
-        location: locations[i] || "Doha, Qatar",
-        description: descriptions[i] || "No description available",
-        source: "Bayt Qatar",
-        sourceUrl: links[i] ? `https://www.bayt.com${links[i]}` : url,
-        applyUrl: links[i] ? `https://www.bayt.com${links[i]}` : url,
-        employmentType: "Full-Time",
-        postedAt: new Date(),
-      });
-    }
-  } catch (err: any) {
-    console.warn("Bayt scraper error:", err.message);
+    return jobs;
+  } finally {
+    await page.close().catch(() => {});
   }
-
-  return jobs;
 }

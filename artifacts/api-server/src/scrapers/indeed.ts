@@ -1,68 +1,58 @@
 import type { ScrapedJob } from "../lib/scraper-engine";
+import { PlaywrightScraper } from "../lib/playwright-scraper";
+import { logger } from "../lib/logger";
+
+const URL = "https://qa.indeed.com/jobs?q=&l=Qatar";
+
+const CARD_SELECTORS = [
+  "div.job_seen_beacon",
+  "div[data-testid='job-card']",
+  "div[id^='jobCard']",
+  "li[class*=job]",
+  ".jobsearch-ResultsList > div",
+];
 
 export async function scrapeIndeedQatar(): Promise<ScrapedJob[]> {
-  const jobs: ScrapedJob[] = [];
+  const pw = PlaywrightScraper.getInstance();
+  const page = await pw.navigate(URL, { timeout: 45_000, retries: 2 });
 
   try {
-    const url = "https://qa.indeed.com/jobs?q=&l=Qatar";
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        Accept: "text/html,application/xhtml+xml",
-      },
-    });
+    await page.waitForLoadState("networkidle");
+    await page.waitForTimeout(3000);
 
-    if (!response.ok) return jobs;
-
-    const html = await response.text();
-
-    const titleRegex = /<h2[^>]*class="[^"]*jobTitle[^"]*"[^>]*>[\s\S]*?<a[^>]*>([\s\S]*?)<\/a>/gi;
-    const companyRegex = /<span[^>]*class="[^"]*companyName[^"]*"[^>]*>([\s\S]*?)<\/span>/gi;
-    const locationRegex = /<div[^>]*class="[^"]*companyLocation[^"]*"[^>]*>([\s\S]*?)<\/div>/gi;
-    const salaryRegex = /<div[^>]*class="[^"]*salary-snippet[^"]*"[^>]*>([\s\S]*?)<\/div>/gi;
-    const descRegex = /<div[^>]*class="[^"]*job-snippet[^"]*"[^>]*>([\s\S]*?)<\/div>/gi;
-    const linkRegex = /<a[^>]*class="[^"]*jcs-JobTitle[^"]*"[^>]*href="([^"]*)"[^>]*>/gi;
-
-    const titles: string[] = [];
-    const companies: string[] = [];
-    const locations: string[] = [];
-    const salaries: string[] = [];
-    const descs: string[] = [];
-    const links: string[] = [];
-
-    let m;
-    while ((m = titleRegex.exec(html)) !== null) titles.push(m[1].replace(/<[^>]*>/g, "").trim());
-    while ((m = companyRegex.exec(html)) !== null) companies.push(m[1].replace(/<[^>]*>/g, "").trim());
-    while ((m = locationRegex.exec(html)) !== null) locations.push(m[1].replace(/<[^>]*>/g, "").trim());
-    while ((m = salaryRegex.exec(html)) !== null) salaries.push(m[1].replace(/<[^>]*>/g, "").trim());
-    while ((m = descRegex.exec(html)) !== null) descs.push(m[1].replace(/<[^>]*>/g, "").trim());
-    while ((m = linkRegex.exec(html)) !== null) links.push(m[1].trim());
-
-    const count = Math.min(titles.length, 25);
-    for (let i = 0; i < count; i++) {
-      const salary = salaries[i] || "";
-      const salaryMatch = salary.match(/(\d[\d,]*)/g);
-      const salaryMin = salaryMatch ? parseInt(salaryMatch[0].replace(/,/g, "")) : undefined;
-      const salaryMax = salaryMatch && salaryMatch[1] ? parseInt(salaryMatch[1].replace(/,/g, "")) : undefined;
-
-      jobs.push({
-        title: titles[i] || "Unknown Position",
-        company: companies[i] || "Unknown Company",
-        location: locations[i] || "Qatar",
-        salary: salaries[i] || undefined,
-        salaryMin,
-        salaryMax,
-        salaryCurrency: "QAR",
-        description: descs[i] || "No description available",
-        source: "Indeed Qatar",
-        sourceUrl: links[i] ? `https://qa.indeed.com${links[i]}` : url,
-        applyUrl: links[i] ? `https://qa.indeed.com${links[i]}` : url,
-        postedAt: new Date(),
-      });
+    let cardSelector = "";
+    for (const sel of CARD_SELECTORS) {
+      const count = await page.locator(sel).count();
+      if (count > 0) {
+        cardSelector = sel;
+        logger.info({ selector: sel, count }, "Indeed: found card selector");
+        break;
+      }
     }
-  } catch (err: any) {
-    console.warn("Indeed Qatar scraper error:", err.message);
-  }
 
-  return jobs;
+    if (!cardSelector) {
+      await pw.captureDebug(page, "indeed-no-selector");
+      logger.warn("Indeed: no known card selector matched");
+      return [];
+    }
+
+    const jobs = await pw.extractJobs(
+      page,
+      cardSelector,
+      {
+        title: "h2.jobTitle a, a.jcs-JobTitle, h2 a[data-jk]",
+        company: "span.companyName, [data-testid='company-name'], span[class*=company]",
+        location: "div.companyLocation, [data-testid='text-location'], div[class*=location]",
+        salary: "div.salary-snippet, [data-testid='salary']",
+        description: "div.job-snippet, ul.job-snippet li, [data-testid='job-snippet']",
+        link: "a.jcs-JobTitle, h2.jobTitle a, a[data-jk]",
+      },
+      "Indeed Qatar",
+      URL,
+    );
+
+    return jobs;
+  } finally {
+    await page.close().catch(() => {});
+  }
 }

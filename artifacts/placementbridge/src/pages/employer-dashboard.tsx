@@ -620,7 +620,7 @@ function JobsTab() {
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-2">
                         <Button variant="ghost" size="icon" className="text-white/20 hover:text-white rounded-xl hover:bg-white/5 transition-colors" asChild>
-                          <Link href={`/edit-job?id=${job.id}`}>
+                          <Link href={`/jobs/${job.id}/edit`}>
                             <FileText className="h-4 w-4" />
                           </Link>
                         </Button>
