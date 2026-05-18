@@ -46,6 +46,7 @@ export const jobs = pgTable("jobs", {
   postedAt: timestamp("posted_at"),
   expiresAt: timestamp("expires_at"),
   scrapedAt: timestamp("scraped_at").defaultNow(),
+  lastSeenAt: timestamp("last_seen_at"),
 
   aiSummary: text("ai_summary"),
   aiCategory: text("ai_category"),

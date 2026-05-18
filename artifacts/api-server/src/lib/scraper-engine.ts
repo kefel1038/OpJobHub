@@ -83,7 +83,7 @@ export class ScraperEngine {
   }
 
   async processJobs(scrapedJobs: ScrapedJob[]) {
-    this.jobsScraped = scrapedJobs.length;
+    this.jobsScraped += scrapedJobs.length;
 
     for (const sj of scrapedJobs) {
       try {
@@ -114,7 +114,46 @@ export class ScraperEngine {
       .limit(1);
 
     if (existing.length > 0) {
-      this.jobsDuplicates++;
+      const now = new Date();
+      const newExpires = new Date();
+      newExpires.setDate(newExpires.getDate() + 4);
+
+      const updateData: Record<string, any> = {
+        lastSeenAt: now,
+        scrapedAt: now,
+        expiresAt: newExpires,
+        status: "active",
+        sourceUrl: sj.sourceUrl || existing[0].sourceUrl,
+        applyUrl: sj.applyUrl || existing[0].applyUrl,
+        salary: sj.salary || existing[0].salary,
+        salaryMin: sj.salaryMin ?? existing[0].salaryMin,
+        salaryMax: sj.salaryMax ?? existing[0].salaryMax,
+      };
+
+      if (!existing[0].aiSummary || !existing[0].industry) {
+        const [aiResult] = await Promise.allSettled([
+          aiCategorizeJob({ title: sj.title, company: sj.company, description: sj.description }),
+        ]);
+
+        if (aiResult.status === "fulfilled" && aiResult.value) {
+          const c = aiResult.value;
+          if (!existing[0].industry && c.industry) updateData.industry = c.industry;
+          if (!existing[0].category && c.category) updateData.category = c.category;
+          if (!existing[0].experienceLevel && c.experienceLevel) updateData.experienceLevel = c.experienceLevel;
+          if (!existing[0].employmentType && c.employmentType) updateData.employmentType = c.employmentType;
+          if ((!existing[0].skills || existing[0].skills.length === 0) && c.skills) updateData.skills = c.skills;
+          if ((!existing[0].tags || existing[0].tags.length === 0) && c.tags) updateData.tags = c.tags;
+          if (existing[0].visaSponsored == null && c.visaSponsored != null) updateData.visaSponsored = c.visaSponsored;
+          if (existing[0].isRemote == null && c.isRemote != null) updateData.isRemote = c.isRemote;
+          if (!existing[0].aiSummary && c.summary) updateData.aiSummary = c.summary;
+        }
+      }
+
+      await db
+        .update(jobs)
+        .set(updateData)
+        .where(eq(jobs.id, existing[0].id));
+      this.jobsUpdated++;
       return;
     }
 
@@ -134,6 +173,41 @@ export class ScraperEngine {
       companyId = existingCompany.id;
     }
 
+    const [aiResult, scamResult] = await Promise.allSettled([
+      aiCategorizeJob({ title: sj.title, company: sj.company, description: sj.description }),
+      aiDetectScam({ title: sj.title, company: sj.company, description: sj.description, salary: sj.salary }),
+    ]);
+
+    if (scamResult.status === "fulfilled" && scamResult.value?.isScam) {
+      logger.warn(
+        { job: sj.title, confidence: scamResult.value.confidence, reasons: scamResult.value.reasons },
+        "Job flagged as potential scam",
+      );
+    }
+
+    let industry = sj.industry;
+    let category = sj.category;
+    let experienceLevel = sj.experienceLevel;
+    let employmentType = sj.employmentType;
+    let skills = sj.skills;
+    let tags = sj.tags;
+    let visaSponsored = sj.visaSponsored;
+    let isRemote = sj.isRemote;
+    let aiSummary: string | null = null;
+
+    if (aiResult.status === "fulfilled" && aiResult.value) {
+      const c = aiResult.value;
+      industry = c.industry || industry;
+      category = c.category || category;
+      experienceLevel = c.experienceLevel || experienceLevel;
+      employmentType = c.employmentType || employmentType;
+      skills = c.skills || skills;
+      tags = c.tags || tags;
+      visaSponsored = c.visaSponsored ?? visaSponsored;
+      isRemote = c.isRemote ?? isRemote;
+      aiSummary = c.summary || null;
+    }
+
     await db.insert(jobs).values({
       title: sj.title,
       company: sj.company,
@@ -145,14 +219,14 @@ export class ScraperEngine {
       salaryMax: sj.salaryMax ?? null,
       salaryCurrency: sj.salaryCurrency ?? "QAR",
       description: sj.description,
-      employmentType: sj.employmentType ?? "Full-Time",
-      experienceLevel: sj.experienceLevel,
-      industry: sj.industry,
-      category: sj.category,
-      tags: sj.tags ?? [],
-      skills: sj.skills ?? [],
-      visaSponsored: sj.visaSponsored ?? false,
-      isRemote: sj.isRemote ?? false,
+      employmentType: employmentType ?? "Full-Time",
+      experienceLevel,
+      industry,
+      category,
+      tags: tags ?? [],
+      skills: skills ?? [],
+      visaSponsored: visaSponsored ?? false,
+      isRemote: isRemote ?? false,
       isUrgent: sj.isUrgent ?? false,
       source: sj.source,
       sourceId: this.sourceId,
@@ -161,7 +235,9 @@ export class ScraperEngine {
       postedAt: sj.postedAt ?? new Date(),
       expiresAt,
       scrapedAt: new Date(),
+      lastSeenAt: new Date(),
       status: "active",
+      aiSummary,
     });
 
     this.jobsNew++;
@@ -169,11 +245,35 @@ export class ScraperEngine {
 
   async cleanupExpired() {
     const result = await db
-      .delete(jobs)
-      .where(lt(jobs.expiresAt, new Date()))
+      .update(jobs)
+      .set({ status: "expired" })
+      .where(
+        and(
+          lt(jobs.expiresAt, new Date()),
+          eq(jobs.status, "active"),
+        ),
+      )
       .returning({ id: jobs.id });
 
-    logger.info({ deleted: result.length }, "Expired jobs cleaned up");
+    logger.info({ archived: result.length }, "Expired jobs archived");
+    return result.length;
+  }
+
+  async archiveStale(days: number = 7) {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const result = await db
+      .update(jobs)
+      .set({ status: "expired" })
+      .where(
+        and(
+          lt(jobs.lastSeenAt, cutoff),
+          eq(jobs.status, "active"),
+        ),
+      )
+      .returning({ id: jobs.id });
+
+    logger.info({ archived: result.length, days }, "Stale jobs archived");
     return result.length;
   }
 

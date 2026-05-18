@@ -12,7 +12,6 @@ const API_URLS = [
 export async function scrapeQatarLiving(): Promise<ScrapedJob[]> {
   const pw = PlaywrightScraper.getInstance();
 
-  // Try direct API fetch via Playwright (handles cookies/auth)
   for (const apiUrl of API_URLS) {
     try {
       const jobs = await tryFetchApi(pw, apiUrl);
@@ -25,7 +24,6 @@ export async function scrapeQatarLiving(): Promise<ScrapedJob[]> {
     }
   }
 
-  // Fallback: intercept API calls from page + extract rendered DOM
   const page = await pw.createPage();
   let capturedJobs: ScrapedJob[] = [];
 
@@ -52,15 +50,42 @@ export async function scrapeQatarLiving(): Promise<ScrapedJob[]> {
 
     if (capturedJobs.length > 0) return capturedJobs;
 
-    // Try extracting from rendered DOM (featured positions, etc.)
     const domJobs = await page.evaluate(() => {
-      const results: Array<{ title: string; company: string; link: string }> = [];
+      const results: Array<{
+        title: string;
+        company: string;
+        link: string;
+        location: string;
+        salary: string;
+        type: string;
+      }> = [];
 
-      document.querySelectorAll("a[href*='/jobs/']").forEach((a) => {
+      const seen = new Set<string>();
+
+      document.querySelectorAll("a[href*='/job']").forEach((a) => {
+        const link = (a as HTMLAnchorElement).href;
+        if (seen.has(link)) return;
         const text = a.textContent?.trim();
-        if (text && text.length > 3 && text.length < 150) {
-          results.push({ title: text, company: "", link: (a as HTMLAnchorElement).href });
-        }
+        if (!text || text.length < 4 || text.length > 200) return;
+        seen.add(link);
+
+        const card = a.closest("div, article, li, tr") as HTMLElement | null;
+        const cardText = card?.innerText || "";
+
+        const lines = cardText.split("\n").map((l) => l.trim()).filter(Boolean);
+
+        const locationMatch = cardText.match(/Doha|Qatar|Al\s+\w+/i);
+        const salaryMatch = cardText.match(/QAR\s*[\d,]+|[\d,]+\s*QAR|QR\s*[\d,]+/i);
+        const typeMatch = cardText.match(/Full.?Time|Part.?Time|Contract|Temporary/i);
+
+        results.push({
+          title: text,
+          company: extractCompany(lines, text) || "Qatar Living",
+          link,
+          location: locationMatch?.[0] || "Doha, Qatar",
+          salary: salaryMatch?.[0] || "",
+          type: typeMatch?.[0] || "Full-Time",
+        });
       });
 
       return results;
@@ -69,12 +94,14 @@ export async function scrapeQatarLiving(): Promise<ScrapedJob[]> {
     if (domJobs.length > 0) {
       const jobs = domJobs.slice(0, 25).map((d) => ({
         title: d.title,
-        company: "Qatar Living",
-        location: "Doha, Qatar",
-        description: "No description available",
+        company: d.company,
+        location: d.location,
+        salary: d.salary || undefined,
+        description: `Position: ${d.title} at ${d.company}. View details and apply on the employer website.`,
         source: "Qatar Living" as const,
         sourceUrl: d.link,
         applyUrl: d.link,
+        employmentType: d.type,
         postedAt: new Date(),
       }));
       logger.info({ count: jobs.length }, "QatarLiving: extracted from DOM");
@@ -87,6 +114,22 @@ export async function scrapeQatarLiving(): Promise<ScrapedJob[]> {
   } finally {
     await page.close().catch(() => {});
   }
+}
+
+function extractCompany(lines: string[], title: string): string | null {
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed === title || trimmed.length > 60) continue;
+    if (trimmed.match(/^(at|by|@)\s+/i)) return trimmed.replace(/^(at|by|@)\s+/i, "").trim();
+  }
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed === title || trimmed.length > 60) continue;
+    if (trimmed.match(/^[A-Z][a-z]+(\s+[A-Z][a-z]+)*$/) && !trimmed.match(/(Doha|Qatar)/i)) {
+      return trimmed;
+    }
+  }
+  return null;
 }
 
 async function tryFetchApi(pw: PlaywrightScraper, url: string): Promise<ScrapedJob[]> {

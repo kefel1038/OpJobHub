@@ -34,6 +34,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
       - name: Run scraper
         run: pnpm --filter @workspace/api-server run scrape
         env:

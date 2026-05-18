@@ -40,6 +40,9 @@ async function main() {
     const deleted = await engine.cleanupExpired();
     logger.info({ deleted }, "Expired jobs cleaned up");
 
+    const stale = await engine.archiveStale(7);
+    logger.info({ stale }, "Stale jobs archived");
+
     await engine.finalize();
     logger.info("Scrape session completed");
   } finally {
