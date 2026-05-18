@@ -28,6 +28,7 @@ const Contact = lazy(() => import("@/pages/contact"));
 const Freelance = lazy(() => import("@/pages/freelance"));
 const Privacy = lazy(() => import("@/pages/privacy"));
 const Terms = lazy(() => import("@/pages/terms"));
+const NotFound = lazy(() => import("@/pages/not-found"));
 
 function SuspendedPage({ Component }: { Component: React.LazyExoticComponent<React.ComponentType> }) {
   return (
@@ -68,7 +69,7 @@ function Router() {
       <Route path="/freelance">{() => <SuspendedPage Component={Freelance} />}</Route>
       <Route path="/privacy">{() => <SuspendedPage Component={Privacy} />}</Route>
       <Route path="/terms">{() => <SuspendedPage Component={Terms} />}</Route>
-      <Route component={NotFound} />
+      <Route>{() => <SuspendedPage Component={NotFound} />}</Route>
     </Switch>
   );
 }
