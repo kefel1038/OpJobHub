@@ -1,7 +1,7 @@
-import { db, jobs, jobSources, scrapeLogs, companies } from "@workspace/db";
+import { db, jobs, jobSources, scrapeLogs, companies, jobEmbeddings } from "@workspace/db";
 import { eq, and, sql, gte, lt, desc, inArray } from "drizzle-orm";
 import { logger } from "./logger";
-import { openrouter } from "./openai";
+import { openrouter, getEmbedding } from "./openai";
 
 export interface ScrapedJob {
   title: string;
@@ -100,6 +100,7 @@ export class ScraperEngine {
     const normalizedTitle = sj.title.trim().toLowerCase();
     const normalizedCompany = sj.company.trim().toLowerCase();
 
+    // ── Step 1: Exact title+company dedup ───────────────────────
     const existing = await db
       .select()
       .from(jobs)
@@ -114,49 +115,20 @@ export class ScraperEngine {
       .limit(1);
 
     if (existing.length > 0) {
-      const now = new Date();
-      const newExpires = new Date();
-      newExpires.setDate(newExpires.getDate() + 4);
-
-      const updateData: Record<string, any> = {
-        lastSeenAt: now,
-        scrapedAt: now,
-        expiresAt: newExpires,
-        status: "active",
-        sourceUrl: sj.sourceUrl || existing[0].sourceUrl,
-        applyUrl: sj.applyUrl || existing[0].applyUrl,
-        salary: sj.salary || existing[0].salary,
-        salaryMin: sj.salaryMin ?? existing[0].salaryMin,
-        salaryMax: sj.salaryMax ?? existing[0].salaryMax,
-      };
-
-      if (!existing[0].aiSummary || !existing[0].industry) {
-        const [aiResult] = await Promise.allSettled([
-          aiCategorizeJob({ title: sj.title, company: sj.company, description: sj.description }),
-        ]);
-
-        if (aiResult.status === "fulfilled" && aiResult.value) {
-          const c = aiResult.value;
-          if (!existing[0].industry && c.industry) updateData.industry = c.industry;
-          if (!existing[0].category && c.category) updateData.category = c.category;
-          if (!existing[0].experienceLevel && c.experienceLevel) updateData.experienceLevel = c.experienceLevel;
-          if (!existing[0].employmentType && c.employmentType) updateData.employmentType = c.employmentType;
-          if ((!existing[0].skills || existing[0].skills.length === 0) && c.skills) updateData.skills = c.skills;
-          if ((!existing[0].tags || existing[0].tags.length === 0) && c.tags) updateData.tags = c.tags;
-          if (existing[0].visaSponsored == null && c.visaSponsored != null) updateData.visaSponsored = c.visaSponsored;
-          if (existing[0].isRemote == null && c.isRemote != null) updateData.isRemote = c.isRemote;
-          if (!existing[0].aiSummary && c.summary) updateData.aiSummary = c.summary;
-        }
-      }
-
-      await db
-        .update(jobs)
-        .set(updateData)
-        .where(eq(jobs.id, existing[0].id));
+      await this.mergeIntoJob(sj, existing[0]);
       this.jobsUpdated++;
       return;
     }
 
+    // ── Step 2: Cross-source vector similarity dedup ────────────
+    const vectorMatch = await this.findVectorDuplicate(sj);
+    if (vectorMatch) {
+      await this.mergeIntoJob(sj, vectorMatch);
+      this.jobsDuplicates++;
+      return;
+    }
+
+    // ── Step 3: Insert new job ─────────────────────────────────
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 4);
 
@@ -208,39 +180,127 @@ export class ScraperEngine {
       aiSummary = c.summary || null;
     }
 
-    await db.insert(jobs).values({
-      title: sj.title,
-      company: sj.company,
-      companyId,
-      companyLogo: sj.companyLogo,
-      location: sj.location,
-      salary: sj.salary,
-      salaryMin: sj.salaryMin ?? null,
-      salaryMax: sj.salaryMax ?? null,
-      salaryCurrency: sj.salaryCurrency ?? "QAR",
-      description: sj.description,
-      employmentType: employmentType ?? "Full-Time",
-      experienceLevel,
-      industry,
-      category,
-      tags: tags ?? [],
-      skills: skills ?? [],
-      visaSponsored: visaSponsored ?? false,
-      isRemote: isRemote ?? false,
-      isUrgent: sj.isUrgent ?? false,
-      source: sj.source,
-      sourceId: this.sourceId,
-      sourceUrl: sj.sourceUrl,
-      applyUrl: sj.applyUrl,
-      postedAt: sj.postedAt ?? new Date(),
-      expiresAt,
-      scrapedAt: new Date(),
-      lastSeenAt: new Date(),
-      status: "active",
-      aiSummary,
-    });
+    const [inserted] = await db
+      .insert(jobs)
+      .values({
+        title: sj.title,
+        company: sj.company,
+        companyId,
+        companyLogo: sj.companyLogo,
+        location: sj.location,
+        salary: sj.salary,
+        salaryMin: sj.salaryMin ?? null,
+        salaryMax: sj.salaryMax ?? null,
+        salaryCurrency: sj.salaryCurrency ?? "QAR",
+        description: sj.description,
+        employmentType: employmentType ?? "Full-Time",
+        experienceLevel,
+        industry,
+        category,
+        tags: tags ?? [],
+        skills: skills ?? [],
+        visaSponsored: visaSponsored ?? false,
+        isRemote: isRemote ?? false,
+        isUrgent: sj.isUrgent ?? false,
+        source: sj.source,
+        sourceId: this.sourceId,
+        sourceUrl: sj.sourceUrl,
+        applyUrl: sj.applyUrl,
+        postedAt: sj.postedAt ?? new Date(),
+        expiresAt,
+        scrapedAt: new Date(),
+        lastSeenAt: new Date(),
+        status: "active",
+        aiSummary,
+      })
+      .returning({ id: jobs.id });
 
     this.jobsNew++;
+
+    // ── Step 4: Generate embedding for the new job ─────────────
+    if (inserted && process.env.OPENAI_API_KEY) {
+      try {
+        const text = `${sj.title} at ${sj.company}. ${sj.description.slice(0, 1000)} Location: ${sj.location}`;
+        const embedding = await getEmbedding(text);
+        await db
+          .insert(jobEmbeddings)
+          .values({ jobId: inserted.id, embedding })
+          .onConflictDoNothing({ target: jobEmbeddings.jobId });
+      } catch (err) {
+        logger.warn({ err, job: sj.title }, "Failed to generate embedding");
+      }
+    }
+  }
+
+  private async findVectorDuplicate(sj: ScrapedJob) {
+    if (!process.env.OPENAI_API_KEY) return null;
+    try {
+      const text = `${sj.title} at ${sj.company}. ${sj.description.slice(0, 1000)} Location: ${sj.location}`;
+      const embedding = await getEmbedding(text);
+
+      const result = await db.execute(sql`
+        SELECT j.id, j.title, j.company, j.source, j.source_url, j.description,
+               j.salary, j.employment_type, j.industry, j.ai_summary,
+               1 - (je.embedding <=> ${JSON.stringify(embedding)}::vector) as similarity
+        FROM ${jobEmbeddings} je
+        JOIN ${jobs} j ON j.id = je.job_id
+        WHERE j.status = 'active'
+          AND 1 - (je.embedding <=> ${JSON.stringify(embedding)}::vector) > 0.85
+        ORDER BY similarity DESC
+        LIMIT 1
+      `);
+
+      if (result.rows.length > 0) {
+        const match = result.rows[0];
+        logger.info(
+          { job: sj.title, match: match.title, similarity: match.similarity, source: match.source },
+          "Cross-source duplicate detected via vector similarity",
+        );
+        return match;
+      }
+    } catch (err) {
+      logger.warn({ err, job: sj.title }, "Vector dedup check failed");
+    }
+    return null;
+  }
+
+  private async mergeIntoJob(sj: ScrapedJob, target: any) {
+    const now = new Date();
+    const newExpires = new Date();
+    newExpires.setDate(newExpires.getDate() + 4);
+
+    const updateData: Record<string, any> = {
+      lastSeenAt: now,
+      scrapedAt: now,
+      expiresAt: newExpires,
+      status: "active",
+      sourceUrl: sj.sourceUrl || target.source_url || target.sourceUrl,
+      applyUrl: sj.applyUrl || target.apply_url || target.applyUrl,
+      salary: sj.salary || target.salary,
+      salaryMin: sj.salaryMin ?? target.salary_min ?? target.salaryMin,
+      salaryMax: sj.salaryMax ?? target.salary_max ?? target.salaryMax,
+    };
+
+    if (!target.ai_summary && !target.aiSummary) {
+      const [aiResult] = await Promise.allSettled([
+        aiCategorizeJob({ title: sj.title, company: sj.company, description: sj.description }),
+      ]);
+
+      if (aiResult.status === "fulfilled" && aiResult.value) {
+        const c = aiResult.value;
+        if (!target.industry && c.industry) updateData.industry = c.industry;
+        if (!target.category && c.category) updateData.category = c.category;
+        if (!target.experience_level && !target.experienceLevel && c.experienceLevel) updateData.experienceLevel = c.experienceLevel;
+        if (!target.employment_type && !target.employmentType && c.employmentType) updateData.employmentType = c.employmentType;
+        if ((!target.skills || (typeof target.skills === 'string' ? JSON.parse(target.skills).length : target.skills.length) === 0) && c.skills) updateData.skills = c.skills;
+        if ((!target.tags || (typeof target.tags === 'string' ? JSON.parse(target.tags).length : target.tags.length) === 0) && c.tags) updateData.tags = c.tags;
+        if (target.visa_sponsored == null && target.visaSponsored == null && c.visaSponsored != null) updateData.visaSponsored = c.visaSponsored;
+        if (target.is_remote == null && target.isRemote == null && c.isRemote != null) updateData.isRemote = c.isRemote;
+        if (!target.ai_summary && !target.aiSummary && c.summary) updateData.aiSummary = c.summary;
+      }
+    }
+
+    await db.update(jobs).set(updateData).where(eq(jobs.id, target.id));
   }
 
   async cleanupExpired() {
