@@ -117,7 +117,18 @@ export function JobCard({ job, index, onSelect, isSelected }: JobCardProps) {
                 {(job.visaSponsored || (job.nationalityFriendly && job.nationalityFriendly.length > 0)) && (
                   <Badge className="bg-amber-500/15 text-amber-600 border-amber-500/20 text-[10px] px-2 py-0 rounded-md font-semibold dark:text-amber-400">
                     <Globe className="h-2.5 w-2.5 mr-0.5 inline" />
-                    MIGRATION FRIENDLY
+                    VISA FRIENDLY
+                  </Badge>
+                )}
+                {job.aiMatchScore && job.aiMatchScore >= 85 && (
+                  <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/20 text-[10px] px-2 py-0 rounded-md font-semibold dark:text-emerald-400">
+                    <Sparkles className="h-2.5 w-2.5 mr-0.5 inline" />
+                    HIGH MATCH
+                  </Badge>
+                )}
+                {job.aiMatchScore && job.aiMatchScore >= 70 && job.aiMatchScore < 85 && (
+                  <Badge className="bg-blue-500/15 text-blue-600 border-blue-500/20 text-[10px] px-2 py-0 rounded-md font-semibold dark:text-blue-400">
+                    AI MATCH {job.aiMatchScore}%
                   </Badge>
                 )}
               </div>

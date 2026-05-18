@@ -17,6 +17,10 @@ import { JobsHero } from "@/components/jobs/JobsHero";
 import { JobsFilterSidebar } from "@/components/jobs/JobsFilterSidebar";
 import { JobCard } from "@/components/jobs/JobCard";
 import { JobDetailPanel } from "@/components/jobs/JobDetailPanel";
+import { JobListSkeleton } from "@/components/jobs/JobListSkeleton";
+import { EmptyJobState } from "@/components/jobs/EmptyJobState";
+import { RecommendedJobsRail } from "@/components/jobs/RecommendedJobsRail";
+import { SavedSearches } from "@/components/jobs/SavedSearches";
 import { FeaturedJobsCarousel } from "@/components/jobs/FeaturedJobsCarousel";
 import { TopCompaniesGrid } from "@/components/jobs/TopCompaniesGrid";
 import { AICareerInsights } from "@/components/jobs/AICareerInsights";
@@ -279,6 +283,12 @@ export default function Jobs() {
     );
   }
 
+  const loadMore = () => {
+    if (pagination.hasMore) {
+      setParams({ page: currentPage + 1 });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <JobsNavbar />
@@ -326,6 +336,16 @@ export default function Jobs() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <SavedSearches 
+                currentParams={Object.fromEntries(
+                  Object.entries(params).filter(([_, v]) => v != null && v !== '').map(([k, v]) => [k, String(v)])
+                )} 
+                onApplySearch={(newParams) => {
+                  Object.entries(newParams).forEach(([key, value]) => {
+                    setParams({ [key]: value });
+                  });
+                }} 
+              />
               <Button
                 variant="outline"
                 size="sm"
@@ -386,30 +406,13 @@ export default function Jobs() {
                 </div>
               </div>
 
+              <RecommendedJobsRail 
+                currentParams={params} 
+                onSelect={handleSelectJob} 
+              />
+
               {isLoading && !loadingTimedOut ? (
-                <div className="space-y-4">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="rounded-2xl border border-border/60 p-5">
-                      <div className="flex items-start gap-4">
-                        <Skeleton className="h-14 w-14 rounded-xl shrink-0" />
-                        <div className="flex-1 space-y-3">
-                          <Skeleton className="h-5 w-3/4" />
-                          <Skeleton className="h-4 w-1/2" />
-                          <div className="flex gap-2">
-                            <Skeleton className="h-6 w-20 rounded-full" />
-                            <Skeleton className="h-6 w-24 rounded-full" />
-                            <Skeleton className="h-6 w-16 rounded-full" />
-                          </div>
-                          <Skeleton className="h-4 w-full" />
-                          <div className="flex gap-3 pt-2">
-                            <Skeleton className="h-3 flex-1" />
-                            <Skeleton className="h-8 w-24 rounded-lg" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <JobListSkeleton count={5} />
               ) : error || loadingTimedOut ? (
                 <div className="text-center py-20">
                   <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
@@ -434,80 +437,10 @@ export default function Jobs() {
                   </div>
                 </div>
               ) : jobs.length === 0 ? (
-                <div className="text-center py-20">
-                  <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                    <Search className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <p className="text-xl font-bold mb-2">No jobs found</p>
-                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    {hasActiveFilters
-                      ? "Try adjusting your search terms or filters to find more opportunities in Qatar."
-                      : "No active job listings right now. Check back later or upload your resume for AI matching."}
-                  </p>
-                  <div className="flex items-center justify-center gap-3 flex-wrap">
-                    {hasActiveFilters && (
-                      <Button variant="outline" onClick={clearAllFilters} className="rounded-full">
-                        Clear all filters
-                      </Button>
-                    )}
-                    <Button variant="default" className="rounded-full gap-2" onClick={() => setShowJobAlerts(true)}>
-                      <Bell className="h-4 w-4" /> Get Job Alerts
-                    </Button>
-                    <Button variant="secondary" className="rounded-full gap-2" onClick={() => window.location.href = "/ai-matching"} disabled={!window.location.href.includes("ai-matching") && false}>
-                      <Sparkles className="h-4 w-4" /> AI Match My Profile
-                    </Button>
-                  </div>
-                  {hasActiveFilters && (
-                    <div className="mt-8 text-left max-w-md mx-auto">
-                      <p className="text-sm font-medium text-muted-foreground mb-3">Suggestions:</p>
-                      <ul className="space-y-2 text-sm text-muted-foreground">
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-0.5">•</span>
-                          Check your spelling for search terms
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-0.5">•</span>
-                          Try more general keywords or different categories
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-0.5">•</span>
-                          Expand your location or salary range
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-0.5">•</span>
-                          Remove some filters to see more results
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-0.5">•</span>
-                          Describe your ideal job in AI search for semantic matching
-                        </li>
-                      </ul>
-                    </div>
-                  )}
-                  {!hasActiveFilters && (
-                    <div className="mt-8 text-left max-w-md mx-auto">
-                      <p className="text-sm font-medium text-muted-foreground mb-3">Try these:</p>
-                      <ul className="space-y-2 text-sm text-muted-foreground">
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-0.5">•</span>
-                          Search for "Engineer", "Driver", "Nurse", or "IT"
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-0.5">•</span>
-                          Browse by industry tabs at the top
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-0.5">•</span>
-                          Enable Visa Sponsored filter for international roles
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-primary mt-0.5">•</span>
-                          Upload your resume for AI-powered job matching
-                        </li>
-                      </ul>
-                    </div>
-                  )}
-                </div>
+                <EmptyJobState
+                  hasActiveFilters={hasActiveFilters}
+                  onClearFilters={clearAllFilters}
+                />
               ) : (
                 <>
                   <div className="space-y-3">
@@ -523,6 +456,19 @@ export default function Jobs() {
                   </div>
 
                   {renderPagination()}
+
+                  {/* Mobile Load More */}
+                  {pagination.hasMore && (
+                    <div className="flex justify-center mt-4 lg:hidden">
+                      <Button 
+                        variant="outline" 
+                        onClick={loadMore}
+                        className="rounded-full px-8"
+                      >
+                        Load More Jobs
+                      </Button>
+                    </div>
+                  )}
 
                   {pagination.total > 0 && (
                     <div className="text-center py-6">

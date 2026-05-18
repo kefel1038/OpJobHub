@@ -440,13 +440,25 @@ With a team of passionate professionals, we're committed to excellence and conti
               </div>
             </ScrollArea>
 
-            <div className="border-t border-border/60 p-4 bg-background/80 backdrop-blur-sm">
+            <div className="border-t border-border/60 p-4 bg-background/80 backdrop-blur-sm sticky bottom-0 z-10">
               <div className="flex items-center gap-3">
-                <ApplyButton applyUrl={job.applyUrl} title={job.title} company={job.company} />
-                <Button variant="outline" className="h-12 rounded-xl gap-2" asChild>
-                  <a href={job.applyUrl && (job.applyUrl.startsWith("http") || job.applyUrl.startsWith("www")) ? job.applyUrl : "#"} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-4 w-4" /> Company Site
-                  </a>
+                <ApplyButton applyUrl={job.applyUrl} title={job.title} company={job.company} className="flex-1" />
+                <Button variant="outline" size="lg" className="h-12 rounded-xl px-4" onClick={() => {
+                  // Simple save logic
+                  const saved = JSON.parse(localStorage.getItem("savedJobs") || "[]");
+                  if (!saved.includes(job.id)) {
+                    saved.push(job.id);
+                    localStorage.setItem("savedJobs", JSON.stringify(saved));
+                    toast.success("Job saved");
+                  }
+                }}>
+                  <Bookmark className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="lg" className="h-12 rounded-xl px-4" onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("Link copied");
+                }}>
+                  <Share2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>
