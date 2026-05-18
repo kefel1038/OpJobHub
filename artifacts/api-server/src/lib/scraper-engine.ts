@@ -47,6 +47,10 @@ export class ScraperEngine {
   private jobsFailed = 0;
   private errors: string[] = [];
 
+  setSourceId(id: number | null) {
+    this.sourceId = id;
+  }
+
   async initialize(sourceName: string, sourceDisplayName: string) {
     const [existing] = await db
       .select()
@@ -96,7 +100,7 @@ export class ScraperEngine {
     }
   }
 
-  private async processSingleJob(sj: ScrapedJob) {
+  async processSingleJob(sj: ScrapedJob, skipAI = false) {
     const normalizedTitle = sj.title.trim().toLowerCase();
     const normalizedCompany = sj.company.trim().toLowerCase();
 
@@ -115,7 +119,7 @@ export class ScraperEngine {
       .limit(1);
 
     if (existing.length > 0) {
-      await this.mergeIntoJob(sj, existing[0]);
+      await this.mergeIntoJob(sj, existing[0], skipAI);
       this.jobsUpdated++;
       return;
     }
@@ -123,7 +127,7 @@ export class ScraperEngine {
     // ── Step 2: Cross-source vector similarity dedup ────────────
     const vectorMatch = await this.findVectorDuplicate(sj);
     if (vectorMatch) {
-      await this.mergeIntoJob(sj, vectorMatch);
+      await this.mergeIntoJob(sj, vectorMatch, skipAI);
       this.jobsDuplicates++;
       return;
     }
@@ -145,18 +149,6 @@ export class ScraperEngine {
       companyId = existingCompany.id;
     }
 
-    const [aiResult, scamResult] = await Promise.allSettled([
-      aiCategorizeJob({ title: sj.title, company: sj.company, description: sj.description }),
-      aiDetectScam({ title: sj.title, company: sj.company, description: sj.description, salary: sj.salary }),
-    ]);
-
-    if (scamResult.status === "fulfilled" && scamResult.value?.isScam) {
-      logger.warn(
-        { job: sj.title, confidence: scamResult.value.confidence, reasons: scamResult.value.reasons },
-        "Job flagged as potential scam",
-      );
-    }
-
     let industry = sj.industry;
     let category = sj.category;
     let experienceLevel = sj.experienceLevel;
@@ -167,17 +159,31 @@ export class ScraperEngine {
     let isRemote = sj.isRemote;
     let aiSummary: string | null = null;
 
-    if (aiResult.status === "fulfilled" && aiResult.value) {
-      const c = aiResult.value;
-      industry = c.industry || industry;
-      category = c.category || category;
-      experienceLevel = c.experienceLevel || experienceLevel;
-      employmentType = c.employmentType || employmentType;
-      skills = c.skills || skills;
-      tags = c.tags || tags;
-      visaSponsored = c.visaSponsored ?? visaSponsored;
-      isRemote = c.isRemote ?? isRemote;
-      aiSummary = c.summary || null;
+    if (!skipAI) {
+      const [aiResult, scamResult] = await Promise.allSettled([
+        aiCategorizeJob({ title: sj.title, company: sj.company, description: sj.description }),
+        aiDetectScam({ title: sj.title, company: sj.company, description: sj.description, salary: sj.salary }),
+      ]);
+
+      if (scamResult.status === "fulfilled" && scamResult.value?.isScam) {
+        logger.warn(
+          { job: sj.title, confidence: scamResult.value.confidence, reasons: scamResult.value.reasons },
+          "Job flagged as potential scam",
+        );
+      }
+
+      if (aiResult.status === "fulfilled" && aiResult.value) {
+        const c = aiResult.value;
+        industry = c.industry || industry;
+        category = c.category || category;
+        experienceLevel = c.experienceLevel || experienceLevel;
+        employmentType = c.employmentType || employmentType;
+        skills = c.skills || skills;
+        tags = c.tags || tags;
+        visaSponsored = c.visaSponsored ?? visaSponsored;
+        isRemote = c.isRemote ?? isRemote;
+        aiSummary = c.summary || null;
+      }
     }
 
     const [inserted] = await db
@@ -232,7 +238,7 @@ export class ScraperEngine {
     }
   }
 
-  private async findVectorDuplicate(sj: ScrapedJob) {
+  async findVectorDuplicate(sj: ScrapedJob) {
     if (!process.env.OPENAI_API_KEY) return null;
     try {
       const text = `${sj.title} at ${sj.company}. ${sj.description.slice(0, 1000)} Location: ${sj.location}`;
@@ -264,7 +270,7 @@ export class ScraperEngine {
     return null;
   }
 
-  private async mergeIntoJob(sj: ScrapedJob, target: any) {
+  async mergeIntoJob(sj: ScrapedJob, target: any, skipAI = false) {
     const now = new Date();
     const newExpires = new Date();
     newExpires.setDate(newExpires.getDate() + 4);
@@ -281,7 +287,7 @@ export class ScraperEngine {
       salaryMax: sj.salaryMax ?? target.salary_max ?? target.salaryMax,
     };
 
-    if (!target.ai_summary && !target.aiSummary) {
+    if (!skipAI && !target.ai_summary && !target.aiSummary) {
       const [aiResult] = await Promise.allSettled([
         aiCategorizeJob({ title: sj.title, company: sj.company, description: sj.description }),
       ]);

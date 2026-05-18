@@ -27,6 +27,12 @@ export enum QueueNames {
   EMBEDDINGS = "embeddings",
   OBSERVABILITY = "observability",
   PIPELINE = "pipeline",
+
+  // Scrape pipeline
+  SCRAPE = "scrape",
+  SCRAPE_ENRICH = "scrape-enrich",
+  SCRAPE_PUBLISH = "scrape-publish",
+  SCRAPE_CLEANUP = "scrape-cleanup",
 }
 
 const _queues = new Map<string, Queue>();

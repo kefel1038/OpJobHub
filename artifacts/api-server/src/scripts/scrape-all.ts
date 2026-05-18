@@ -5,8 +5,22 @@ import { logger } from "../lib/logger";
 
 async function main() {
   const sourceFilter = process.env.SCRAPE_SOURCE || "";
+  const useQueues = !!process.env.REDIS_URL;
 
-  logger.info({ sourceFilter: sourceFilter || "all" }, "Starting scrape session");
+  logger.info({ sourceFilter: sourceFilter || "all", mode: useQueues ? "queue" : "inline" }, "Starting scrape session");
+
+  if (useQueues) {
+    const { runScrapePipelineViaQueue, startScrapeWorkers } = await import("../services/queue/scrape-worker");
+    startScrapeWorkers();
+    const result = await runScrapePipelineViaQueue(sourceFilter || undefined);
+    logger.info({ dispatched: result.dispatched }, "Scrape jobs dispatched to queues");
+    // Allow workers time to process before cleanup
+    await new Promise((r) => setTimeout(r, 5000));
+    const { dispatchScrapeCleanup } = await import("../services/queue/scrape-worker");
+    await dispatchScrapeCleanup();
+    logger.info("Queue-based scrape session complete");
+    process.exit(0);
+  }
 
   const pw = PlaywrightScraper.getInstance();
   await pw.init();

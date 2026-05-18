@@ -7,6 +7,7 @@ import { outreachAgent } from "./outreach-agent";
 import { sourceManager } from "./source-manager";
 import { continuousPipeline } from "./continuous-pipeline";
 import { startPipelineWorkers } from "../queue/pipeline-worker";
+import { startScrapeWorkers } from "../queue/scrape-worker";
 
 export class AgentOrchestrator {
   private active = false;
@@ -26,9 +27,10 @@ export class AgentOrchestrator {
 
     if (process.env.REDIS_URL) {
       startPipelineWorkers();
-      logger.info("BullMQ pipeline workers started");
+      startScrapeWorkers();
+      logger.info("BullMQ pipeline + scrape workers started");
     } else {
-      logger.warn("No REDIS_URL set — pipeline workers disabled (direct execution fallback active)");
+      logger.warn("No REDIS_URL set — queue workers disabled (direct execution fallback active)");
     }
 
     logger.info("Agent orchestrator started — listening for recruitment events — autonomous sourcing active");
