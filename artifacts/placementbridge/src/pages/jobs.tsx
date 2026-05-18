@@ -544,7 +544,7 @@ export default function Jobs() {
       <TopCompaniesGrid />
       <AICareerInsights />
 
-      <JobDetailPanel job={selectedJob} open={detailPanelOpen} onClose={handleClosePanel} />
+      <JobDetailPanel job={selectedJob as any} open={detailPanelOpen} onClose={handleClosePanel} />
       <AIChatbot />
 
       <AnimatePresence>

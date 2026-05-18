@@ -3,10 +3,12 @@ import { Pool } from "pg";
 import * as schema from "./schema";
 
 function getPool(): Pool {
-  const url =
-    process.env.DATABASE_URL ||
-    // Fallback for when DATABASE_URL hasn't been set in Vercel dashboard
-    "postgresql://postgres.fmcblciptvnagrpsrzcw:Lovr_1990_Lovr@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres";
+  const url = process.env.DATABASE_URL;
+  if (!url) {
+    throw new Error(
+      "DATABASE_URL environment variable is required. Set it in your .env file or Vercel dashboard."
+    );
+  }
   return new Pool({
     connectionString: url,
     max: 5,

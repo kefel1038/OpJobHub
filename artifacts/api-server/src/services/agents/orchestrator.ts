@@ -20,7 +20,7 @@ export class AgentOrchestrator {
     eventBus.on(RecruitmentEventTypes.CANDIDATE_APPLIED, this.handleCandidateApplied.bind(this));
     eventBus.on(RecruitmentEventTypes.INTERVIEW_MISSED, this.handleInterviewMissed.bind(this));
     eventBus.on(RecruitmentEventTypes.CANDIDATE_GHOSTED, this.handleCandidateGhosted.bind(this));
-    eventBus.on("*", this.logAllEvents.bind(this));
+    eventBus.on("*", async (e) => { this.logAllEvents(e); });
 
     sourceManager.initializeDefaultSources().catch(err => logger.error({ err }, "Failed to init default sources"));
     continuousPipeline.startScheduledRuns(60);

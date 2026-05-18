@@ -383,7 +383,7 @@ router.post("/copilot", async (req, res) => {
         const allJobs = await db.select({ skills: jobs.skills, salaryMin: jobs.salaryMin, title: jobs.title, industry: jobs.industry })
           .from(jobs).where(eq(jobs.status, "active")).limit(200);
         const salaryData = allJobs.filter((j) => j.salaryMin).map((j) => j.salaryMin);
-        const avgSalary = salaryData.length > 0 ? Math.round(salaryData.reduce((a: number, b: number) => a + b, 0) / salaryData.length) : 0;
+        const avgSalary = salaryData.length > 0 ? Math.round(salaryData.reduce((a: number, b) => a + (b ?? 0), 0) / salaryData.length) : 0;
         const industries = [...new Set(allJobs.map((j) => j.industry).filter(Boolean))];
         marketData = `\nMarket snapshot: ${allJobs.length} active jobs, average salary ${avgSalary}, industries: ${industries.slice(0, 8).join(", ")}`;
       } catch { /* ignore */ }
@@ -630,7 +630,7 @@ router.post("/match-by-profile", async (req, res) => {
         else {
           const locWords = loc.split(/[\s,]+/);
           const jobLocWords = jobLoc.split(/[\s,]+/);
-          const common = locWords.filter((w) => jobLocWords.includes(w) && w.length > 2).length;
+          const common = locWords.filter((w: string) => jobLocWords.includes(w) && w.length > 2).length;
           locScore = Math.min(10, common * 3);
         }
       } else if (location && !job.location) {

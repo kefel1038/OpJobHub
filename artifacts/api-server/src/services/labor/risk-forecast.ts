@@ -30,7 +30,7 @@ class RiskForecastService {
       .where(
         and(
           eq(laborMetrics.metricType, "demand_index"),
-          eq(laborMetrics.role || "", role),
+          eq(laborMetrics.role, role),
           gte(laborMetrics.createdAt, new Date(Date.now() - windowDays * 86400000)),
         ),
       )
@@ -43,7 +43,7 @@ class RiskForecastService {
       .where(
         and(
           eq(laborMetrics.metricType, "supply_index"),
-          eq(laborMetrics.role || "", role),
+          eq(laborMetrics.role, role),
           gte(laborMetrics.createdAt, new Date(Date.now() - windowDays * 86400000)),
         ),
       )
@@ -107,7 +107,7 @@ class RiskForecastService {
     const conditions = [
       gte(sponsorshipOutcomes.createdAt, new Date(Date.now() - days * 86400000)),
     ];
-    if (industry) conditions.push(eq(sponsorshipOutcomes.visaType || "", industry));
+    if (industry) conditions.push(eq(sponsorshipOutcomes.visaType, industry));
 
     const outcomes = await db
       .select()
@@ -369,7 +369,7 @@ class RiskForecastService {
       .where(
         and(
           eq(laborMetrics.metricType, "supply_index"),
-          eq(laborMetrics.role || "", role),
+          eq(laborMetrics.role, role),
           gte(laborMetrics.createdAt, new Date(Date.now() - 180 * 86400000)),
         ),
       )
@@ -387,7 +387,7 @@ class RiskForecastService {
       .where(
         and(
           eq(laborMetrics.metricType, "demand_index"),
-          eq(laborMetrics.role || "", role),
+          eq(laborMetrics.role, role),
           gte(laborMetrics.createdAt, new Date(Date.now() - 180 * 86400000)),
         ),
       )

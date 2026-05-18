@@ -1,5 +1,5 @@
 import { db, forecastAccuracy, laborForecasts, migrationForecasts, skillForecasts } from "@workspace/db";
-import { eq, and, gte, lte, desc, sql, count, avg, stddev } from "drizzle-orm";
+import { eq, and, gte, lte, desc, sql, count, avg } from "drizzle-orm";
 import { logger } from "../../lib/logger";
 
 export interface ForecastCalibration {
@@ -176,7 +176,7 @@ class ConfidenceEngine {
         .from(laborForecasts)
         .where(eq(laborForecasts.id, forecastId))
         .limit(1);
-      if (rows[0]) return rows[0];
+      if (rows[0]) return { confidence: rows[0].confidence ?? 0 };
     }
     if (forecastType === "migration_volume" || forecastType === "corridor_growth") {
       const rows = await db
@@ -184,7 +184,7 @@ class ConfidenceEngine {
         .from(migrationForecasts)
         .where(eq(migrationForecasts.id, forecastId))
         .limit(1);
-      if (rows[0]) return rows[0];
+      if (rows[0]) return { confidence: rows[0].confidence ?? 0 };
     }
     if (forecastType === "skill_demand" || forecastType === "skill_scarcity") {
       const rows = await db
@@ -192,7 +192,7 @@ class ConfidenceEngine {
         .from(skillForecasts)
         .where(eq(skillForecasts.id, forecastId))
         .limit(1);
-      if (rows[0]) return rows[0];
+      if (rows[0]) return { confidence: rows[0].confidence ?? 0 };
     }
     return null;
   }

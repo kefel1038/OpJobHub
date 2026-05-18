@@ -118,7 +118,7 @@ class TenantOrchestrator {
     if (!tenantRecord?.active) return { valid: false };
     await db.update(apiKeys).set({ lastUsedAt: new Date() }).where(eq(apiKeys.id, key.id));
     return {
-      valid: true, tenant: { ...tenant, active: tenantRecord.active ?? true },
+      valid: true, tenant: { ...tenant!, active: tenantRecord.active ?? true },
       key: { id: key.id, keyPrefix: key.keyPrefix, name: key.name, permissions: key.permissions as string[], rateLimitTier: key.rateLimitTier ?? "standard" },
     };
   }
@@ -145,8 +145,8 @@ class TenantOrchestrator {
   async getQuotas(tenantId: number): Promise<QuotaStatus[]> {
     const quotas = await db.select().from(enterpriseQuotas).where(eq(enterpriseQuotas.tenantId, tenantId));
     return quotas.map(q => ({
-      quotaType: q.quotaType, limit: q.limit, used: q.used,
-      remaining: Math.max(0, q.limit - q.used),
+      quotaType: q.quotaType, limit: q.limit ?? 0, used: q.used ?? 0,
+      remaining: Math.max(0, (q.limit ?? 0) - (q.used ?? 0)),
       resetAt: q.resetAt?.toISOString() ?? null,
       overageAllowed: q.overageAllowed ?? false,
     }));
@@ -156,7 +156,7 @@ class TenantOrchestrator {
     const [quota] = await db.select().from(enterpriseQuotas)
       .where(and(eq(enterpriseQuotas.tenantId, tenantId), eq(enterpriseQuotas.quotaType, quotaType)));
     if (!quota) return { allowed: true, remaining: Infinity };
-    const remaining = quota.limit - quota.used;
+    const remaining = (quota.limit ?? 0) - (quota.used ?? 0);
     if (remaining <= 0) {
       if (quota.overageAllowed) return { allowed: true, remaining: 0 };
       return { allowed: false, remaining: 0 };

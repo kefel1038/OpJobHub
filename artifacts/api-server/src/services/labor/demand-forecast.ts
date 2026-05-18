@@ -30,7 +30,7 @@ class DemandForecastService {
       .where(
         and(
           eq(laborMetrics.metricType, "demand_index"),
-          eq(laborMetrics.role || "", role),
+          eq(laborMetrics.role, role),
           gte(laborMetrics.createdAt, new Date(Date.now() - windowDays * 86400000)),
         ),
       )
@@ -45,7 +45,7 @@ class DemandForecastService {
       .from(discoveredCandidates)
       .where(
         and(
-          eq(discoveredCandidates.primaryRole || "", role),
+          eq(discoveredCandidates.industry, role),
           gte(discoveredCandidates.createdAt, new Date(Date.now() - days * 86400000)),
         ),
       )
@@ -92,10 +92,10 @@ class DemandForecastService {
 
     const conditions = [
       eq(laborMetrics.metricType, "demand_index"),
-      eq(laborMetrics.industry || "", industry),
+      eq(laborMetrics.industry, industry),
       gte(laborMetrics.createdAt, new Date(Date.now() - windowDays * 86400000)),
     ];
-    if (region) conditions.push(eq(laborMetrics.region || "", region));
+    if (region) conditions.push(eq(laborMetrics.region, region));
 
     const metrics = await db
       .select()
@@ -112,7 +112,7 @@ class DemandForecastService {
       .from(jobs)
       .where(
         and(
-          eq(jobs.industry || "", industry),
+          eq(jobs.industry, industry),
           gte(jobs.createdAt, new Date(Date.now() - days * 86400000)),
         ),
       )
@@ -173,7 +173,7 @@ class DemandForecastService {
       .orderBy(desc(employerMetrics.createdAt))
       .limit(30);
 
-    const hiringVelocities = metrics.map(m => m.hiringVelocity).filter((v): v is number => v !== null);
+    const hiringVelocities = metrics.map(m => m.metricValue).filter((v): v is number => v !== null);
     const currentVelocity = hiringVelocities[0] || 0.5;
     const growthRate = this.computeGrowthRate(hiringVelocities);
 
@@ -182,7 +182,7 @@ class DemandForecastService {
       .from(jobs)
       .where(
         and(
-          eq(jobs.employerId, employerId),
+          eq(jobs.companyId, employerId),
           gte(jobs.createdAt, new Date(Date.now() - days * 86400000)),
         ),
       )
@@ -222,7 +222,7 @@ class DemandForecastService {
       .where(
         and(
           eq(laborMetrics.metricType, "demand_index"),
-          eq(laborMetrics.role || "", role),
+          eq(laborMetrics.role, role),
           gte(laborMetrics.createdAt, new Date(Date.now() - windowDays * 86400000)),
         ),
       )
@@ -235,7 +235,7 @@ class DemandForecastService {
       .where(
         and(
           eq(laborMetrics.metricType, "supply_index"),
-          eq(laborMetrics.role || "", role),
+          eq(laborMetrics.role, role),
           gte(laborMetrics.createdAt, new Date(Date.now() - windowDays * 86400000)),
         ),
       )
@@ -293,7 +293,7 @@ class DemandForecastService {
       .where(
         and(
           eq(laborMetrics.metricType, "wage_pressure"),
-          eq(laborMetrics.role || "", role),
+          eq(laborMetrics.role, role),
           gte(laborMetrics.createdAt, new Date(Date.now() - windowDays * 86400000)),
         ),
       )

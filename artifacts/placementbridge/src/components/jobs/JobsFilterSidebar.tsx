@@ -82,6 +82,7 @@ interface URLFilterParams {
   isRemote: boolean;
   isUrgent: boolean;
   aiMatchScore: string;
+  source: string;
   sort: string;
   page: number;
 }

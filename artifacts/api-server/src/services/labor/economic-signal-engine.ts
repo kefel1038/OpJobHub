@@ -58,10 +58,10 @@ class EconomicSignalEngine {
     const conditions = [];
     if (signalType) conditions.push(eq(economicSignals.signalType, signalType));
     const where = conditions.length > 0 ? and(...conditions) : undefined;
-    const query = where
+    const rows = await (where
       ? db.select().from(economicSignals).where(where).orderBy(desc(economicSignals.timestamp)).limit(limit)
-      : db.select().from(economicSignals).orderBy(desc(economicSignals.timestamp)).limit(limit);
-    return query.map(r => ({
+      : db.select().from(economicSignals).orderBy(desc(economicSignals.timestamp)).limit(limit));
+    return rows.map(r => ({
       id: r.id,
       signalType: r.signalType,
       signalName: r.signalName,

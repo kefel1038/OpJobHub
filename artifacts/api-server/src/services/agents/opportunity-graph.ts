@@ -169,7 +169,7 @@ class OpportunityGraph {
         existing.matchCount++;
         existing.weight = Math.min(1.0, existing.weight + 0.1);
       } else {
-        grouped.set(s.candidateId, { ...s, matchCount: 1 });
+        grouped.set(s.candidateId, { ...s, weight: s.weight ?? 0, matchCount: 1 });
       }
     }
 

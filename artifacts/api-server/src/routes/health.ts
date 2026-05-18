@@ -252,9 +252,10 @@ router.get("/db-check", async (_req, res) => {
 
 router.post("/migrate", async (_req, res) => {
   const { Pool } = require("pg");
-  const url =
-    process.env.DATABASE_URL ||
-    "postgresql://postgres.fmcblciptvnagrpsrzcw:Lovr_1990_Lovr@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres";
+  const url = process.env.DATABASE_URL;
+  if (!url) {
+    return res.status(500).json({ error: "DATABASE_URL environment variable is required" });
+  }
   const pool = new Pool({ connectionString: url, ssl: { rejectUnauthorized: false } });
   try {
     const statements = MIGRATION_SQL.split("--> statement-breakpoint").map((s) => s.trim()).filter(Boolean);

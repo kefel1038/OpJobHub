@@ -33,7 +33,7 @@ class MigrationStabilityService {
     const readiness = await this.computeReadiness(candidateId);
     const mobility = await this.computeMobility(candidateId);
     const relocationSuccessProbability = this.computeRelocationSuccess(readiness, mobility);
-    const retentionAfterRelocation = this.computeRetentionProbability(candidateId);
+    const retentionAfterRelocation = await this.computeRetentionProbability(candidateId);
     const adaptationRisk = this.determineAdaptationRisk(readiness, mobility);
     const churnRiskAfterRelocation = 1 - retentionAfterRelocation;
     const corridorFriction = destinationCountry

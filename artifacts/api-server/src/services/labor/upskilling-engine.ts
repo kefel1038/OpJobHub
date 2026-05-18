@@ -166,7 +166,7 @@ class UpskillingEngine {
       .from(discoveredCandidates)
       .where(
         and(
-          eq(discoveredCandidates.skills || "", skillName),
+          sql`${discoveredCandidates.skills} ? ${skillName}`,
           gte(discoveredCandidates.createdAt, new Date(Date.now() - 180 * 86400000)),
         ),
       )

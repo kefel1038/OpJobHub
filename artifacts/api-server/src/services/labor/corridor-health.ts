@@ -140,8 +140,8 @@ class CorridorHealthService {
             eq(migrationEvents.eventType, "relocation_completed"),
           ),
         );
-      const count = events[0]?.count || 0;
-      return { score: Math.min(1, 0.5 + count * 0.02), trend: count > 5 ? "established" : "developing" };
+      const eventCount = events[0]?.count || 0;
+      return { score: Math.min(1, 0.5 + eventCount * 0.02), trend: eventCount > 5 ? "established" : "developing" };
     } catch { return { score: 0.5, trend: "developing" }; }
   }
 

@@ -42,7 +42,12 @@ async function main() {
       for (const scraper of allScrapers) {
         try {
           logger.info({ source: scraper.name }, "Starting scraper");
-          const jobs = await scraper.scrape();
+          let jobs = await scraper.scrape();
+          if (jobs.length === 0) {
+            logger.warn({ source: scraper.name }, "Scraper returned 0 jobs, retrying once after 5s");
+            await new Promise((r) => setTimeout(r, 5000));
+            jobs = await scraper.scrape();
+          }
           logger.info({ source: scraper.name, count: jobs.length }, "Scraped jobs");
           await engine.processJobs(jobs);
         } catch (err: any) {

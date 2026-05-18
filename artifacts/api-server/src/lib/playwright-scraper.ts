@@ -94,6 +94,12 @@ export class PlaywrightScraper {
         });
 
         await page.waitForLoadState("domcontentloaded");
+
+        const hasContent = await page.evaluate(() => document.body.innerText.length > 0).catch(() => false);
+        if (!hasContent) {
+          throw new Error("Page loaded but body is empty — possible bot block");
+        }
+
         return;
       } catch (err: any) {
         lastError = err;
@@ -145,8 +151,10 @@ export class PlaywrightScraper {
       }
     }
 
-    const raw = await page.evaluate(
-      ({ cardSelector, fields, maxJobs }) => {
+    let raw: Array<Record<string, string>>;
+    try {
+      raw = await page.evaluate(
+        ({ cardSelector, fields, maxJobs }) => {
         const cards = document.querySelectorAll(cardSelector);
         const results: Array<Record<string, string>> = [];
 
@@ -172,6 +180,11 @@ export class PlaywrightScraper {
       },
       { cardSelector, fields, maxJobs: options?.maxJobs ?? 25 },
     );
+    } catch (err: any) {
+      logger.warn({ source, error: err.message }, "Failed to evaluate job cards");
+      await this.captureDebug(page, `${source}-evaluate-fail`);
+      return [];
+    }
 
     logger.info({ source, found: raw.length }, "Extracted raw job cards");
 

@@ -142,7 +142,7 @@ router.get("/simulation/accuracy", authMiddleware, requireEmployer, async (req: 
 
 router.get("/simulation/accuracy/:simulationType", authMiddleware, requireEmployer, async (req: Request, res: Response) => {
   try {
-    const simulationType = req.params.simulationType;
+    const simulationType = req.params.simulationType as string;
     const stats = await outcomeLearner.computeAccuracy({
       employerId: req.user!.id,
       simulationType,

@@ -28,7 +28,7 @@ class MarketBalancer {
       .where(
         and(
           eq(laborMetrics.metricType, "demand_index"),
-          eq(laborMetrics.role || "", role),
+          eq(laborMetrics.role, role),
           gte(laborMetrics.createdAt, new Date(Date.now() - windowDays * 86400000)),
         ),
       )
@@ -41,7 +41,7 @@ class MarketBalancer {
       .where(
         and(
           eq(laborMetrics.metricType, "supply_index"),
-          eq(laborMetrics.role || "", role),
+          eq(laborMetrics.role, role),
           gte(laborMetrics.createdAt, new Date(Date.now() - windowDays * 86400000)),
         ),
       )
@@ -221,7 +221,7 @@ class MarketBalancer {
       .where(
         and(
           eq(laborMetrics.metricType, "wage_pressure"),
-          eq(laborMetrics.role || "", role),
+          eq(laborMetrics.role, role),
           gte(laborMetrics.createdAt, new Date(Date.now() - 90 * 86400000)),
         ),
       )

@@ -119,8 +119,8 @@ router.get("/jobs/:id/similar", async (req: Request, res: Response) => {
         eq(jobs.status, "active"),
         sql`${jobs.id} != ${id}`,
         or(
-          eq(jobs.industry, job.industry),
-          eq(jobs.employmentType, job.employmentType),
+          eq(jobs.industry, job.industry ?? ""),
+          eq(jobs.employmentType, job.employmentType ?? ""),
           ilike(jobs.title, `%${job.title.split(" ").slice(0, 2).join(" ")}%`),
         ),
       ),

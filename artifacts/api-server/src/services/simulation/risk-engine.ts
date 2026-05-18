@@ -59,7 +59,7 @@ class RiskEngine {
 
     let skillGap = 0;
     if (params.jobSkills && params.candidateSkills) {
-      const missing = params.jobSkills.filter(s => !params.candidateSkills.includes(s));
+      const missing = params.jobSkills.filter(s => !(params.candidateSkills ?? []).includes(s));
       skillGap = params.jobSkills.length > 0 ? missing.length / params.jobSkills.length : 0;
       if (skillGap > 0.3) {
         contributingFactors.push(`${missing.length} skill gap${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}`);
