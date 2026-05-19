@@ -1,0 +1,91 @@
+name: Daily Qatar Jobs Autonomous Pipeline
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    inputs:
+      source:
+        description: "Scrape specific source (leave empty for all)"
+        required: false
+        type: string
+      dry-run:
+        description: "Run cleanup in dry-run mode (no destructive actions)"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: scrape-jobs
+  cancel-in-progress: true
+
+env:
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  SCRAPER_DEBUG_DIR: /tmp/scraper-debug
+  CLEANUP_ARCHIVE_DAYS: ${{ vars.CLEANUP_ARCHIVE_DAYS || '30' }}
+  CLEANUP_DELETE_DAYS: ${{ vars.CLEANUP_DELETE_DAYS || '60' }}
+  CLEANUP_DRY_RUN: ${{ inputs.dry-run && 'true' || 'false' }}
+
+jobs:
+  daily-pipeline:
+    name: Daily Job Ingestion Pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
+      - name: Build project
+        run: pnpm --filter @workspace/api-server build
+
+      - name: Run scraper
+        run: pnpm --filter @workspace/api-server run scrape
+        env:
+          SCRAPE_SOURCE: ${{ github.event.inputs.source || '' }}
+
+      - name: Run lifecycle cleanup
+        run: pnpm --filter @workspace/api-server run lifecycle:cleanup
+        env:
+          CLEANUP_ARCHIVE_DAYS: ${{ env.CLEANUP_ARCHIVE_DAYS }}
+          CLEANUP_DELETE_DAYS: ${{ env.CLEANUP_DELETE_DAYS }}
+          CLEANUP_DRY_RUN: ${{ env.CLEANUP_DRY_RUN }}
+
+      - name: Recompute freshness scores
+        run: pnpm --filter @workspace/api-server run lifecycle:freshness
+
+      - name: Update scraper health metrics
+        run: pnpm --filter @workspace/api-server run lifecycle:health
+
+      - name: Generate daily report
+        run: pnpm --filter @workspace/api-server run lifecycle:report
+
+      - name: Upload debug artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraper-debug-${{ github.run_id }}
+          path: /tmp/scraper-debug/
+          retention-days: 7
+
+      - name: Log completion
+        run: |
+          echo "=========================================="
+          echo "  Daily Qatar Jobs Pipeline Complete"
+          echo "  Timestamp: $(date -u)"
+          echo "  Run ID: ${{ github.run_id }}"
+          echo "=========================================="

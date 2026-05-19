@@ -366,15 +366,16 @@ export default function Jobs() {
               </Button>
               <div className="hidden sm:flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 rounded-full px-3 py-1.5">
                 <ChevronDown className="h-3.5 w-3.5" />
-                <select
-                  value={params.sort}
-                  onChange={(e) => setParams({ sort: e.target.value })}
-                  className="bg-transparent border-0 text-sm focus:outline-none cursor-pointer"
-                >
-                  <option value="newest">Newest</option>
-                  <option value="salary">Highest Salary</option>
-                  <option value="views">Most Viewed</option>
-                </select>
+                  <select
+                    value={params.sort}
+                    onChange={(e) => setParams({ sort: e.target.value })}
+                    className="bg-transparent border-0 text-sm focus:outline-none cursor-pointer"
+                  >
+                    <option value="freshest">Freshest</option>
+                    <option value="newest">Newest</option>
+                    <option value="salary">Highest Salary</option>
+                    <option value="views">Most Viewed</option>
+                  </select>
               </div>
             </div>
           </div>

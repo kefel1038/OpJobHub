@@ -35,7 +35,7 @@ router.get("/", async (req: Request, res: Response) => {
   const limitNum = Math.min(50, Math.max(1, parseInt(limit) || 20));
   const offset = (pageNum - 1) * limitNum;
 
-  const conditions: any[] = [eq(jobs.status, "active")];
+  const conditions: any[] = [and(eq(jobs.status, "active"), eq(jobs.isArchived, false))];
 
   if (q) {
     const searchTerm = `%${q}%`;
@@ -169,7 +169,9 @@ router.get("/", async (req: Request, res: Response) => {
         ? desc(jobs.salaryMax)
         : sort === "views"
           ? desc(jobs.viewCount)
-          : desc(jobs.createdAt);
+          : sort === "freshest"
+            ? desc(jobs.freshnessScore)
+            : desc(jobs.createdAt);
 
   const [{ total }] = await db
     .select({ total: count() })
@@ -207,7 +209,7 @@ router.get("/suggestions", async (req: Request, res: Response) => {
   const results = await db
     .select({ title: jobs.title })
     .from(jobs)
-    .where(and(eq(jobs.status, "active"), ilike(jobs.title, searchTerm)))
+    .where(and(eq(jobs.status, "active"), eq(jobs.isArchived, false), ilike(jobs.title, searchTerm)))
     .limit(10);
 
   const uniqueTitles = [...new Set(results.map((r) => r.title))];
@@ -218,7 +220,7 @@ router.get("/trending", async (req: Request, res: Response) => {
   const recent = await db
     .select({ title: jobs.title, count: count() })
     .from(jobs)
-    .where(and(eq(jobs.status, "active"), gte(jobs.createdAt, sql`NOW() - INTERVAL '7 days'`)))
+    .where(and(eq(jobs.status, "active"), eq(jobs.isArchived, false), gte(jobs.createdAt, sql`NOW() - INTERVAL '7 days'`)))
     .groupBy(jobs.title)
     .orderBy(desc(sql`count`))
     .limit(20);
@@ -231,12 +233,12 @@ router.get("/stats", async (req: Request, res: Response) => {
   const [{ total }] = await db
     .select({ total: count() })
     .from(jobs)
-    .where(eq(jobs.status, "active"));
+    .where(and(eq(jobs.status, "active"), eq(jobs.isArchived, false)));
 
   const industries = await db
     .select({ industry: jobs.industry, count: count() })
     .from(jobs)
-    .where(and(eq(jobs.status, "active"), sql`${jobs.industry} IS NOT NULL`))
+    .where(and(eq(jobs.status, "active"), eq(jobs.isArchived, false), sql`${jobs.industry} IS NOT NULL`))
     .groupBy(jobs.industry)
     .orderBy(desc(sql`count`))
     .limit(20);
@@ -244,7 +246,7 @@ router.get("/stats", async (req: Request, res: Response) => {
   const locations = await db
     .select({ location: jobs.location, count: count() })
     .from(jobs)
-    .where(and(eq(jobs.status, "active"), sql`${jobs.location} IS NOT NULL`))
+    .where(and(eq(jobs.status, "active"), eq(jobs.isArchived, false), sql`${jobs.location} IS NOT NULL`))
     .groupBy(jobs.location)
     .orderBy(desc(sql`count`))
     .limit(20);
@@ -252,7 +254,7 @@ router.get("/stats", async (req: Request, res: Response) => {
   const recentCount = await db
     .select({ count: count() })
     .from(jobs)
-    .where(and(eq(jobs.status, "active"), gte(jobs.createdAt, sql`NOW() - INTERVAL '24 hours'`)));
+    .where(and(eq(jobs.status, "active"), eq(jobs.isArchived, false), gte(jobs.createdAt, sql`NOW() - INTERVAL '24 hours'`)));
 
   res.json({
     totalJobs: Number(total),

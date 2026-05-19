@@ -47,6 +47,14 @@ function isRecentJob(createdAt: string): boolean {
   return diff < 48 * 60 * 60 * 1000;
 }
 
+function getFreshnessLabel(score: number | null | undefined): { label: string; color: string } | null {
+  if (score == null) return null;
+  if (score >= 90) return { label: "FRESH", color: "bg-emerald-500/15 text-emerald-600 border-emerald-500/20 dark:text-emerald-400" };
+  if (score >= 60) return { label: "ACTIVE", color: "bg-blue-500/15 text-blue-600 border-blue-500/20 dark:text-blue-400" };
+  if (score >= 30) return { label: "AGING", color: "bg-amber-500/15 text-amber-600 border-amber-500/20 dark:text-amber-400" };
+  return { label: "STALE", color: "bg-gray-500/15 text-gray-600 border-gray-500/20 dark:text-gray-400" };
+}
+
 export function JobCard({ job, index, onSelect, isSelected }: JobCardProps) {
   const [saved, setSaved] = useState(false);
   const colorClass = companyColors[job.id % companyColors.length];
@@ -70,6 +78,7 @@ export function JobCard({ job, index, onSelect, isSelected }: JobCardProps) {
   const isNew = isNewJob(job.createdAt);
   const isRecent = isRecentJob(job.createdAt);
   const locationBadge = getLocationBadge(job.location);
+  const freshnessBadge = getFreshnessLabel(job.freshnessScore);
 
   return (
     <motion.div
@@ -99,6 +108,11 @@ export function JobCard({ job, index, onSelect, isSelected }: JobCardProps) {
                 <h3 className="text-base font-bold text-foreground truncate group-hover:text-primary transition-colors">
                   {job.title}
                 </h3>
+                {freshnessBadge && (
+                  <Badge className={`${freshnessBadge.color} text-[10px] px-2 py-0 rounded-md font-semibold`}>
+                    {freshnessBadge.label}
+                  </Badge>
+                )}
                 {isNew && (
                   <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/20 text-[10px] px-2 py-0 rounded-md font-semibold dark:text-emerald-400">
                     NEW TODAY

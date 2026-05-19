@@ -1,10 +1,13 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, jobs, scrapeLogs, jobSources } from "@workspace/db";
-import { eq, desc, sql, count, and, gte, lt, like, inArray } from "drizzle-orm";
+import { db, jobs, scrapeLogs, jobSources, sourceHealth } from "@workspace/db";
+import { eq, desc, sql, count, and, or, gte, lt, like, inArray } from "drizzle-orm";
 import { authMiddleware, requireRole } from "../lib/auth";
 import { ScraperEngine } from "../lib/scraper-engine";
 import { allScrapers } from "../scrapers";
 import { logger } from "../lib/logger";
+import { freshnessEngine } from "../services/jobs/freshness-engine";
+import { sourceHealthMonitor } from "../services/jobs/source-health";
+import { scrapeReporter } from "../services/jobs/reporting";
 
 const router: IRouter = Router();
 
@@ -101,25 +104,81 @@ router.post("/scraper/cleanup", authMiddleware, requireRole("admin"), async (req
 });
 
 router.get("/scraper/stats", async (req: Request, res: Response) => {
-  const totalJobs = await db.select({ count: count() }).from(jobs).where(eq(jobs.status, "active"));
+  const totalJobs = await db.select({ count: count() }).from(jobs).where(and(eq(jobs.status, "active"), eq(jobs.isArchived, false)));
   const expiredJobs = await db.select({ count: count() }).from(jobs).where(eq(jobs.status, "expired"));
+  const archivedJobs = await db.select({ count: count() }).from(jobs).where(eq(jobs.isArchived, true));
   const lastScrape = await db.select().from(scrapeLogs).orderBy(desc(scrapeLogs.startedAt)).limit(1);
 
   const sources = await db.select({
     source: jobs.source,
     count: count(),
-  }).from(jobs).where(eq(jobs.status, "active")).groupBy(jobs.source);
+  }).from(jobs).where(and(eq(jobs.status, "active"), eq(jobs.isArchived, false))).groupBy(jobs.source);
 
   const recentJobs = await db.select({ count: count() }).from(jobs)
-    .where(and(eq(jobs.status, "active"), gte(jobs.createdAt, sql`NOW() - INTERVAL '24 hours'`)));
+    .where(and(eq(jobs.status, "active"), eq(jobs.isArchived, false), gte(jobs.createdAt, sql`NOW() - INTERVAL '24 hours'`)));
+
+  const healthSummary = await db.select({
+    source: sourceHealth.sourceName,
+    level: sourceHealth.healthLevel,
+    score: sourceHealth.healthScore,
+  }).from(sourceHealth).where(or(eq(sourceHealth.healthLevel, "warning"), eq(sourceHealth.healthLevel, "broken")));
 
   res.json({
     totalJobs: Number(totalJobs[0]?.count ?? 0),
     expiredJobs: Number(expiredJobs[0]?.count ?? 0),
+    archivedJobs: Number(archivedJobs[0]?.count ?? 0),
     recentJobs: Number(recentJobs[0]?.count ?? 0),
     lastScrape: lastScrape[0] ?? null,
     sources,
+    healthWarnings: healthSummary,
   });
+});
+
+router.post("/scraper/refresh-freshness", authMiddleware, requireRole("admin"), async (_req: Request, res: Response) => {
+  try {
+    const count = await freshnessEngine.recomputeAll();
+    res.json({ success: true, updated: count });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get("/scraper/source-health", async (_req: Request, res: Response) => {
+  const health = await sourceHealthMonitor.getAllSourceHealth();
+  res.json(health);
+});
+
+router.get("/scraper/source-health/:sourceName", async (req: Request, res: Response) => {
+  const sourceName = String(req.params.sourceName);
+  const health = await sourceHealthMonitor.getSourceHealth(sourceName);
+  if (!health) {
+    res.status(404).json({ error: "Source health not found" });
+    return;
+  }
+  res.json(health);
+});
+
+router.post("/scraper/update-health", authMiddleware, requireRole("admin"), async (_req: Request, res: Response) => {
+  try {
+    await sourceHealthMonitor.updateAllSources();
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get("/scraper/daily-report", async (_req: Request, res: Response) => {
+  const report = await scrapeReporter.getLatestReport();
+  res.json(report ?? { error: "No report available" });
+});
+
+router.post("/scraper/generate-report", authMiddleware, requireRole("admin"), async (_req: Request, res: Response) => {
+  try {
+    const report = await scrapeReporter.generateDailyReport();
+    res.json({ success: true, report });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 export default router;

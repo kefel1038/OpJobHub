@@ -2,6 +2,7 @@ import { db, jobs, jobSources, scrapeLogs, companies, jobEmbeddings } from "@wor
 import { eq, and, sql, gte, lt, desc, inArray } from "drizzle-orm";
 import { logger } from "./logger";
 import { openrouter, getEmbedding } from "./openai";
+import { FreshnessEngine } from "../services/jobs/freshness-engine";
 
 export interface ScrapedJob {
   title: string;
@@ -46,6 +47,7 @@ export class ScraperEngine {
   private jobsDuplicates = 0;
   private jobsFailed = 0;
   private errors: string[] = [];
+  private freshnessEngine = new FreshnessEngine();
 
   setSourceId(id: number | null) {
     this.sourceId = id;
@@ -186,6 +188,17 @@ export class ScraperEngine {
       }
     }
 
+    const freshnessScore = await this.freshnessEngine.computeScore({
+      id: 0,
+      postedAt: sj.postedAt ?? new Date(),
+      lastSeenAt: new Date(),
+      scrapedAt: new Date(),
+      createdAt: new Date(),
+      viewCount: 0,
+      applyCount: 0,
+      saveCount: 0,
+    });
+
     const [inserted] = await db
       .insert(jobs)
       .values({
@@ -217,6 +230,8 @@ export class ScraperEngine {
         scrapedAt: new Date(),
         lastSeenAt: new Date(),
         status: "active",
+        isArchived: false,
+        freshnessScore,
         aiSummary,
       })
       .returning({ id: jobs.id });
@@ -306,17 +321,35 @@ export class ScraperEngine {
       }
     }
 
+    updateData.freshnessScore = await this.freshnessEngine.computeScore({
+      id: target.id,
+      postedAt: sj.postedAt ?? target.posted_at ?? target.postedAt,
+      lastSeenAt: now,
+      scrapedAt: now,
+      createdAt: target.created_at ?? target.createdAt,
+      viewCount: target.view_count ?? target.viewCount ?? 0,
+      applyCount: target.apply_count ?? target.applyCount ?? 0,
+      saveCount: target.save_count ?? target.saveCount ?? 0,
+    });
+    updateData.isArchived = false;
+
     await db.update(jobs).set(updateData).where(eq(jobs.id, target.id));
   }
 
   async cleanupExpired() {
     const result = await db
       .update(jobs)
-      .set({ status: "expired" })
+      .set({
+        status: "expired",
+        isArchived: true,
+        archivedAt: new Date(),
+        freshnessScore: 0,
+      })
       .where(
         and(
           lt(jobs.expiresAt, new Date()),
           eq(jobs.status, "active"),
+          eq(jobs.isArchived, false),
         ),
       )
       .returning({ id: jobs.id });
@@ -330,11 +363,17 @@ export class ScraperEngine {
     cutoff.setDate(cutoff.getDate() - days);
     const result = await db
       .update(jobs)
-      .set({ status: "expired" })
+      .set({
+        status: "expired",
+        isArchived: true,
+        archivedAt: new Date(),
+        freshnessScore: 0,
+      })
       .where(
         and(
           lt(jobs.lastSeenAt, cutoff),
           eq(jobs.status, "active"),
+          eq(jobs.isArchived, false),
         ),
       )
       .returning({ id: jobs.id });

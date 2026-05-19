@@ -13,8 +13,13 @@ router.get("/jobs", async (_req: Request, res: Response) => {
     const allJobs = await db
       .select()
       .from(jobs)
-      .where(eq(jobs.status, "active"))
-      .orderBy(desc(jobs.isFeatured), desc(jobs.createdAt));
+      .where(
+        and(
+          eq(jobs.status, "active"),
+          eq(jobs.isArchived, false),
+        ),
+      )
+      .orderBy(desc(jobs.freshnessScore), desc(jobs.isFeatured), desc(jobs.createdAt));
     res.json(serializeDates(allJobs));
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -30,8 +35,14 @@ router.get("/jobs/featured", async (_req: Request, res: Response) => {
   const featuredJobs = await db
     .select()
     .from(jobs)
-    .where(and(eq(jobs.status, "active"), eq(jobs.isFeatured, true)))
-    .orderBy(desc(jobs.createdAt))
+    .where(
+      and(
+        eq(jobs.status, "active"),
+        eq(jobs.isArchived, false),
+        eq(jobs.isFeatured, true),
+      ),
+    )
+    .orderBy(desc(jobs.freshnessScore), desc(jobs.createdAt))
     .limit(20);
 
   res.json(serializeDates(featuredJobs));
@@ -41,8 +52,14 @@ router.get("/jobs/recent", async (_req: Request, res: Response) => {
   const recentJobs = await db
     .select()
     .from(jobs)
-    .where(and(eq(jobs.status, "active"), gte(jobs.createdAt, sql`NOW() - INTERVAL '24 hours'`)))
-    .orderBy(desc(jobs.createdAt))
+    .where(
+      and(
+        eq(jobs.status, "active"),
+        eq(jobs.isArchived, false),
+        gte(jobs.createdAt, sql`NOW() - INTERVAL '24 hours'`),
+      ),
+    )
+    .orderBy(desc(jobs.freshnessScore), desc(jobs.createdAt))
     .limit(50);
 
   res.json(serializeDates(recentJobs));
@@ -52,8 +69,14 @@ router.get("/jobs/urgent", async (_req: Request, res: Response) => {
   const urgentJobs = await db
     .select()
     .from(jobs)
-    .where(and(eq(jobs.status, "active"), eq(jobs.isUrgent, true)))
-    .orderBy(desc(jobs.createdAt))
+    .where(
+      and(
+        eq(jobs.status, "active"),
+        eq(jobs.isArchived, false),
+        eq(jobs.isUrgent, true),
+      ),
+    )
+    .orderBy(desc(jobs.freshnessScore), desc(jobs.createdAt))
     .limit(20);
 
   res.json(serializeDates(urgentJobs));
@@ -63,8 +86,14 @@ router.get("/jobs/visa-sponsored", async (_req: Request, res: Response) => {
   const visaJobs = await db
     .select()
     .from(jobs)
-    .where(and(eq(jobs.status, "active"), eq(jobs.visaSponsored, true)))
-    .orderBy(desc(jobs.createdAt))
+    .where(
+      and(
+        eq(jobs.status, "active"),
+        eq(jobs.isArchived, false),
+        eq(jobs.visaSponsored, true),
+      ),
+    )
+    .orderBy(desc(jobs.freshnessScore), desc(jobs.createdAt))
     .limit(50);
 
   res.json(serializeDates(visaJobs));
@@ -75,8 +104,14 @@ router.get("/jobs/industry/:industry", async (req: Request, res: Response) => {
   const industryJobs = await db
     .select()
     .from(jobs)
-    .where(and(eq(jobs.status, "active"), ilike(jobs.industry, `%${industry}%`)))
-    .orderBy(desc(jobs.createdAt))
+    .where(
+      and(
+        eq(jobs.status, "active"),
+        eq(jobs.isArchived, false),
+        ilike(jobs.industry, `%${industry}%`),
+      ),
+    )
+    .orderBy(desc(jobs.freshnessScore), desc(jobs.createdAt))
     .limit(50);
 
   res.json(serializeDates(industryJobs));
@@ -117,6 +152,7 @@ router.get("/jobs/:id/similar", async (req: Request, res: Response) => {
     .where(
       and(
         eq(jobs.status, "active"),
+        eq(jobs.isArchived, false),
         sql`${jobs.id} != ${id}`,
         or(
           eq(jobs.industry, job.industry ?? ""),
@@ -125,7 +161,7 @@ router.get("/jobs/:id/similar", async (req: Request, res: Response) => {
         ),
       ),
     )
-    .orderBy(desc(jobs.createdAt))
+    .orderBy(desc(jobs.freshnessScore), desc(jobs.createdAt))
     .limit(6);
 
   res.json(serializeDates(similarJobs));

@@ -2,6 +2,8 @@ import { ScraperEngine } from "../lib/scraper-engine";
 import { PlaywrightScraper } from "../lib/playwright-scraper";
 import { allScrapers } from "../scrapers";
 import { logger } from "../lib/logger";
+import { FreshnessEngine } from "../services/jobs/freshness-engine";
+import { SourceHealthMonitor } from "../services/jobs/source-health";
 
 async function main() {
   const sourceFilter = process.env.SCRAPE_SOURCE || "";
@@ -61,6 +63,14 @@ async function main() {
 
     const stale = await engine.archiveStale(7);
     logger.info({ stale }, "Stale jobs archived");
+
+    const freshnessEngine = new FreshnessEngine();
+    const freshnessCount = await freshnessEngine.recomputeAll();
+    logger.info({ count: freshnessCount }, "Freshness scores recomputed");
+
+    const sourceHealthMonitor = new SourceHealthMonitor();
+    await sourceHealthMonitor.updateAllSources();
+    logger.info("Source health metrics updated");
 
     await engine.finalize();
     logger.info("Scrape session completed");

@@ -45,6 +45,9 @@ export interface Job {
   postedAt?: string;
   expiresAt?: string;
   scrapedAt?: string;
+  archivedAt?: string | null;
+  isArchived?: boolean;
+  freshnessScore?: number | null;
   aiSummary?: string | null;
   aiCategory?: string | null;
   aiMatchScore?: number | null;
@@ -91,9 +94,11 @@ export interface SearchStats {
 export interface ScraperStats {
   totalJobs: number;
   expiredJobs: number;
+  archivedJobs: number;
   recentJobs: number;
   lastScrape: any;
   sources: Array<{ source: string; count: number }>;
+  healthWarnings?: Array<{ source: string; level: string; score: number }>;
 }
 
 export function getToken(): string | null {
@@ -347,6 +352,30 @@ export const api = {
   },
   cleanupExpiredJobs() {
     return request<{ success: boolean; deleted: number }>("/scraper/cleanup", {
+      method: "POST",
+    });
+  },
+  refreshFreshness() {
+    return request<{ success: boolean; updated: number }>("/scraper/refresh-freshness", {
+      method: "POST",
+    });
+  },
+  getSourceHealth() {
+    return request<any[]>("/scraper/source-health");
+  },
+  getSourceHealthByName(name: string) {
+    return request<any>(`/scraper/source-health/${encodeURIComponent(name)}`);
+  },
+  updateSourceHealth() {
+    return request<{ success: boolean }>("/scraper/update-health", {
+      method: "POST",
+    });
+  },
+  getDailyReport() {
+    return request<any>("/scraper/daily-report");
+  },
+  generateReport() {
+    return request<{ success: boolean; report: any }>("/scraper/generate-report", {
       method: "POST",
     });
   },
