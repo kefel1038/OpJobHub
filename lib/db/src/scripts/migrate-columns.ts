@@ -60,7 +60,10 @@ async function main() {
   }
 
   const dbUrl = await getIpv4ConnectionString(process.env.DATABASE_URL);
-  const pool = new Pool({ connectionString: dbUrl });
+  const pool = new Pool({
+    connectionString: dbUrl,
+    ssl: { rejectUnauthorized: false },
+  });
   const client = await pool.connect();
 
   try {
