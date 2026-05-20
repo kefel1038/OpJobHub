@@ -19,6 +19,7 @@ env:
   OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
   SCRAPER_DEBUG_DIR: /tmp/scraper-debug
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   scrape:
@@ -33,7 +34,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: "pnpm"
 
       - name: Install dependencies
@@ -41,6 +42,9 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install chromium
+
+      - name: Build project
+        run: pnpm --filter @workspace/api-server build
 
       - name: Run scraper
         run: pnpm --filter @workspace/api-server run scrape
@@ -50,13 +54,14 @@ jobs:
       - name: Cleanup expired jobs
         run: pnpm --filter @workspace/api-server run scrape:cleanup
 
-      - name: Upload debug artifacts on failure
-        if: failure()
+      - name: Upload debug artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: scraper-debug-${{ github.run_id }}
           path: /tmp/scraper-debug/
           retention-days: 7
+          if-no-files-found: ignore
 
       - name: Log completion
         run: echo "Scrape completed at $(date)"

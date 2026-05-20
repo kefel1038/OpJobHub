@@ -27,6 +27,7 @@ env:
   CLEANUP_ARCHIVE_DAYS: ${{ vars.CLEANUP_ARCHIVE_DAYS || '30' }}
   CLEANUP_DELETE_DAYS: ${{ vars.CLEANUP_DELETE_DAYS || '60' }}
   CLEANUP_DRY_RUN: ${{ inputs.dry-run && 'true' || 'false' }}
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   daily-pipeline:
@@ -41,7 +42,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: "pnpm"
 
       - name: Install dependencies
@@ -74,13 +75,14 @@ jobs:
       - name: Generate daily report
         run: pnpm --filter @workspace/api-server run lifecycle:report
 
-      - name: Upload debug artifacts on failure
-        if: failure()
+      - name: Upload debug artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: scraper-debug-${{ github.run_id }}
           path: /tmp/scraper-debug/
           retention-days: 7
+          if-no-files-found: ignore
 
       - name: Log completion
         run: |
