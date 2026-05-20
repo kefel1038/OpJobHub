@@ -32,8 +32,19 @@ async function getIpv4ConnectionString(url: string): Promise<string> {
     console.log(`Resolved ${host} → ${ipv4}`);
     return url.replace(host, ipv4);
   } catch {
-    console.warn(`Could not resolve ${host} to IPv4, trying connection anyway`);
-    return url;
+    console.error("");
+    console.error("========================================================================");
+    console.error("  Cannot reach your Supabase database from GitHub Actions.");
+    console.error("  Reason: Your project is IPv6-only, but GHA runners don't have IPv6.");
+    console.error("");
+    console.error("  Fix: Enable the IPv4 add-on in your Supabase project:");
+    console.error("  https://supabase.com/dashboard/project/fmcblciptvnagrpsrzcw/settings/database");
+    console.error("  → scroll to 'IPv4 Add-on' → enable it");
+    console.error("");
+    console.error("  After enabling, update the DATABASE_URL secret in your GitHub repo.");
+    console.error("========================================================================");
+    console.error("");
+    process.exit(1);
   }
 }
 
