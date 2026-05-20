@@ -11,10 +11,7 @@ async function main() {
   }
 
   console.log("Connecting to database...");
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-  });
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   const client = await pool.connect();
 
   try {
