@@ -2,70 +2,17 @@ import dns from "dns";
 dns.setDefaultResultOrder("ipv4first");
 
 import pg from "pg";
-import { resolve4 } from "dns/promises";
 
 const { Pool } = pg;
-
-function stripSslMode(url: string): string {
-  return url.replace(/(\?|&)sslmode=[^&]*/g, "$1").replace(/(\?|&)uselibpqcompat=[^&]*/g, "$1").replace(/\?$/, "");
-}
-
-async function getIpv4ConnectionString(url: string): Promise<string> {
-  const hostMatch = url.match(/\/\/([^@]+@)?([^:\/\s?#]+)/);
-  if (!hostMatch) return url;
-  const host = hostMatch[2];
-
-  if (/^\d+\.\d+\.\d+\.\d+$/.test(host)) return stripSslMode(url);
-
-  if (host.startsWith("[")) {
-    console.error("");
-    console.error("ERROR: DATABASE_URL contains an IPv6 literal.");
-    console.error("Update the DATABASE_URL secret to use your Supabase hostname");
-    console.error("(e.g. db.xxxxx.supabase.co) instead of the IPv6 address.");
-    process.exit(1);
-  }
-
-  if ((host.match(/:/g) || []).length > 1) {
-    console.error("");
-    console.error("ERROR: DATABASE_URL contains a bare IPv6 address.");
-    console.error("Update the DATABASE_URL secret to use your Supabase hostname");
-    console.error("(e.g. db.xxxxx.supabase.co) instead.");
-    process.exit(1);
-  }
-
-  try {
-    const addrs = await resolve4(host);
-    const ipv4 = addrs[0];
-    console.log(`Resolved ${host} → ${ipv4}`);
-    return stripSslMode(url.replace(host, ipv4));
-  } catch {
-    console.error("");
-    console.error("========================================================================");
-    console.error("  Cannot reach your Supabase database from GitHub Actions.");
-    console.error("  Reason: Your project is IPv6-only (no IPv4 DNS record).");
-    console.error("  GHA runners do not have IPv6 connectivity.");
-    console.error("");
-    console.error("  Fix: Add an IPv4 address to your Supabase project:");
-    console.error("  https://supabase.com/dashboard/project/fmcblciptvnagrpsrzcw/settings/database");
-    console.error("  → scroll to 'IPv4 Add-on' → enable it");
-    console.error("");
-    console.error("  Alternatively, update DATABASE_URL to use a region pooler:");
-    console.error("  postgresql://postgres:password@aws-0-REGION.pooler.supabase.com:5432/postgres");
-    console.error("  (Replace REGION with your project's AWS region)");
-    console.error("========================================================================");
-    console.error("");
-    process.exit(1);
-  }
-}
 
 async function main() {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required");
   }
 
-  const dbUrl = await getIpv4ConnectionString(process.env.DATABASE_URL);
+  console.log("Connecting to database...");
   const pool = new Pool({
-    connectionString: dbUrl,
+    connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
   });
   const client = await pool.connect();
