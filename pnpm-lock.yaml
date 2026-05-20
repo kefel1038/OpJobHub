@@ -15,6 +15,9 @@ catalogs:
     drizzle-orm:
       specifier: ^0.45.1
       version: 0.45.2
+    tsx:
+      specifier: ^4.21.0
+      version: 4.21.0
     zod:
       specifier: ^3.25.76
       version: 3.25.76
@@ -405,6 +408,9 @@ importers:
       drizzle-kit:
         specifier: ^0.31.9
         version: 0.31.10
+      tsx:
+        specifier: 'catalog:'
+        version: 4.21.0
 
   lib/enterprise-sdk:
     dependencies:
