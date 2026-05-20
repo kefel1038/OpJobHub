@@ -1,13 +1,49 @@
 import pg from "pg";
+import { resolve4 } from "dns/promises";
 
 const { Pool } = pg;
+
+async function getIpv4ConnectionString(url: string): Promise<string> {
+  const hostMatch = url.match(/\/\/([^@]+@)?([^:\/\s?#]+)/);
+  if (!hostMatch) return url;
+  const host = hostMatch[2];
+
+  // If it's already an IPv4 literal, nothing to do
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(host)) return url;
+
+  // If it's an IPv6 literal, we cannot resolve to IPv4 — user must use hostname
+  if (host.startsWith("[")) {
+    console.error("ERROR: DATABASE_URL contains an IPv6 literal. GitHub Actions does not support IPv6.");
+    console.error("Update the DATABASE_URL secret to use your Supabase hostname (e.g. db.xxxxx.supabase.co) instead of the IPv6 address.");
+    process.exit(1);
+  }
+
+  // Heuristic: bare IPv6 without brackets (contains multiple colons)
+  if ((host.match(/:/g) || []).length > 1) {
+    console.error("ERROR: DATABASE_URL contains a bare IPv6 address. GitHub Actions does not support IPv6.");
+    console.error("Update the DATABASE_URL secret to use your Supabase hostname (e.g. db.xxxxx.supabase.co) instead.");
+    process.exit(1);
+  }
+
+  // Resolve hostname to IPv4
+  try {
+    const addrs = await resolve4(host);
+    const ipv4 = addrs[0];
+    console.log(`Resolved ${host} → ${ipv4}`);
+    return url.replace(host, ipv4);
+  } catch {
+    console.warn(`Could not resolve ${host} to IPv4, trying connection anyway`);
+    return url;
+  }
+}
 
 async function main() {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required");
   }
 
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL, family: 4 });
+  const dbUrl = await getIpv4ConnectionString(process.env.DATABASE_URL);
+  const pool = new Pool({ connectionString: dbUrl });
   const client = await pool.connect();
 
   try {
