@@ -44,7 +44,7 @@ jobs:
         run: npx playwright install chromium
 
       - name: Sync database schema
-        run: pnpm --filter @workspace/db push
+        run: pnpm --filter @workspace/db run migrate-columns
 
       - name: Build project
         run: pnpm --filter @workspace/api-server build
