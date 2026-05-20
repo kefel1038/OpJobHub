@@ -1,3 +1,6 @@
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first");
+
 import pg from "pg";
 import { resolve4 } from "dns/promises";
 
@@ -8,24 +11,24 @@ async function getIpv4ConnectionString(url: string): Promise<string> {
   if (!hostMatch) return url;
   const host = hostMatch[2];
 
-  // If it's already an IPv4 literal, nothing to do
   if (/^\d+\.\d+\.\d+\.\d+$/.test(host)) return url;
 
-  // If it's an IPv6 literal, we cannot resolve to IPv4 — user must use hostname
   if (host.startsWith("[")) {
-    console.error("ERROR: DATABASE_URL contains an IPv6 literal. GitHub Actions does not support IPv6.");
-    console.error("Update the DATABASE_URL secret to use your Supabase hostname (e.g. db.xxxxx.supabase.co) instead of the IPv6 address.");
+    console.error("");
+    console.error("ERROR: DATABASE_URL contains an IPv6 literal.");
+    console.error("Update the DATABASE_URL secret to use your Supabase hostname");
+    console.error("(e.g. db.xxxxx.supabase.co) instead of the IPv6 address.");
     process.exit(1);
   }
 
-  // Heuristic: bare IPv6 without brackets (contains multiple colons)
   if ((host.match(/:/g) || []).length > 1) {
-    console.error("ERROR: DATABASE_URL contains a bare IPv6 address. GitHub Actions does not support IPv6.");
-    console.error("Update the DATABASE_URL secret to use your Supabase hostname (e.g. db.xxxxx.supabase.co) instead.");
+    console.error("");
+    console.error("ERROR: DATABASE_URL contains a bare IPv6 address.");
+    console.error("Update the DATABASE_URL secret to use your Supabase hostname");
+    console.error("(e.g. db.xxxxx.supabase.co) instead.");
     process.exit(1);
   }
 
-  // Resolve hostname to IPv4
   try {
     const addrs = await resolve4(host);
     const ipv4 = addrs[0];
@@ -35,13 +38,16 @@ async function getIpv4ConnectionString(url: string): Promise<string> {
     console.error("");
     console.error("========================================================================");
     console.error("  Cannot reach your Supabase database from GitHub Actions.");
-    console.error("  Reason: Your project is IPv6-only, but GHA runners don't have IPv6.");
+    console.error("  Reason: Your project is IPv6-only (no IPv4 DNS record).");
+    console.error("  GHA runners do not have IPv6 connectivity.");
     console.error("");
-    console.error("  Fix: Enable the IPv4 add-on in your Supabase project:");
+    console.error("  Fix: Add an IPv4 address to your Supabase project:");
     console.error("  https://supabase.com/dashboard/project/fmcblciptvnagrpsrzcw/settings/database");
     console.error("  → scroll to 'IPv4 Add-on' → enable it");
     console.error("");
-    console.error("  After enabling, update the DATABASE_URL secret in your GitHub repo.");
+    console.error("  Alternatively, update DATABASE_URL to use a region pooler:");
+    console.error("  postgresql://postgres:password@aws-0-REGION.pooler.supabase.com:5432/postgres");
+    console.error("  (Replace REGION with your project's AWS region)");
     console.error("========================================================================");
     console.error("");
     process.exit(1);

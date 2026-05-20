@@ -20,6 +20,7 @@ env:
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
   SCRAPER_DEBUG_DIR: /tmp/scraper-debug
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  NODE_OPTIONS: --dns-result-order=ipv4first
 
 jobs:
   scrape:

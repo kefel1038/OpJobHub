@@ -28,6 +28,7 @@ env:
   CLEANUP_DELETE_DAYS: ${{ vars.CLEANUP_DELETE_DAYS || '60' }}
   CLEANUP_DRY_RUN: ${{ inputs.dry-run && 'true' || 'false' }}
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  NODE_OPTIONS: --dns-result-order=ipv4first
 
 jobs:
   daily-pipeline:
