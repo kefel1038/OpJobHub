@@ -6,12 +6,16 @@ import { resolve4 } from "dns/promises";
 
 const { Pool } = pg;
 
+function stripSslMode(url: string): string {
+  return url.replace(/(\?|&)sslmode=[^&]*/g, "$1").replace(/(\?|&)uselibpqcompat=[^&]*/g, "$1").replace(/\?$/, "");
+}
+
 async function getIpv4ConnectionString(url: string): Promise<string> {
   const hostMatch = url.match(/\/\/([^@]+@)?([^:\/\s?#]+)/);
   if (!hostMatch) return url;
   const host = hostMatch[2];
 
-  if (/^\d+\.\d+\.\d+\.\d+$/.test(host)) return url;
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(host)) return stripSslMode(url);
 
   if (host.startsWith("[")) {
     console.error("");
@@ -33,7 +37,7 @@ async function getIpv4ConnectionString(url: string): Promise<string> {
     const addrs = await resolve4(host);
     const ipv4 = addrs[0];
     console.log(`Resolved ${host} → ${ipv4}`);
-    return url.replace(host, ipv4);
+    return stripSslMode(url.replace(host, ipv4));
   } catch {
     console.error("");
     console.error("========================================================================");
