@@ -2,12 +2,12 @@ import type { ScrapedJob } from "../lib/scraper-engine";
 import { PlaywrightScraper } from "../lib/playwright-scraper";
 import { logger } from "../lib/logger";
 
-const URL = "https://mzadqatar.com/en/job-vacancies/job-offer";
+const BASE_URL = "https://mzadqatar.com/en/job-vacancies/job-offer";
 const MAX_PAGES = 3;
 
 export async function scrapeMzadQatar(): Promise<ScrapedJob[]> {
   const pw = PlaywrightScraper.getInstance();
-  const page = await pw.navigate(URL, { timeout: 45_000, retries: 2 });
+  const page = await pw.navigate(BASE_URL, { timeout: 45_000, retries: 2 });
 
   try {
     await page.waitForLoadState("networkidle");
@@ -22,7 +22,7 @@ export async function scrapeMzadQatar(): Promise<ScrapedJob[]> {
         if ((await nextBtn.count()) === 0) break;
         const href = await nextBtn.getAttribute("href");
         if (!href) break;
-        await page.goto(new URL(href, URL).href, { waitUntil: "networkidle", timeout: 30_000 });
+        await page.goto(new URL(href, BASE_URL).href, { waitUntil: "networkidle", timeout: 30_000 });
         await page.waitForSelector(".products_section_helper", { timeout: 10_000 }).catch(() => {});
         await page.waitForTimeout(2000);
       }
