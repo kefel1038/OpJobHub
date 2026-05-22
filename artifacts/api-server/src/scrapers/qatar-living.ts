@@ -51,6 +51,22 @@ export async function scrapeQatarLiving(): Promise<ScrapedJob[]> {
     if (capturedJobs.length > 0) return capturedJobs;
 
     const domJobs = await page.evaluate(() => {
+      const extractCompany = (lines: string[], title: string): string | null => {
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed === title || trimmed.length > 60) continue;
+          if (trimmed.match(/^(at|by|@)\s+/i)) return trimmed.replace(/^(at|by|@)\s+/i, "").trim();
+        }
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed === title || trimmed.length > 60) continue;
+          if (trimmed.match(/^[A-Z][a-z]+(\s+[A-Z][a-z]+)*$/) && !trimmed.match(/(Doha|Qatar)/i)) {
+            return trimmed;
+          }
+        }
+        return null;
+      };
+
       const results: Array<{
         title: string;
         company: string;
@@ -114,22 +130,6 @@ export async function scrapeQatarLiving(): Promise<ScrapedJob[]> {
   } finally {
     await page.close().catch(() => {});
   }
-}
-
-function extractCompany(lines: string[], title: string): string | null {
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed === title || trimmed.length > 60) continue;
-    if (trimmed.match(/^(at|by|@)\s+/i)) return trimmed.replace(/^(at|by|@)\s+/i, "").trim();
-  }
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed === title || trimmed.length > 60) continue;
-    if (trimmed.match(/^[A-Z][a-z]+(\s+[A-Z][a-z]+)*$/) && !trimmed.match(/(Doha|Qatar)/i)) {
-      return trimmed;
-    }
-  }
-  return null;
 }
 
 async function tryFetchApi(pw: PlaywrightScraper, url: string): Promise<ScrapedJob[]> {
