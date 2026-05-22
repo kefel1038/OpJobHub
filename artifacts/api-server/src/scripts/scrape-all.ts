@@ -6,7 +6,7 @@ import { FreshnessEngine } from "../services/jobs/freshness-engine";
 import { SourceHealthMonitor } from "../services/jobs/source-health";
 
 async function main() {
-  const sourceFilter = process.env.SCRAPE_SOURCE || "";
+  const sourceFilter = (process.env.SCRAPE_SOURCE || "").trim();
   const useQueues = !!process.env.REDIS_URL;
 
   logger.info({ sourceFilter: sourceFilter || "all", mode: useQueues ? "queue" : "inline" }, "Starting scrape session");
