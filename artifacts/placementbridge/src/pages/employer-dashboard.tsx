@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import {
   LayoutDashboard, Briefcase, Users, MessageSquare, BarChart3,
   Settings, Bell, Search, Menu, X, Plus,
@@ -49,7 +49,14 @@ const navItems: { id: TabId; label: string; icon: React.ElementType; count?: str
 
 export default function EmployerDashboard() {
   const { user, isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const search = useSearch();
+  const initialTab = (() => {
+    const params = new URLSearchParams(search);
+    const tab = params.get("tab") as TabId | null;
+    const validTabs: TabId[] = ["overview", "jobs", "candidates", "messages", "analytics", "team", "agents", "observability", "sourcing", "knowledge-graph", "predictive", "labor", "migration", "forecasting", "orchestration", "infrastructure"];
+    return tab && validTabs.includes(tab) ? tab : "overview";
+  })();
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(true); // Default to dark for premium feel
 

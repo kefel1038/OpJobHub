@@ -2,10 +2,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Shield, Lock, Eye, CheckCircle2, AlertTriangle, Fingerprint, 
   Search, ShieldAlert, BadgeCheck, Zap, Globe, MessageSquare,
-  ChevronRight, BrainCircuit, Activity, BarChart3, ArrowRight, Sparkles
+  ChevronRight, BrainCircuit, Activity, BarChart3, ArrowRight, Sparkles,
+  LayoutDashboard, Briefcase, Users as UsersIcon
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 
 export function IntelligencePlatformSection() {
   const systems = [
@@ -182,12 +185,25 @@ export function TrustGovernanceSection() {
 export function DashboardPreviewSection() {
   const tabs = ["Labor Intel", "Migration", "Forecasting", "Predictive AI", "Graph", "Orchestration"];
   const [activeTab, setActiveTab] = useState(0);
+  const [, navigate] = useLocation();
+
+  const tabRoutes: Record<string, string> = {
+    "Labor Intel": "/employer/dashboard?tab=labor",
+    "Migration": "/employer/dashboard?tab=migration",
+    "Forecasting": "/employer/dashboard?tab=forecasting",
+    "Predictive AI": "/employer/dashboard?tab=predictive",
+    "Graph": "/employer/dashboard?tab=knowledge-graph",
+    "Orchestration": "/employer/dashboard?tab=orchestration",
+  };
 
   return (
     <section className="py-24 bg-[#050505] relative overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-black text-white mb-6">Workforce Command Center</h2>
+          <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+            Interactive preview of your employer dashboard. Click any section to access the full command center.
+          </p>
           <div className="flex flex-wrap justify-center gap-2 mt-8">
             {tabs.map((tab, i) => (
               <button
@@ -205,7 +221,8 @@ export function DashboardPreviewSection() {
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto rounded-[3rem] border border-white/10 bg-black/40 backdrop-blur-3xl overflow-hidden p-2 shadow-2xl relative">
+        <div className="max-w-5xl mx-auto rounded-[3rem] border border-white/10 bg-black/40 backdrop-blur-3xl overflow-hidden p-2 shadow-2xl relative cursor-pointer group"
+             onClick={() => navigate(tabRoutes[tabs[activeTab]])}>
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 pointer-events-none" />
           <div className="bg-[#0a0a0a] rounded-[2.6rem] p-12 min-h-[400px]">
              <AnimatePresence mode="wait">
@@ -232,6 +249,9 @@ export function DashboardPreviewSection() {
                           <div className="text-3xl font-black text-emerald-400">99.2%</div>
                        </div>
                     </div>
+                    <div className="mt-6 inline-flex items-center gap-2 text-xs font-bold text-blue-400 group-hover:text-blue-300 transition-colors uppercase tracking-widest">
+                      Launch Dashboard <ArrowRight className="h-3 w-3" />
+                    </div>
                  </div>
                  <div className="space-y-4">
                     <div className="p-6 rounded-3xl bg-white/5 border border-white/5">
@@ -252,6 +272,11 @@ export function DashboardPreviewSection() {
                </motion.div>
              </AnimatePresence>
           </div>
+        </div>
+        <div className="text-center mt-8">
+          <Button asChild className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-8 h-12 font-bold">
+            <Link href="/employer/dashboard">Open Full Dashboard</Link>
+          </Button>
         </div>
       </div>
     </section>
@@ -300,6 +325,14 @@ export function PublicIntelligenceFeedSection() {
 }
 
 export function FinalCTASection() {
+  const { user, isAuthenticated } = useAuth();
+  const [, navigate] = useLocation();
+  const isEmployer = isAuthenticated && user?.role === "employer";
+
+  const handlePrimaryCTA = () => {
+    navigate(isEmployer ? "/employer/dashboard" : "/register");
+  };
+
   return (
     <section className="py-32 bg-[#050505] relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_100%,rgba(60,80,255,0.1),transparent_50%)]" />
@@ -309,15 +342,20 @@ export function FinalCTASection() {
           Transform your recruitment from a reactive marketplace into a predictive, autonomous intelligence infrastructure.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <Button size="lg" className="rounded-full bg-white text-black hover:bg-white/90 px-10 h-16 font-bold text-lg group">
-            Create Employer Account
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+          <Button size="lg" onClick={handlePrimaryCTA} className="rounded-full bg-white text-black hover:bg-white/90 px-10 h-16 font-bold text-lg group">
+            {isEmployer ? (
+              <>Go to Dashboard <LayoutDashboard className="ml-2 h-5 w-5" /></>
+            ) : (
+              <>Create Employer Account <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" /></>
+            )}
           </Button>
-          <Button variant="outline" size="lg" className="rounded-full border-white/10 bg-white/5 text-white hover:bg-white/10 px-10 h-16 font-bold text-lg">
-            Launch Enterprise Workspace
+          <Button variant="outline" size="lg" asChild className="rounded-full border-white/10 bg-white/5 text-white hover:bg-white/10 px-10 h-16 font-bold text-lg">
+            <Link href={isEmployer ? "/employer/dashboard" : "/login"}>
+              {isEmployer ? "Go to Dashboard" : "Launch Enterprise Workspace"}
+            </Link>
           </Button>
-          <Button variant="ghost" size="lg" className="rounded-full text-blue-400 hover:text-blue-300 hover:bg-blue-400/5 px-10 h-16 font-bold text-lg">
-            Talk to Intelligence Team
+          <Button variant="ghost" size="lg" asChild className="rounded-full text-blue-400 hover:text-blue-300 hover:bg-blue-400/5 px-10 h-16 font-bold text-lg">
+            <Link href="/contact">Talk to Intelligence Team</Link>
           </Button>
         </div>
       </div>
@@ -327,6 +365,15 @@ export function FinalCTASection() {
 
 export function AICopilotWidget() {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [, navigate] = useLocation();
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setOpen(false);
+    setQuery("");
+    navigate("/employer/dashboard");
+  };
 
   return (
     <div className="fixed bottom-8 right-8 z-50">
@@ -363,23 +410,25 @@ export function AICopilotWidget() {
                       "Forecast migration volume UAE ↔ Kenya",
                       "Check sponsorship bottleneck risks"
                     ].map(q => (
-                      <button key={q} className="text-left p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold text-blue-400 hover:bg-blue-500/20 transition-all">
+                      <button key={q} onClick={() => { setQuery(q); handleSubmit(); }} className="text-left p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold text-blue-400 hover:bg-blue-500/20 transition-all">
                         {q}
                       </button>
                     ))}
                  </div>
               </div>
               <div className="p-6 border-t border-white/5">
-                 <div className="relative">
+                 <form onSubmit={handleSubmit} className="relative">
                     <input 
                       type="text" 
+                      value={query}
+                      onChange={e => setQuery(e.target.value)}
                       placeholder="Type your query..."
                       className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500/50 transition-all"
                     />
-                    <Button size="icon" className="absolute right-2 top-2 h-10 w-10 rounded-xl bg-blue-600 hover:bg-blue-700">
+                    <Button type="submit" size="icon" className="absolute right-2 top-2 h-10 w-10 rounded-xl bg-blue-600 hover:bg-blue-700">
                        <ArrowRight className="h-4 w-4" />
                     </Button>
-                 </div>
+                 </form>
               </div>
            </motion.div>
          )}

@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Sparkles, ArrowRight, Activity, Globe, Zap, BarChart3, Shield, Workflow } from "lucide-react";
+import { Sparkles, ArrowRight, Activity, Globe, Zap, BarChart3, Shield, Workflow, LayoutDashboard } from "lucide-react";
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from "recharts";
+import { useAuth } from "@/hooks/use-auth";
 
 const data = [
   { name: '00:00', value: 400 },
@@ -17,6 +18,18 @@ const data = [
 ];
 
 export function HeroSection() {
+  const { user, isAuthenticated } = useAuth();
+  const [, navigate] = useLocation();
+  const isEmployer = isAuthenticated && user?.role === "employer";
+
+  const handleStartHiring = () => {
+    if (isEmployer) {
+      navigate("/employer/dashboard");
+    } else {
+      navigate("/register");
+    }
+  };
+
   return (
     <section className="relative min-h-screen bg-[#050505] overflow-hidden pt-20">
       {/* Dynamic Background */}
@@ -43,15 +56,18 @@ export function HeroSection() {
               Source, forecast, simulate, and orchestrate workforce pipelines across Africa and the GCC using autonomous labor intelligence.
             </p>
             <div className="flex flex-wrap gap-4 mb-12">
-              <Button size="lg" className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-8 h-14 font-bold text-base group">
-                Start Hiring
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              <Button size="lg" onClick={handleStartHiring} className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-8 h-14 font-bold text-base group">
+                {isEmployer ? (
+                  <>Go to Dashboard <LayoutDashboard className="ml-2 h-5 w-5" /></>
+                ) : (
+                  <>Start Hiring <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" /></>
+                )}
               </Button>
-              <Button variant="outline" size="lg" className="rounded-full border-white/10 bg-white/5 text-white hover:bg-white/10 px-8 h-14 font-bold text-base">
-                Book Enterprise Demo
+              <Button variant="outline" size="lg" asChild className="rounded-full border-white/10 bg-white/5 text-white hover:bg-white/10 px-8 h-14 font-bold text-base">
+                <Link href="/contact">Book Enterprise Demo</Link>
               </Button>
-              <Button variant="ghost" size="lg" className="rounded-full text-blue-400 hover:text-blue-300 hover:bg-blue-400/5 px-8 h-14 font-bold text-base">
-                Explore Workforce Intelligence
+              <Button variant="ghost" size="lg" asChild className="rounded-full text-blue-400 hover:text-blue-300 hover:bg-blue-400/5 px-8 h-14 font-bold text-base">
+                <Link href="/ai-matching">Explore Workforce Intelligence</Link>
               </Button>
             </div>
 

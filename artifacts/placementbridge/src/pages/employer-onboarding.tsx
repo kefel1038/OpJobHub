@@ -14,6 +14,7 @@ export default function EmployerOnboarding() {
   const [, navigate] = useLocation();
   const [step, setStep] = useState(1);
   const totalSteps = 3;
+  const [error, setError] = useState("");
 
   const [data, setData] = useState({
     companyName: "",
@@ -24,7 +25,21 @@ export default function EmployerOnboarding() {
     skillPriorities: "",
   });
 
+  const validate = () => {
+    setError("");
+    if (step === 1 && (!data.companyName.trim() || !data.industry)) {
+      setError("Please enter your company name and select an industry.");
+      return false;
+    }
+    if (step === 2 && data.regions.length === 0) {
+      setError("Please select at least one target region.");
+      return false;
+    }
+    return true;
+  };
+
   const next = () => {
+    if (!validate()) return;
     if (step < totalSteps) setStep(step + 1);
     else navigate("/employer/dashboard");
   };
@@ -176,6 +191,11 @@ export default function EmployerOnboarding() {
                     </div>
                   )}
 
+                  {error && (
+                    <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium">
+                      {error}
+                    </div>
+                  )}
                   <div className="flex items-center justify-between pt-8 border-t border-white/5">
                     <div className="text-[10px] font-bold text-gray-600 uppercase flex items-center gap-2">
                        <BrainCircuit className="h-4 w-4" />

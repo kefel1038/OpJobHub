@@ -1,10 +1,13 @@
 import { motion } from "framer-motion";
 import { 
   Activity, Globe, Zap, BarChart3, TrendingUp, Users, ArrowUpRight, ArrowDownRight, 
-  MapPin, ShieldCheck, Database, BrainCircuit, Sparkles
+  MapPin, ShieldCheck, Database, BrainCircuit, Sparkles, LayoutDashboard, ArrowRight
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link, useLocation } from "wouter";
 import { api } from "@/lib/api";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
 
 export function LiveIntelligenceSection() {
   const [stats, setStats] = useState<any>(null);
@@ -176,9 +179,9 @@ export function SolutionsMappingSection() {
               </p>
               
               <div className="pt-6 border-t border-white/5">
-                <button className="flex items-center gap-2 text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-widest">
+                <Link href="/employer/dashboard" className="flex items-center gap-2 text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-widest">
                   Access Intelligence <ArrowUpRight className="h-3 w-3" />
-                </button>
+                </Link>
               </div>
             </motion.div>
           ))}
