@@ -6,6 +6,7 @@ import { scrapeNaukrigulf } from "./naukrigulf";
 import { scrapeGulfTalent } from "./gulf-talent";
 import { scrapeIndeedQatar } from "./indeed";
 import { scrapeMzadQatar } from "./mzadqatar";
+import { scrapeEl7far } from "./el7far";
 
 export interface ScraperDefinition {
   name: string;
@@ -21,6 +22,7 @@ export {
   scrapeGulfTalent,
   scrapeIndeedQatar,
   scrapeMzadQatar,
+  scrapeEl7far,
 };
 
 export const allScrapers: ScraperDefinition[] = [
@@ -31,4 +33,5 @@ export const allScrapers: ScraperDefinition[] = [
   { name: "gulf-talent", displayName: "GulfTalent", scrape: scrapeGulfTalent },
   { name: "indeed", displayName: "Indeed Qatar", scrape: scrapeIndeedQatar },
   { name: "mzad-qatar", displayName: "Mzad Qatar", scrape: scrapeMzadQatar },
+  { name: "el7far", displayName: "El7far", scrape: scrapeEl7far },
 ];
