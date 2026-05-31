@@ -1,6 +1,7 @@
 import { changeLanguage } from "@/components/GoogleTranslate";
 import { Mail, Phone, MapPin, Building2, Briefcase, Users, Sparkles, Globe } from "lucide-react";
 import { Link } from "wouter";
+import { KefelJobsLogo } from "@/components/ui/KefelJobsLogo";
 
 export function Footer() {
   return (
@@ -11,8 +12,8 @@ export function Footer() {
         <div className="grid md:grid-cols-6 gap-12 mb-20">
           {/* Brand */}
           <div className="col-span-2">
-            <div className="flex items-center gap-2 mb-8">
-              <img src="/logo.png" alt="KeFeL Media" className="h-12 w-auto" />
+            <div className="flex items-center mb-8">
+              <KefelJobsLogo variant="full" height={48} className="text-white fill-current" />
             </div>
             <p className="text-white/60 font-bold max-w-sm leading-relaxed mb-8">
               Africa-to-Gulf AI-powered workforce recruitment platform. Connecting top talent with leading companies across the Middle East.

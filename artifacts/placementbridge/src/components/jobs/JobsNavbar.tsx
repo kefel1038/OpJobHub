@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { motion, AnimatePresence } from "framer-motion";
+import { KefelJobsLogo } from "@/components/ui/KefelJobsLogo";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -40,13 +41,8 @@ export function JobsNavbar() {
       )}
     >
       <div className="container mx-auto px-4 flex items-center justify-between h-16 md:h-20">
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-            <Sparkles className="h-4 w-4 text-primary-foreground" />
-          </div>
-          <span className="font-heading font-black text-lg hidden sm:block">
-            KeFeL <span className="text-primary">Jobs</span>
-          </span>
+        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+          <KefelJobsLogo variant="horizontal" height={34} />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-6">

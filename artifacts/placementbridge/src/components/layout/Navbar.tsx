@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
 import { LANGUAGES, changeLanguage } from "@/components/GoogleTranslate";
+import { KefelJobsLogo } from "@/components/ui/KefelJobsLogo";
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -20,13 +21,8 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 bg-background/90 backdrop-blur border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-            K
-          </div>
-          <span className="font-bold text-lg tracking-tight">
-            KeFeL <span className="text-primary">Jobs</span>
-          </span>
+        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+          <KefelJobsLogo variant="horizontal" height={34} />
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">

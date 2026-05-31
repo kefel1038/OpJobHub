@@ -12,6 +12,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { useAuth } from "@/hooks/use-auth";
+import { KefelJobsLogo } from "@/components/ui/KefelJobsLogo";
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -27,11 +28,8 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 bg-background/90 backdrop-blur border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex flex-col items-center gap-0.5 group mr-6">
-          <div className="bg-[#0f172a] h-10 w-11 flex items-center justify-center rounded-sm border border-slate-700 shadow-sm transition-transform group-hover:scale-105">
-            <span className="font-serif text-white text-2xl font-bold leading-none tracking-tighter drop-shadow-sm" style={{ fontFamily: "Georgia, serif" }}>KF</span>
-          </div>
-          <span className="text-[9px] font-bold tracking-widest text-foreground uppercase">KeFeL Media</span>
+        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity mr-6">
+          <KefelJobsLogo variant="horizontal" height={34} />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-6">
