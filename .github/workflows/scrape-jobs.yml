@@ -1,8 +1,10 @@
+
 name: Daily Qatar Jobs Scraper
 
 on:
   schedule:
     - cron: "0 8 * * *"
+
   workflow_dispatch:
     inputs:
       source:
@@ -12,56 +14,60 @@ on:
 
 concurrency:
   group: scrape-jobs
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
   OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
   SCRAPER_DEBUG_DIR: /tmp/scraper-debug
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   NODE_OPTIONS: --dns-result-order=ipv4first
-  NODE_TLS_REJECT_UNAUTHORIZED: "0"
 
 jobs:
   scrape:
     name: Scrape Qatar Jobs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: "pnpm"
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browsers
-        run: npx playwright install chromium
+      - name: Verify Playwright version
+        run: pnpm --filter @workspace/api-server exec playwright --version
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @workspace/api-server exec playwright install --with-deps chromium
 
       - name: Sync database schema
         run: pnpm --filter @workspace/db run migrate-columns
 
-      - name: Build project
-        run: pnpm --filter @workspace/api-server build
+      - name: Build API server
+        run: pnpm --filter @workspace/api-server run build
 
       - name: Run scraper
         run: pnpm --filter @workspace/api-server run scrape
         env:
-          SCRAPE_SOURCE: ${{ github.event.inputs.source || '' }}
+          SCRAPE_SOURCE: ${{ inputs.source || '' }}
 
       - name: Cleanup expired jobs
         run: pnpm --filter @workspace/api-server run scrape:cleanup
 
       - name: Upload debug artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: scraper-debug-${{ github.run_id }}
           path: /tmp/scraper-debug/
@@ -69,4 +75,10 @@ jobs:
           if-no-files-found: ignore
 
       - name: Log completion
-        run: echo "Scrape completed at $(date)"
+        if: always()
+        run: |
+          echo "=========================================="
+          echo "Daily Qatar Jobs Scraper"
+          echo "Completed at: $(date -u)"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "=========================================="
