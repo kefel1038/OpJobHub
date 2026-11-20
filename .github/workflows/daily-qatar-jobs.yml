@@ -1,14 +1,17 @@
+
 name: Daily Qatar Jobs Autonomous Pipeline
 
 on:
   schedule:
     - cron: "0 0 * * *"
+
   workflow_dispatch:
     inputs:
       source:
         description: "Scrape specific source (leave empty for all)"
         required: false
         type: string
+
       dry-run:
         description: "Run cleanup in dry-run mode (no destructive actions)"
         required: false
@@ -17,59 +20,63 @@ on:
 
 concurrency:
   group: scrape-jobs
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
   OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
   SCRAPER_DEBUG_DIR: /tmp/scraper-debug
-  CLEANUP_ARCHIVE_DAYS: ${{ vars.CLEANUP_ARCHIVE_DAYS || '30' }}
-  CLEANUP_DELETE_DAYS: ${{ vars.CLEANUP_DELETE_DAYS || '60' }}
-  CLEANUP_DRY_RUN: ${{ inputs.dry-run && 'true' || 'false' }}
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   NODE_OPTIONS: --dns-result-order=ipv4first
-  NODE_TLS_REJECT_UNAUTHORIZED: "0"
 
 jobs:
   daily-pipeline:
     name: Daily Job Ingestion Pipeline
-    runs-on: ubuntu-latest
+
+    # Prevent GitHub from selecting Ubuntu 26.04
+    runs-on: ubuntu-24.04
+
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: "pnpm"
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browsers
-        run: npx playwright install chromium
+      - name: Verify Playwright version
+        run: pnpm --filter @workspace/api-server exec playwright --version
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter @workspace/api-server exec playwright install --with-deps chromium
 
       - name: Sync database schema
         run: pnpm --filter @workspace/db run migrate-columns
 
-      - name: Build project
-        run: pnpm --filter @workspace/api-server build
+      - name: Build API server
+        run: pnpm --filter @workspace/api-server run build
 
       - name: Run scraper
         run: pnpm --filter @workspace/api-server run scrape
         env:
-          SCRAPE_SOURCE: ${{ github.event.inputs.source || '' }}
+          SCRAPE_SOURCE: ${{ inputs.source || '' }}
 
       - name: Run lifecycle cleanup
         run: pnpm --filter @workspace/api-server run lifecycle:cleanup
         env:
-          CLEANUP_ARCHIVE_DAYS: ${{ env.CLEANUP_ARCHIVE_DAYS }}
-          CLEANUP_DELETE_DAYS: ${{ env.CLEANUP_DELETE_DAYS }}
-          CLEANUP_DRY_RUN: ${{ env.CLEANUP_DRY_RUN }}
+          CLEANUP_ARCHIVE_DAYS: ${{ vars.CLEANUP_ARCHIVE_DAYS || '30' }}
+          CLEANUP_DELETE_DAYS: ${{ vars.CLEANUP_DELETE_DAYS || '60' }}
+          CLEANUP_DRY_RUN: ${{ inputs.dry-run && 'true' || 'false' }}
 
       - name: Recompute freshness scores
         run: pnpm --filter @workspace/api-server run lifecycle:freshness
@@ -90,9 +97,10 @@ jobs:
           if-no-files-found: ignore
 
       - name: Log completion
+        if: always()
         run: |
           echo "=========================================="
-          echo "  Daily Qatar Jobs Pipeline Complete"
+          echo "  Daily Qatar Jobs Pipeline"
           echo "  Timestamp: $(date -u)"
           echo "  Run ID: ${{ github.run_id }}"
           echo "=========================================="
